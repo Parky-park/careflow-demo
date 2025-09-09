@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Users, 
@@ -80,6 +81,10 @@ const navItems: NavItem[] = [
 ];
 
 export function NavigationSidebar() {
+  const location = useLocation();
+  
+  const isActive = (href: string) => location.pathname === href;
+  
   return (
     <nav className="w-64 border-r bg-card/30 backdrop-blur-sm">
       <div className="p-6 space-y-6">
@@ -91,24 +96,27 @@ export function NavigationSidebar() {
             {navItems.slice(0, 5).map((item) => (
               <Button
                 key={item.href}
-                variant={item.active ? "default" : "ghost"}
+                variant={isActive(item.href) ? "default" : "ghost"}
                 className={cn(
                   "w-full justify-start gap-3 h-10",
-                  item.active 
+                  isActive(item.href)
                     ? "bg-primary text-primary-foreground shadow-sm" 
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
+                asChild
               >
-                {item.icon}
-                <span className="flex-1 text-left">{item.label}</span>
-                {item.badge && (
-                  <Badge 
-                    variant={item.active ? "secondary" : "outline"} 
-                    className="h-5 px-1.5 text-xs"
-                  >
-                    {item.badge}
-                  </Badge>
-                )}
+                <Link to={item.href}>
+                  {item.icon}
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.badge && (
+                    <Badge 
+                      variant={isActive(item.href) ? "secondary" : "outline"} 
+                      className="h-5 px-1.5 text-xs"
+                    >
+                      {item.badge}
+                    </Badge>
+                  )}
+                </Link>
               </Button>
             ))}
           </div>
