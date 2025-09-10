@@ -1,5 +1,3 @@
-import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { NavigationSidebar } from "@/components/dashboard/NavigationSidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -84,152 +82,142 @@ const Notifications = () => {
   const unreadCount = mockNotifications.filter(n => !n.read).length;
 
   return (
-    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
-      <DashboardHeader />
-      
-      <div className="flex flex-1 overflow-hidden">
-        <NavigationSidebar />
-        
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                  <Bell className="h-8 w-8 text-primary" />
-                  Notifications
-                  {unreadCount > 0 && (
-                    <Badge className="bg-destructive text-destructive-foreground">
-                      {unreadCount} new
-                    </Badge>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+            <Bell className="h-8 w-8 text-primary" />
+            Notifications
+            {unreadCount > 0 && (
+              <Badge className="bg-destructive text-destructive-foreground">
+                {unreadCount} new
+              </Badge>
+            )}
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Stay updated with important alerts and system notifications
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline">Mark all as read</Button>
+          <Button variant="outline">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Notifications List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Notifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {mockNotifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={`p-4 border-l-4 rounded-lg transition-colors hover:bg-muted/30 ${
+                  getNotificationColor(notification.type)
+                } ${!notification.read ? 'bg-opacity-20' : ''}`}
+              >
+                <div className="flex items-start gap-4">
+                  {notification.avatar ? (
+                    <Avatar className="h-10 w-10 mt-1">
+                      <AvatarImage src={notification.avatar} />
+                      <AvatarFallback>
+                        {notification.title.split(' ')[0][0]}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <div className="p-2 rounded-full bg-muted mt-1">
+                      {getNotificationIcon(notification.type)}
+                    </div>
                   )}
-                </h1>
-                <p className="text-muted-foreground mt-2">
-                  Stay updated with important alerts and system notifications
-                </p>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <h3 className={`font-medium text-foreground flex items-center gap-2 ${
+                          !notification.read ? 'font-semibold' : ''
+                        }`}>
+                          {notification.title}
+                          {!notification.read && (
+                            <div className="w-2 h-2 bg-primary rounded-full" />
+                          )}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {notification.message}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {notification.timestamp}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline">Mark all as read</Button>
-                <Button variant="outline">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+            ))}
+          </div>
+
+          {mockNotifications.length === 0 && (
+            <div className="text-center py-8">
+              <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">No notifications</h3>
+              <p className="text-muted-foreground">
+                You're all caught up! New notifications will appear here.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Notification Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Notification Preferences</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <h4 className="font-medium">Patient Alerts</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span>Critical patient updates</span>
+                  <Badge className="bg-success">Enabled</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Admission/Discharge notifications</span>
+                  <Badge className="bg-success">Enabled</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Risk score changes</span>
+                  <Badge variant="outline">Disabled</Badge>
+                </div>
               </div>
             </div>
-
-            {/* Notifications List */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Notifications</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {mockNotifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-4 border-l-4 rounded-lg transition-colors hover:bg-muted/30 ${
-                        getNotificationColor(notification.type)
-                      } ${!notification.read ? 'bg-opacity-20' : ''}`}
-                    >
-                      <div className="flex items-start gap-4">
-                        {notification.avatar ? (
-                          <Avatar className="h-10 w-10 mt-1">
-                            <AvatarImage src={notification.avatar} />
-                            <AvatarFallback>
-                              {notification.title.split(' ')[0][0]}
-                            </AvatarFallback>
-                          </Avatar>
-                        ) : (
-                          <div className="p-2 rounded-full bg-muted mt-1">
-                            {getNotificationIcon(notification.type)}
-                          </div>
-                        )}
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1">
-                              <h3 className={`font-medium text-foreground flex items-center gap-2 ${
-                                !notification.read ? 'font-semibold' : ''
-                              }`}>
-                                {notification.title}
-                                {!notification.read && (
-                                  <div className="w-2 h-2 bg-primary rounded-full" />
-                                )}
-                              </h3>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {notification.message}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              {notification.timestamp}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+            
+            <div className="space-y-3">
+              <h4 className="font-medium">System Alerts</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span>Inventory warnings</span>
+                  <Badge className="bg-success">Enabled</Badge>
                 </div>
-
-                {mockNotifications.length === 0 && (
-                  <div className="text-center py-8">
-                    <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No notifications</h3>
-                    <p className="text-muted-foreground">
-                      You're all caught up! New notifications will appear here.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Notification Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <h4 className="font-medium">Patient Alerts</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span>Critical patient updates</span>
-                        <Badge className="bg-success">Enabled</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Admission/Discharge notifications</span>
-                        <Badge className="bg-success">Enabled</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Risk score changes</span>
-                        <Badge variant="outline">Disabled</Badge>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <h4 className="font-medium">System Alerts</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span>Inventory warnings</span>
-                        <Badge className="bg-success">Enabled</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>System maintenance</span>
-                        <Badge className="bg-success">Enabled</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Team assignments</span>
-                        <Badge className="bg-success">Enabled</Badge>
-                      </div>
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between">
+                  <span>System maintenance</span>
+                  <Badge className="bg-success">Enabled</Badge>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex items-center justify-between">
+                  <span>Team assignments</span>
+                  <Badge className="bg-success">Enabled</Badge>
+                </div>
+              </div>
+            </div>
           </div>
-        </main>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -1,5 +1,3 @@
-import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { NavigationSidebar } from "@/components/dashboard/NavigationSidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,50 +29,13 @@ const Messages = () => {
     },
     {
       id: "3",
-      participant: "Cardiology Team",
-      role: "Group Chat",
-      lastMessage: "Weekly team meeting scheduled for tomorrow at 2 PM",
-      timestamp: "1 hour ago",
-      unread: 5,
-      priority: "low",
-      encrypted: true
-    },
-    {
-      id: "4",
-      participant: "Dr. Raj Patel",
+      participant: "Dr. Sarah Wilson",
       role: "Emergency Medicine",
-      lastMessage: "Thanks for the quick response on the trauma case",
-      timestamp: "2 hours ago",
-      unread: 0,
-      priority: "low",
+      lastMessage: "New admission requires immediate attention",
+      timestamp: "12 min ago",
+      unread: 1,
+      priority: "high",
       encrypted: true
-    }
-  ];
-
-  const activeMessages = [
-    {
-      id: "1",
-      sender: "Dr. Michael Chen",
-      message: "Patient in Room 302 needs immediate cardiac consultation. Elevated troponins and EKG changes.",
-      timestamp: "3 min ago",
-      isOwn: false,
-      attachments: ["ecg_report.pdf"]
-    },
-    {
-      id: "2",
-      sender: "You",
-      message: "On my way to Room 302. ETA 5 minutes. Please prep the patient for echo.",
-      timestamp: "2 min ago", 
-      isOwn: true,
-      attachments: []
-    },
-    {
-      id: "3",
-      sender: "Dr. Michael Chen",
-      message: "Perfect. Echo tech is already on standby. Patient is stable but concerned about chest pain.",
-      timestamp: "1 min ago",
-      isOwn: false,
-      attachments: []
     }
   ];
 
@@ -88,177 +49,155 @@ const Messages = () => {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
-      <DashboardHeader />
-      
-      <div className="flex flex-1 overflow-hidden">
-        <NavigationSidebar />
-        
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="space-y-6">
-            {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                <MessageSquare className="h-8 w-8 text-primary" />
-                Secure Messages
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                HIPAA-compliant healthcare communication platform
-              </p>
-            </div>
-
-            {/* Messaging Interface */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
-              
-              {/* Conversations List */}
-              <Card className="lg:col-span-1">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5" />
-                      Conversations
-                    </span>
-                    <Badge variant="outline" className="flex items-center gap-1">
-                      <Shield className="h-3 w-3" />
-                      Encrypted
-                    </Badge>
-                  </CardTitle>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search messages..." className="pl-10" />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="space-y-1">
-                    {conversations.map((conversation) => (
-                      <div key={conversation.id} className="p-3 hover:bg-muted/50 cursor-pointer border-b last:border-b-0">
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={`https://api.dicebear.com/7.x/personas/svg?seed=${conversation.participant}`} />
-                            <AvatarFallback>
-                              {conversation.participant.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium text-sm truncate">{conversation.participant}</p>
-                                {conversation.encrypted && (
-                                  <Shield className="h-3 w-3 text-success" />
-                                )}
-                              </div>
-                              {conversation.unread > 0 && (
-                                <Badge className="bg-primary text-primary-foreground h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
-                                  {conversation.unread}
-                                </Badge>
-                              )}
-                            </div>
-                            
-                            <Badge variant="outline" className="text-xs mb-2">
-                              {conversation.role}
-                            </Badge>
-                            
-                            <p className="text-xs text-muted-foreground line-clamp-2 mb-1">
-                              {conversation.lastMessage}
-                            </p>
-                            
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                {conversation.timestamp}
-                              </div>
-                              <Badge className={`text-xs ${getPriorityColor(conversation.priority)}`}>
-                                {conversation.priority}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Active Conversation */}
-              <Card className="lg:col-span-2 flex flex-col">
-                <CardHeader className="border-b">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src="https://api.dicebear.com/7.x/personas/svg?seed=Dr.MichaelChen" />
-                        <AvatarFallback>MC</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">Dr. Michael Chen</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Shield className="h-3 w-3 text-success" />
-                          Cardiologist • End-to-end encrypted
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Star className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Priority
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                {/* Messages */}
-                <CardContent className="flex-1 p-4 space-y-4 overflow-y-auto">
-                  {activeMessages.map((message) => (
-                    <div key={message.id} className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[70%] ${message.isOwn ? 'bg-primary text-primary-foreground' : 'bg-muted'} rounded-lg p-3`}>
-                        {!message.isOwn && (
-                          <p className="text-xs font-medium mb-1">{message.sender}</p>
-                        )}
-                        <p className="text-sm">{message.message}</p>
-                        
-                        {message.attachments.length > 0 && (
-                          <div className="mt-2 pt-2 border-t border-current/20">
-                            {message.attachments.map((attachment, index) => (
-                              <div key={index} className="flex items-center gap-2 text-xs">
-                                <Paperclip className="h-3 w-3" />
-                                {attachment}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        
-                        <p className={`text-xs mt-2 ${message.isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                          {message.timestamp}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-                
-                {/* Message Input */}
-                <div className="border-t p-4">
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Paperclip className="h-4 w-4" />
-                    </Button>
-                    <Input placeholder="Type a secure message..." className="flex-1" />
-                    <Button size="sm" className="gap-2">
-                      <Send className="h-4 w-4" />
-                      Send
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                    <Shield className="h-3 w-3" />
-                    All messages are encrypted and HIPAA compliant
-                  </p>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </main>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+          <MessageSquare className="h-8 w-8 text-primary" />
+          Secure Messages
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          HIPAA-compliant secure messaging for healthcare teams
+        </p>
       </div>
+
+      {/* Messages Interface */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Conversations List */}
+        <Card className="lg:col-span-1">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Conversations</span>
+              <Badge variant="secondary">{conversations.filter(c => c.unread > 0).length}</Badge>
+            </CardTitle>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input placeholder="Search conversations..." className="pl-10" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {conversations.map((conversation) => (
+                <div
+                  key={conversation.id}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 cursor-pointer border"
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback>
+                      {conversation.participant.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium truncate">{conversation.participant}</h3>
+                        <p className="text-xs text-muted-foreground">{conversation.role}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {conversation.unread > 0 && (
+                          <Badge variant="destructive" className="h-5 px-2 text-xs">
+                            {conversation.unread}
+                          </Badge>
+                        )}
+                        <Badge className={getPriorityColor(conversation.priority)}>
+                          {conversation.priority}
+                        </Badge>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate mt-1">
+                      {conversation.lastMessage}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Clock className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">{conversation.timestamp}</span>
+                      {conversation.encrypted && (
+                        <Shield className="h-3 w-3 text-green-500" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Message Thread */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Avatar>
+                  <AvatarFallback>MC</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3>Dr. Michael Chen</h3>
+                  <p className="text-sm text-muted-foreground">Cardiologist</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className={getPriorityColor('high')}>High Priority</Badge>
+                <Shield className="h-4 w-4 text-green-500" />
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4 min-h-[300px]">
+              {/* Sample Messages */}
+              <div className="flex gap-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>MC</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-sm">Patient in Room 302 needs immediate cardiac consultation. Elevated troponin levels and EKG changes noted.</p>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    <span>3 minutes ago</span>
+                    <Shield className="h-3 w-3 text-green-500" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <div className="flex-1 max-w-xs">
+                  <div className="bg-primary/10 rounded-lg p-3 ml-auto">
+                    <p className="text-sm">On my way to Room 302 now. Will assess and provide recommendations.</p>
+                  </div>
+                  <div className="flex items-center justify-end gap-2 mt-1 text-xs text-muted-foreground">
+                    <span>Just now</span>
+                    <Shield className="h-3 w-3 text-green-500" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Message Input */}
+            <div className="flex gap-2 pt-4 border-t">
+              <Button variant="outline" size="sm">
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              <Input placeholder="Type your secure message..." className="flex-1" />
+              <Button size="sm">
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Security Notice */}
+      <Card className="border-green-200 bg-green-50">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 text-green-800">
+            <Shield className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              All messages are HIPAA-compliant and end-to-end encrypted
+            </span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
