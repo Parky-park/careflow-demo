@@ -4,6 +4,7 @@ import { ChangePasswordModal } from "@/components/modals/ChangePasswordModal";
 import { SecurityLogModal } from "@/components/modals/SecurityLogModal";
 import { SystemLogsModal } from "@/components/modals/SystemLogsModal";
 import { ManageIntegrationsModal } from "@/components/modals/ManageIntegrationsModal";
+import { EditProfileModal } from "@/components/modals/EditProfileModal";
 import { useToast } from "@/hooks/use-toast";
 import { Settings as SettingsIcon } from "lucide-react";
 import { useState } from "react";
@@ -14,6 +15,7 @@ const Settings = () => {
   const [showSecurityLogModal, setShowSecurityLogModal] = useState(false);
   const [showSystemLogsModal, setShowSystemLogsModal] = useState(false);
   const [showManageIntegrationsModal, setShowManageIntegrationsModal] = useState(false);
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -61,7 +63,7 @@ const Settings = () => {
                 <span className="font-medium">Today, 9:15 AM</span>
               </div>
             </div>
-            <Button className="w-full" variant="outline">
+            <Button className="w-full" variant="outline" onClick={() => setShowEditProfileModal(true)}>
               Edit Profile
             </Button>
           </CardContent>
@@ -177,6 +179,7 @@ const Settings = () => {
         </Card>
       </div>
       
+      <EditProfileModal open={showEditProfileModal} onOpenChange={setShowEditProfileModal} />
       <ChangePasswordModal open={showChangePasswordModal} onOpenChange={setShowChangePasswordModal} />
       <SecurityLogModal open={showSecurityLogModal} onOpenChange={setShowSecurityLogModal} />
       <SystemLogsModal open={showSystemLogsModal} onOpenChange={setShowSystemLogsModal} />
