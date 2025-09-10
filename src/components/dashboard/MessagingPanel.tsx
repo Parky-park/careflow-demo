@@ -68,41 +68,41 @@ export function MessagingPanel() {
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6">
         {mockMessages.map((message) => (
-          <div key={message.id} className="flex gap-3 p-3 rounded-lg border bg-card hover:bg-muted/30 transition-colors">
-            <Avatar className="h-8 w-8 flex-shrink-0">
+          <div key={message.id} className="flex gap-2 md:gap-3 p-2 md:p-3 rounded-lg border bg-card hover:bg-muted/30 transition-colors">
+            <Avatar className="h-7 w-7 md:h-8 md:w-8 flex-shrink-0">
               <AvatarImage src={`https://api.dicebear.com/7.x/personas/svg?seed=${message.sender}`} />
               <AvatarFallback className="text-xs">
                 {message.sender.split(' ').map(n => n[0]).join('')}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{message.sender}</p>
-                  <Badge variant="secondary" className="text-xs">
+              <div className="flex items-center justify-between mb-1 gap-2">
+                <div className="flex items-center gap-1 md:gap-2 min-w-0">
+                  <p className="text-xs md:text-sm font-medium truncate">{message.sender}</p>
+                  <Badge variant="secondary" className="text-xs hidden sm:inline-block">
                     {message.role}
                   </Badge>
                 </div>
-                <Badge className={`text-xs ${getPriorityColor(message.priority)}`}>
+                <Badge className={`text-xs flex-shrink-0 ${getPriorityColor(message.priority)}`}>
                   {message.priority}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+              <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 mb-1 md:mb-2">
                 {message.message}
               </p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                {message.timestamp}
+              <div className="flex items-center gap-1 md:gap-2 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{message.timestamp}</span>
                 {message.encrypted && (
-                  <Shield className="h-3 w-3 text-success" />
+                  <Shield className="h-3 w-3 text-success flex-shrink-0" />
                 )}
               </div>
             </div>
           </div>
         ))}
-        <Button variant="outline" className="w-full">
+        <Button variant="outline" className="w-full text-sm">
           View All Messages
         </Button>
       </CardContent>

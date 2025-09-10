@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Bell, Search, Settings, MessageCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -42,27 +43,28 @@ export function DashboardHeader() {
 
   return (
     <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-40">
-      <div className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-accent">
-              <div className="w-6 h-6 bg-white/90 rounded flex items-center justify-center">
+      <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          <SidebarTrigger className="md:hidden" />
+          <Link to="/" className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity">
+            <div className="p-1.5 md:p-2 rounded-lg bg-gradient-to-br from-primary to-accent">
+              <div className="w-5 h-5 md:w-6 md:h-6 bg-white/90 rounded flex items-center justify-center">
                 <span className="text-xs font-bold text-primary">CF</span>
               </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">CareFlow Dashboard</h1>
-              <p className="text-sm text-muted-foreground">Healthcare Management System</p>
+            <div className="hidden sm:block">
+              <h1 className="text-lg md:text-xl font-bold text-foreground">CareFlow Dashboard</h1>
+              <p className="text-xs md:text-sm text-muted-foreground">Healthcare Management System</p>
             </div>
           </Link>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
             <DialogTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2">
                 <Search className="h-4 w-4" />
-                Search
+                <span className="hidden sm:inline">Search</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
@@ -120,12 +122,12 @@ export function DashboardHeader() {
             </Button>
           </div>
 
-          <div className="flex items-center gap-3 pl-4 border-l">
-            <div className="text-right">
+          <div className="flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l">
+            <div className="text-right hidden md:block">
               <p className="text-sm font-medium">Dr. Sarah Wilson</p>
               <p className="text-xs text-muted-foreground">Primary Care Provider</p>
             </div>
-            <Avatar className="h-8 w-8">
+            <Avatar className="h-7 w-7 md:h-8 md:w-8">
               <AvatarImage src="https://api.dicebear.com/7.x/personas/svg?seed=DrSarahWilson" />
               <AvatarFallback>SW</AvatarFallback>
             </Avatar>

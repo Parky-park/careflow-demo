@@ -56,21 +56,21 @@ export function MovIntegrationStatus() {
           MoV Integration Status
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2 md:space-y-3 px-4 md:px-6">
         {integrationStatus.map((integration, index) => (
-          <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
-            <div className="flex items-center gap-3">
+          <div key={index} className="flex items-center justify-between p-2 md:p-3 rounded-lg border">
+            <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
               {getStatusIcon(integration.status)}
-              <div>
-                <p className="font-medium text-sm">{integration.name}</p>
-                <p className="text-xs text-muted-foreground">{integration.description}</p>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-xs md:text-sm truncate">{integration.name}</p>
+                <p className="text-xs text-muted-foreground line-clamp-1">{integration.description}</p>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right flex-shrink-0 ml-2">
               <Badge className={`text-xs ${getStatusColor(integration.status)}`}>
                 {integration.status}
               </Badge>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 hidden sm:block">
                 {integration.lastSync}
               </p>
             </div>

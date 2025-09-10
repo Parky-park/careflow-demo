@@ -35,20 +35,20 @@ export function AnalyticsChart() {
           AI-Driven Insights
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6">
         {insights.map((insight, index) => (
-          <div key={index} className="flex items-start gap-3 p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors">
-            <div className="p-2 rounded-full bg-primary/10 text-primary">
+          <div key={index} className="flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors">
+            <div className="p-1.5 md:p-2 rounded-full bg-primary/10 text-primary flex-shrink-0">
               {insight.icon}
             </div>
-            <div className="flex-1 space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium text-sm">{insight.title}</h4>
-                <Badge variant="secondary" className="text-xs">
-                  {insight.confidence}% confidence
+            <div className="flex-1 space-y-1 md:space-y-2 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="font-medium text-xs md:text-sm truncate">{insight.title}</h4>
+                <Badge variant="secondary" className="text-xs flex-shrink-0">
+                  {insight.confidence}%
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">
                 {insight.description}
               </p>
               <div className="flex items-center gap-2">
@@ -58,7 +58,7 @@ export function AnalyticsChart() {
                     style={{ width: `${insight.confidence}%` }}
                   />
                 </div>
-                <span className="text-xs text-muted-foreground min-w-fit">
+                <span className="text-xs text-muted-foreground min-w-fit hidden md:inline">
                   {insight.confidence}%
                 </span>
               </div>

@@ -100,48 +100,49 @@ export function PatientList() {
           High Utilizer Patients
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6">
         {mockPatients.map((patient) => (
-          <div key={patient.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
+          <div key={patient.id} className="flex items-center justify-between p-2 md:p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
+            <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+              <Avatar className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
                 <AvatarImage src={`https://api.dicebear.com/7.x/personas/svg?seed=${patient.name}`} />
                 <AvatarFallback>
                   {patient.name.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium">{patient.name}</p>
-                  <Badge variant="secondary" className="text-xs">
+              <div className="space-y-1 min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-xs md:text-sm font-medium truncate">{patient.name}</p>
+                  <Badge variant="secondary" className="text-xs flex-shrink-0">
                     {patient.age}y
                   </Badge>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1 md:gap-2 flex-wrap">
                   <Badge className={cn("text-xs flex items-center gap-1", getRiskColor(patient.riskLevel))}>
                     {getRiskIcon(patient.riskLevel)}
-                    {patient.riskLevel} risk
+                    <span className="hidden sm:inline">{patient.riskLevel} risk</span>
+                    <span className="sm:hidden">{patient.riskLevel}</span>
                   </Badge>
                   <Badge className={cn("text-xs flex items-center gap-1", getAttachmentColor(patient.attachmentStatus))}>
                     {getAttachmentIcon(patient.attachmentStatus)}
-                    {patient.attachmentStatus}
+                    <span className="hidden sm:inline">{patient.attachmentStatus}</span>
                   </Badge>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground hidden md:inline">
                     {patient.utilization} visits
                   </span>
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-muted-foreground hidden md:block">
                   <span>Team: {patient.careTeam}</span>
                   <span className="ml-2">Continuity: {patient.continuityScore}%</span>
                 </div>
               </div>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="ml-2 flex-shrink-0 text-xs px-2 md:px-3">
               View
             </Button>
           </div>
         ))}
-        <Button variant="outline" className="w-full">
+        <Button variant="outline" className="w-full text-sm">
           View All Patients
         </Button>
       </CardContent>

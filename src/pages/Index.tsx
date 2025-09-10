@@ -8,23 +8,23 @@ import heroImage from "@/assets/dashboard-hero.jpg";
 
 const Index = () => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Hero Section */}
       <div className="relative rounded-xl overflow-hidden">
         <div 
-          className="h-32 bg-cover bg-center relative"
+          className="h-24 md:h-32 bg-cover bg-center relative"
           style={{ backgroundImage: `url(${heroImage})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-accent/90" />
-          <div className="relative p-6 text-white">
-            <h2 className="text-2xl font-bold mb-2">Welcome to CareFlow Dashboard</h2>
-            <p className="text-white/90">Integrated healthcare management with AI-driven insights</p>
+          <div className="relative p-4 md:p-6 text-white">
+            <h2 className="text-lg md:text-2xl font-bold mb-1 md:mb-2">Welcome to CareFlow Dashboard</h2>
+            <p className="text-sm md:text-base text-white/90">Integrated healthcare management with AI-driven insights</p>
           </div>
         </div>
       </div>
 
       {/* Key Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <MetricCard
           title="Unattached Patients"
           value={247}
@@ -56,7 +56,7 @@ const Index = () => {
       </div>
 
       {/* Secondary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <MetricCard
           title="Hot-Spotter Cases"
           value={8}
@@ -88,11 +88,11 @@ const Index = () => {
       </div>
 
       {/* Main Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="lg:col-span-2 space-y-4 md:space-y-6">
           <AnalyticsChart />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <MetricCard
               title="ICU Capacity"
               value="78%"
@@ -110,7 +110,7 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           <PatientList />
           <MovIntegrationStatus />
           <MessagingPanel />

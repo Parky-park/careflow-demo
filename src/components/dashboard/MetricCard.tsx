@@ -39,15 +39,15 @@ export function MetricCard({ title, value, change, status = 'normal', icon, clas
       getStatusColor(),
       className
     )}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 md:px-6 pt-4 md:pt-6">
+        <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
         {icon || getStatusIcon()}
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 md:px-6 pb-4 md:pb-6">
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-foreground">
+          <div className="text-xl md:text-2xl font-bold text-foreground">
             {value}
           </div>
           {change && (
