@@ -16,15 +16,15 @@ interface FilterModalProps {
 export function FilterModal({ open, onOpenChange, type }: FilterModalProps) {
   const { toast } = useToast();
   const [filters, setFilters] = useState({
-    status: "",
-    riskLevel: "",
-    provider: "",
-    location: "",
-    dateRange: "",
+    status: "all",
+    riskLevel: "all",
+    provider: "all",
+    location: "all",
+    dateRange: "all",
     ageRange: [0, 100],
-    category: "",
-    availability: "",
-    priority: "",
+    category: "all",
+    availability: "all",
+    priority: "all",
     showOnlyActive: true,
     showUnattached: false
   });
@@ -75,15 +75,15 @@ export function FilterModal({ open, onOpenChange, type }: FilterModalProps) {
 
   const handleClearFilters = () => {
     setFilters({
-      status: "",
-      riskLevel: "",
-      provider: "",
-      location: "",
-      dateRange: "",
+      status: "all",
+      riskLevel: "all",
+      provider: "all",
+      location: "all",
+      dateRange: "all",
       ageRange: [0, 100],
-      category: "",
-      availability: "",
-      priority: "",
+      category: "all",
+      availability: "all",
+      priority: "all",
       showOnlyActive: true,
       showUnattached: false
     });
@@ -112,7 +112,7 @@ export function FilterModal({ open, onOpenChange, type }: FilterModalProps) {
                   <SelectValue placeholder={`Select ${option.label.toLowerCase()}`} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All {option.label}</SelectItem>
+                  <SelectItem value="all">All {option.label}</SelectItem>
                   {option.values.map((value) => (
                     <SelectItem key={value} value={value}>
                       {value.charAt(0).toUpperCase() + value.slice(1)}
@@ -168,7 +168,7 @@ export function FilterModal({ open, onOpenChange, type }: FilterModalProps) {
                 <SelectValue placeholder="Select date range" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Time</SelectItem>
+                <SelectItem value="all">All Time</SelectItem>
                 <SelectItem value="today">Today</SelectItem>
                 <SelectItem value="week">This Week</SelectItem>
                 <SelectItem value="month">This Month</SelectItem>
