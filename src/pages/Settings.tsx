@@ -10,13 +10,13 @@ import { Settings as SettingsIcon, Shield, Bell, User, Database, Zap, Lock, Key 
 
 const Settings = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
       <DashboardHeader />
       
-      <div className="flex">
+      <div className="flex flex-1 overflow-hidden">
         <NavigationSidebar />
         
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 overflow-y-auto">
           <div className="space-y-6">
             {/* Header */}
             <div>
