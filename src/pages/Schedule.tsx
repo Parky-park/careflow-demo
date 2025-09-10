@@ -4,9 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { FilterModal } from "@/components/modals/FilterModal";
+import { ScheduleAppointmentModal } from "@/components/modals/ScheduleAppointmentModal";
 import { Calendar, Clock, Users, Plus, Filter, MapPin, Phone } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Schedule = () => {
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const { toast } = useToast();
+
   const todaySchedule = [
     {
       id: "1",
@@ -133,14 +141,48 @@ const Schedule = () => {
     }
   };
 
+  const filterOptions = [
+    {
+      id: 'appointmentType',
+      label: 'Appointment Type',
+      type: 'multiselect' as const,
+      options: ['Patient Consultation', 'Surgery', 'Follow-up', 'Team Meeting', 'Consultation']
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      type: 'multiselect' as const,
+      options: ['Confirmed', 'In-progress', 'Pending', 'Cancelled', 'Scheduled']
+    },
+    {
+      id: 'priority',
+      label: 'Priority',
+      type: 'select' as const,
+      options: ['High', 'Medium', 'Low']
+    },
+    {
+      id: 'provider',
+      label: 'Provider',
+      type: 'select' as const,
+      options: ['Dr. Sarah Wilson', 'Dr. Michael Chen', 'Dr. Raj Patel', 'All Staff']
+    }
+  ];
+
+  const handleApplyFilters = (filters: Record<string, any>) => {
+    toast({
+      title: "Schedule Filters Applied",
+      description: `Applied ${Object.keys(filters).length} filter(s) to schedule view.`,
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
       <DashboardHeader />
       
-      <div className="flex">
+      <div className="flex flex-1 overflow-hidden">
         <NavigationSidebar />
         
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 overflow-y-auto">
           <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -154,11 +196,11 @@ const Schedule = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={() => setShowFilterModal(true)}>
                   <Filter className="h-4 w-4" />
                   Filter View
                 </Button>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => setShowScheduleModal(true)}>
                   <Plus className="h-4 w-4" />
                   Schedule Appointment
                 </Button>
@@ -327,6 +369,20 @@ const Schedule = () => {
           </div>
         </main>
       </div>
+
+      <FilterModal
+        open={showFilterModal}
+        onOpenChange={setShowFilterModal}
+        title="Filter Schedule View"
+        description="Apply filters to customize your schedule display."
+        filters={filterOptions}
+        onApplyFilters={handleApplyFilters}
+      />
+
+      <ScheduleAppointmentModal 
+        open={showScheduleModal} 
+        onOpenChange={setShowScheduleModal} 
+      />
     </div>
   );
 };

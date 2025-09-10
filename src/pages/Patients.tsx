@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { AddPatientModal } from "@/components/modals/AddPatientModal";
+import { FilterModal } from "@/components/modals/FilterModal";
 import { Users, Search, Filter, Plus, AlertTriangle, Heart, Clock, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const mockPatients = [
   {
@@ -59,6 +62,9 @@ const mockPatients = [
 const Patients = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [localSearch, setLocalSearch] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const { toast } = useToast();
   
   // Get search query from URL params
   const urlSearch = searchParams.get("search") || "";
@@ -117,14 +123,48 @@ const Patients = () => {
     }
   };
 
+  const filterOptions = [
+    {
+      id: 'status',
+      label: 'Patient Status',
+      type: 'select' as const,
+      options: ['Active', 'Unattached', 'Discharged', 'Inactive']
+    },
+    {
+      id: 'riskLevel',
+      label: 'Risk Level',
+      type: 'multiselect' as const,
+      options: ['High', 'Medium', 'Low']
+    },
+    {
+      id: 'provider',
+      label: 'Provider',
+      type: 'select' as const,
+      options: ['Dr. Wilson', 'Dr. Chen', 'Dr. Patel', 'Unassigned']
+    },
+    {
+      id: 'conditions',
+      label: 'Conditions',
+      type: 'multiselect' as const,
+      options: ['Diabetes', 'Hypertension', 'COPD', 'Heart Disease', 'Asthma']
+    }
+  ];
+
+  const handleApplyFilters = (filters: Record<string, any>) => {
+    toast({
+      title: "Filters Applied",
+      description: `Applied ${Object.keys(filters).length} filter(s) to patient list.`,
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
       <DashboardHeader />
       
-      <div className="flex">
+      <div className="flex flex-1 overflow-hidden">
         <NavigationSidebar />
         
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 overflow-y-auto">
           <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -137,7 +177,7 @@ const Patients = () => {
                   Comprehensive patient tracking and care coordination
                 </p>
               </div>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowAddModal(true)}>
                 <Plus className="h-4 w-4" />
                 Add Patient
               </Button>
@@ -166,7 +206,7 @@ const Patients = () => {
                       </Button>
                     )}
                   </div>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => setShowFilterModal(true)}>
                     <Filter className="h-4 w-4" />
                     Filters
                   </Button>
@@ -286,6 +326,20 @@ const Patients = () => {
           </div>
         </main>
       </div>
+
+      <AddPatientModal 
+        open={showAddModal} 
+        onOpenChange={setShowAddModal} 
+      />
+
+      <FilterModal
+        open={showFilterModal}
+        onOpenChange={setShowFilterModal}
+        title="Filter Patients"
+        description="Apply filters to find specific patients in your registry."
+        filters={filterOptions}
+        onApplyFilters={handleApplyFilters}
+      />
     </div>
   );
 };
