@@ -83,13 +83,13 @@ const AIInsights = () => {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <DashboardHeader />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex">
         <NavigationSidebar />
         
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-6">
           <div className="space-y-6">
             {/* Header */}
             <div>

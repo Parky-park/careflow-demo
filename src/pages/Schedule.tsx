@@ -5,11 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Clock, Users, Plus, Filter, MapPin, Phone } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 const Schedule = () => {
-  const { toast } = useToast();
   const todaySchedule = [
     {
       id: "1",
@@ -137,13 +134,13 @@ const Schedule = () => {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <DashboardHeader />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex">
         <NavigationSidebar />
         
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-6">
           <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -157,28 +154,11 @@ const Schedule = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  className="gap-2"
-                  onClick={() => {
-                    toast({
-                      title: "Filter View",
-                      description: "Opening schedule view filters..."
-                    });
-                  }}
-                >
+                <Button variant="outline" className="gap-2">
                   <Filter className="h-4 w-4" />
                   Filter View
                 </Button>
-                <Button 
-                  className="gap-2"
-                  onClick={() => {
-                    toast({
-                      title: "Schedule Appointment",
-                      description: "Opening appointment scheduling form..."
-                    });
-                  }}
-                >
+                <Button className="gap-2">
                   <Plus className="h-4 w-4" />
                   Schedule Appointment
                 </Button>

@@ -7,19 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Settings as SettingsIcon, Shield, Bell, User, Database, Zap, Lock, Key } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 const Settings = () => {
-  const { toast } = useToast();
   return (
-    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <DashboardHeader />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex">
         <NavigationSidebar />
         
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-6">
           <div className="space-y-6">
             {/* Header */}
             <div>
@@ -62,17 +59,7 @@ const Settings = () => {
                     <Input id="department" defaultValue="Cardiology" />
                   </div>
                   
-                  <Button 
-                    className="w-full"
-                    onClick={() => {
-                      toast({
-                        title: "Profile Updated",
-                        description: "Your profile information has been saved successfully."
-                      });
-                    }}
-                  >
-                    Update Profile
-                  </Button>
+                  <Button className="w-full">Update Profile</Button>
                 </CardContent>
               </Card>
 
@@ -111,29 +98,11 @@ const Settings = () => {
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      className="flex-1 gap-2"
-                      onClick={() => {
-                        toast({
-                          title: "Change Password",
-                          description: "Opening password change form..."
-                        });
-                      }}
-                    >
+                    <Button variant="outline" className="flex-1 gap-2">
                       <Key className="h-4 w-4" />
                       Change Password
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      className="flex-1 gap-2"
-                      onClick={() => {
-                        toast({
-                          title: "Security Log",
-                          description: "Loading recent security activities..."
-                        });
-                      }}
-                    >
+                    <Button variant="outline" className="flex-1 gap-2">
                       <Lock className="h-4 w-4" />
                       Security Log
                     </Button>
@@ -284,16 +253,7 @@ const Settings = () => {
                     </div>
                   </div>
                   
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => {
-                      toast({
-                        title: "Manage Integrations",
-                        description: "Opening system integration management panel..."
-                      });
-                    }}
-                  >
+                  <Button variant="outline" className="w-full">
                     Manage Integrations
                   </Button>
                 </CardContent>
@@ -338,28 +298,10 @@ const Settings = () => {
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      className="flex-1"
-                      onClick={() => {
-                        toast({
-                          title: "System Logs",
-                          description: "Loading system activity logs..."
-                        });
-                      }}
-                    >
+                    <Button variant="outline" className="flex-1">
                       System Logs
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      className="flex-1"
-                      onClick={() => {
-                        toast({
-                          title: "Export Data",
-                          description: "Preparing data export. This may take a few minutes..."
-                        });
-                      }}
-                    >
+                    <Button variant="outline" className="flex-1">
                       Export Data
                     </Button>
                   </div>

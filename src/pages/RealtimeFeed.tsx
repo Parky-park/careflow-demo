@@ -4,12 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Activity, Clock, MapPin, Users, AlertTriangle, ArrowRight, Pause, Play } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 const RealtimeFeed = () => {
-  const [isPaused, setIsPaused] = useState(false);
-  const { toast } = useToast();
   const adtEvents = [
     {
       id: "1",
@@ -115,13 +111,13 @@ const RealtimeFeed = () => {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <DashboardHeader />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex">
         <NavigationSidebar />
         
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-6">
           <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -135,40 +131,11 @@ const RealtimeFeed = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="gap-2"
-                  onClick={() => {
-                    setIsPaused(!isPaused);
-                    toast({
-                      title: isPaused ? "Feed Resumed" : "Feed Paused",
-                      description: isPaused ? "Real-time updates have been resumed" : "Real-time updates have been paused"
-                    });
-                  }}
-                >
-                  {isPaused ? (
-                    <>
-                      <Play className="h-4 w-4" />
-                      Resume Feed
-                    </>
-                  ) : (
-                    <>
-                      <Pause className="h-4 w-4" />
-                      Pause Feed
-                    </>
-                  )}
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Pause className="h-4 w-4" />
+                  Pause Feed
                 </Button>
-                <Button 
-                  size="sm" 
-                  className="gap-2"
-                  onClick={() => {
-                    toast({
-                      title: "System Alerts",
-                      description: "Opening alerts panel..."
-                    });
-                  }}
-                >
+                <Button size="sm" className="gap-2">
                   <AlertTriangle className="h-4 w-4" />
                   Alerts (3)
                 </Button>
