@@ -4,18 +4,37 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Bell, Search, Settings, MessageCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export function DashboardHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // In a real app, this would perform the search
-      console.log("Searching for:", searchQuery);
+      const query = searchQuery.toLowerCase().trim();
+      
+      // Determine which page to navigate to based on search terms
+      if (query.includes('patient') || query.includes('john') || query.includes('jane') || query.includes('smith')) {
+        navigate(`/patients?search=${encodeURIComponent(searchQuery)}`);
+      } else if (query.includes('provider') || query.includes('doctor') || query.includes('dr.') || query.includes('nurse')) {
+        navigate(`/teams?search=${encodeURIComponent(searchQuery)}`);
+      } else if (query.includes('message') || query.includes('chat') || query.includes('communication')) {
+        navigate(`/messages?search=${encodeURIComponent(searchQuery)}`);
+      } else if (query.includes('inventory') || query.includes('equipment') || query.includes('medication') || query.includes('supply')) {
+        navigate(`/inventory?search=${encodeURIComponent(searchQuery)}`);
+      } else if (query.includes('schedule') || query.includes('appointment') || query.includes('calendar')) {
+        navigate(`/schedule?search=${encodeURIComponent(searchQuery)}`);
+      } else if (query.includes('analytics') || query.includes('report') || query.includes('metric')) {
+        navigate(`/analytics?search=${encodeURIComponent(searchQuery)}`);
+      } else {
+        // Default to patients page for general searches
+        navigate(`/patients?search=${encodeURIComponent(searchQuery)}`);
+      }
+      
       setSearchOpen(false);
       setSearchQuery("");
     }

@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { Users, Search, Filter, Plus, AlertTriangle, Heart, Clock } from "lucide-react";
+import { Users, Search, Filter, Plus, AlertTriangle, Heart, Clock, X } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
 
 const mockPatients = [
   {
@@ -55,6 +57,49 @@ const mockPatients = [
 ];
 
 const Patients = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [localSearch, setLocalSearch] = useState("");
+  
+  // Get search query from URL params
+  const urlSearch = searchParams.get("search") || "";
+  
+  // Use URL search if present, otherwise use local search
+  const activeSearch = urlSearch || localSearch;
+  
+  // Initialize local search with URL search on mount
+  useEffect(() => {
+    if (urlSearch) {
+      setLocalSearch(urlSearch);
+    }
+  }, [urlSearch]);
+
+  // Filter patients based on search query
+  const filteredPatients = useMemo(() => {
+    if (!activeSearch.trim()) return mockPatients;
+    
+    const query = activeSearch.toLowerCase();
+    return mockPatients.filter(patient => 
+      patient.name.toLowerCase().includes(query) ||
+      patient.mrn.toLowerCase().includes(query) ||
+      patient.conditions.some(condition => condition.toLowerCase().includes(query)) ||
+      patient.provider.toLowerCase().includes(query) ||
+      patient.status.toLowerCase().includes(query)
+    );
+  }, [activeSearch]);
+
+  const handleLocalSearch = (value: string) => {
+    setLocalSearch(value);
+    // Clear URL search params when using local search
+    if (urlSearch) {
+      setSearchParams({});
+    }
+  };
+
+  const clearSearch = () => {
+    setLocalSearch("");
+    setSearchParams({});
+  };
+
   const getRiskColor = (level: string) => {
     switch (level) {
       case 'high': return 'bg-destructive text-destructive-foreground';
@@ -107,24 +152,85 @@ const Patients = () => {
                     <Input 
                       placeholder="Search patients by name, MRN, or condition..."
                       className="pl-10"
+                      value={localSearch}
+                      onChange={(e) => handleLocalSearch(e.target.value)}
                     />
+                    {activeSearch && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                        onClick={clearSearch}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                   <Button variant="outline" className="gap-2">
                     <Filter className="h-4 w-4" />
                     Filters
                   </Button>
                 </div>
+                
+                {activeSearch && (
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      Search results for:
+                    </span>
+                    <Badge variant="secondary" className="gap-2">
+                      "{activeSearch}"
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-4 w-4 p-0 hover:bg-transparent"
+                        onClick={clearSearch}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </Badge>
+                    {urlSearch && (
+                      <span className="text-xs text-muted-foreground">
+                        (from search)
+                      </span>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Patient List */}
             <Card>
               <CardHeader>
-                <CardTitle>Patient Registry ({mockPatients.length} patients)</CardTitle>
+                <CardTitle>
+                  Patient Registry ({filteredPatients.length} 
+                  {activeSearch ? ` of ${mockPatients.length}` : ''} patients)
+                  {activeSearch && filteredPatients.length === 0 && (
+                    <span className="text-muted-foreground font-normal ml-2">
+                      - No results found
+                    </span>
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {mockPatients.map((patient) => (
+                {filteredPatients.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No patients found</h3>
+                    <p className="text-muted-foreground">
+                      {activeSearch ? 
+                        `No patients match "${activeSearch}". Try adjusting your search terms.` :
+                        "No patients in the registry yet."
+                      }
+                    </p>
+                    {activeSearch && (
+                      <Button variant="outline" onClick={clearSearch} className="mt-4">
+                        Clear search
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredPatients.map((patient) => (
                     <div key={patient.id} className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors">
                       <div className="flex items-center gap-4">
                         <Avatar className="h-12 w-12">
@@ -172,8 +278,9 @@ const Patients = () => {
                         </Button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                   ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
