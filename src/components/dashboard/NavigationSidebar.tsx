@@ -130,16 +130,27 @@ export function NavigationSidebar() {
             {navItems.slice(5, 9).map((item) => (
               <Button
                 key={item.href}
-                variant="ghost"
-                className="w-full justify-start gap-3 h-10 text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              >
-                {item.icon}
-                <span className="flex-1 text-left">{item.label}</span>
-                {item.badge && (
-                  <Badge variant="outline" className="h-5 px-1.5 text-xs">
-                    {item.badge}
-                  </Badge>
+                variant={isActive(item.href) ? "default" : "ghost"}
+                className={cn(
+                  "w-full justify-start gap-3 h-10",
+                  isActive(item.href)
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
+                asChild
+              >
+                <Link to={item.href}>
+                  {item.icon}
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.badge && (
+                    <Badge 
+                      variant={isActive(item.href) ? "secondary" : "outline"} 
+                      className="h-5 px-1.5 text-xs"
+                    >
+                      {item.badge}
+                    </Badge>
+                  )}
+                </Link>
               </Button>
             ))}
           </div>
@@ -153,11 +164,19 @@ export function NavigationSidebar() {
             {navItems.slice(9).map((item) => (
               <Button
                 key={item.href}
-                variant="ghost"
-                className="w-full justify-start gap-3 h-10 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                variant={isActive(item.href) ? "default" : "ghost"}
+                className={cn(
+                  "w-full justify-start gap-3 h-10",
+                  isActive(item.href)
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )}
+                asChild
               >
-                {item.icon}
-                <span className="flex-1 text-left">{item.label}</span>
+                <Link to={item.href}>
+                  {item.icon}
+                  <span className="flex-1 text-left">{item.label}</span>
+                </Link>
               </Button>
             ))}
           </div>
