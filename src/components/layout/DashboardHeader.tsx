@@ -1,14 +1,31 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Bell, Search, Settings, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useState } from "react";
 
 export function DashboardHeader() {
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // In a real app, this would perform the search
+      console.log("Searching for:", searchQuery);
+      setSearchOpen(false);
+      setSearchQuery("");
+    }
+  };
+
   return (
     <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-40">
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-accent">
               <div className="w-6 h-6 bg-white/90 rounded flex items-center justify-center">
                 <span className="text-xs font-bold text-primary">CF</span>
@@ -18,32 +35,67 @@ export function DashboardHeader() {
               <h1 className="text-xl font-bold text-foreground">CareFlow Dashboard</h1>
               <p className="text-sm text-muted-foreground">Healthcare Management System</p>
             </div>
-          </div>
+          </Link>
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" className="gap-2">
-            <Search className="h-4 w-4" />
-            Search
-          </Button>
+          <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Search className="h-4 w-4" />
+                Search
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Search CareFlow</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSearch} className="space-y-4">
+                <Input
+                  placeholder="Search patients, providers, or records..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full"
+                  autoFocus
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button type="button" variant="outline" onClick={() => setSearchOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={!searchQuery.trim()}>
+                    Search
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="relative">
-              <MessageCircle className="h-4 w-4" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-accent">
-                3
-              </Badge>
+            <Button variant="ghost" size="sm" className="relative" asChild>
+              <Link to="/messages">
+                <MessageCircle className="h-4 w-4" />
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-accent">
+                  3
+                </Badge>
+              </Link>
             </Button>
 
-            <Button variant="ghost" size="sm" className="relative">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="relative" 
+              onClick={() => console.log("Notifications clicked")}
+            >
               <Bell className="h-4 w-4" />
               <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-destructive">
                 5
               </Badge>
             </Button>
 
-            <Button variant="ghost" size="sm">
-              <Settings className="h-4 w-4" />
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/settings">
+                <Settings className="h-4 w-4" />
+              </Link>
             </Button>
           </div>
 
