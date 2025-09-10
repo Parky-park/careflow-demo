@@ -27,14 +27,117 @@ const Settings = () => {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>System Configuration</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Settings content here...</p>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Account Security</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => setShowChangePasswordModal(true)}
+            >
+              Change Password
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => setShowSecurityLogModal(true)}
+            >
+              View Security Log
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => toast({ title: "Two-Factor Authentication", description: "2FA configuration opened." })}
+            >
+              Two-Factor Authentication
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>System Management</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => setShowManageIntegrationsModal(true)}
+            >
+              Manage Integrations
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => setShowSystemLogsModal(true)}
+            >
+              System Logs
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => toast({ title: "Backup Settings", description: "Backup configuration opened." })}
+            >
+              Backup & Recovery
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>User Preferences</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Theme</label>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm">Light</Button>
+                <Button variant="outline" size="sm">Dark</Button>
+                <Button variant="default" size="sm">Auto</Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Language</label>
+              <Button variant="outline" className="w-full justify-start">
+                English (US)
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Timezone</label>
+              <Button variant="outline" className="w-full justify-start">
+                UTC-5 (Eastern Time)
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Notifications</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Email Notifications</span>
+              <Button variant="outline" size="sm">Enabled</Button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">SMS Alerts</span>
+              <Button variant="outline" size="sm">Enabled</Button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Push Notifications</span>
+              <Button variant="outline" size="sm">Disabled</Button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Security Alerts</span>
+              <Button variant="default" size="sm">Always On</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
       
       <ChangePasswordModal open={showChangePasswordModal} onOpenChange={setShowChangePasswordModal} />
       <SecurityLogModal open={showSecurityLogModal} onOpenChange={setShowSecurityLogModal} />
