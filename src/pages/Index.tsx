@@ -5,6 +5,7 @@ import { PatientList } from "@/components/dashboard/PatientList";
 import { RealtimeFeed } from "@/components/dashboard/RealtimeFeed";
 import { AnalyticsChart } from "@/components/dashboard/AnalyticsChart";
 import { MessagingPanel } from "@/components/dashboard/MessagingPanel";
+import { MovIntegrationStatus } from "@/components/dashboard/MovIntegrationStatus";
 import { Users, UserCheck, AlertTriangle, TrendingUp, Activity, Package } from "lucide-react";
 import heroImage from "@/assets/dashboard-hero.jpg";
 
@@ -88,6 +89,7 @@ const Index = () => {
 
             <div className="space-y-6">
               <PatientList />
+              <MovIntegrationStatus />
               <RealtimeFeed />
               <MessagingPanel />
             </div>

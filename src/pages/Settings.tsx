@@ -278,12 +278,28 @@ const Settings = () => {
                       <Badge className="bg-warning text-warning-foreground">Pending</Badge>
                     </div>
                     
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                     <div className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
                         <p className="font-medium">Pharmacy Network</p>
                         <p className="text-sm text-muted-foreground">Prescription management</p>
                       </div>
                       <Badge className="bg-success text-success-foreground">Connected</Badge>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 border rounded-lg bg-primary/5">
+                      <div>
+                        <p className="font-medium">MoV System Integration</p>
+                        <p className="text-sm text-muted-foreground">Drug Utilization Evaluation & Rules Engine</p>
+                      </div>
+                      <Badge className="bg-success text-success-foreground">Active</Badge>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">ADT Feed Integration</p>
+                        <p className="text-sm text-muted-foreground">Admission, Discharge, Transfer updates</p>
+                      </div>
+                      <Badge className="bg-success text-success-foreground">Live</Badge>
                     </div>
                   </div>
                   

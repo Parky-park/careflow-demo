@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Clock, Heart } from "lucide-react";
+import { AlertTriangle, Clock, Heart, UserCheck, UserX, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Patient {
@@ -13,6 +13,9 @@ interface Patient {
   lastVisit: string;
   conditions: string[];
   utilization: number;
+  attachmentStatus: 'attached' | 'unattached' | 'pending';
+  careTeam: string;
+  continuityScore: number;
 }
 
 const mockPatients: Patient[] = [
@@ -23,7 +26,10 @@ const mockPatients: Patient[] = [
     riskLevel: "high",
     lastVisit: "2024-01-08",
     conditions: ["Diabetes", "Hypertension"],
-    utilization: 12
+    utilization: 12,
+    attachmentStatus: "attached",
+    careTeam: "Dr. Wilson's Team",
+    continuityScore: 85
   },
   {
     id: "2", 
@@ -32,7 +38,10 @@ const mockPatients: Patient[] = [
     riskLevel: "medium",
     lastVisit: "2024-01-07",
     conditions: ["Asthma"],
-    utilization: 8
+    utilization: 8,
+    attachmentStatus: "unattached",
+    careTeam: "Available",
+    continuityScore: 42
   },
   {
     id: "3",
@@ -41,7 +50,10 @@ const mockPatients: Patient[] = [
     riskLevel: "high", 
     lastVisit: "2024-01-06",
     conditions: ["COPD", "Heart Disease"],
-    utilization: 15
+    utilization: 15,
+    attachmentStatus: "attached",
+    careTeam: "Cardiology Team",
+    continuityScore: 92
   }
 ];
 
@@ -60,6 +72,23 @@ export function PatientList() {
       case 'high': return <AlertTriangle className="h-3 w-3" />;
       case 'medium': return <Clock className="h-3 w-3" />;
       case 'low': return <Heart className="h-3 w-3" />;
+    }
+  };
+
+  const getAttachmentColor = (status: string) => {
+    switch (status) {
+      case 'attached': return 'bg-success text-success-foreground';
+      case 'unattached': return 'bg-destructive text-destructive-foreground';
+      case 'pending': return 'bg-warning text-warning-foreground';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const getAttachmentIcon = (status: string) => {
+    switch (status) {
+      case 'attached': return <UserCheck className="h-3 w-3" />;
+      case 'unattached': return <UserX className="h-3 w-3" />;
+      case 'pending': return <Users className="h-3 w-3" />;
     }
   };
 
@@ -88,14 +117,22 @@ export function PatientList() {
                     {patient.age}y
                   </Badge>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Badge className={cn("text-xs flex items-center gap-1", getRiskColor(patient.riskLevel))}>
                     {getRiskIcon(patient.riskLevel)}
                     {patient.riskLevel} risk
                   </Badge>
+                  <Badge className={cn("text-xs flex items-center gap-1", getAttachmentColor(patient.attachmentStatus))}>
+                    {getAttachmentIcon(patient.attachmentStatus)}
+                    {patient.attachmentStatus}
+                  </Badge>
                   <span className="text-xs text-muted-foreground">
                     {patient.utilization} visits
                   </span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  <span>Team: {patient.careTeam}</span>
+                  <span className="ml-2">Continuity: {patient.continuityScore}%</span>
                 </div>
               </div>
             </div>
