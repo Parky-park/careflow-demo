@@ -1,5 +1,3 @@
-import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { NavigationSidebar } from "@/components/dashboard/NavigationSidebar";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,205 +5,200 @@ import { BarChart3, TrendingUp, Users, Activity, DollarSign, Calendar } from "lu
 
 const Analytics = () => {
   return (
-    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
-      <DashboardHeader />
-      
-      <div className="flex flex-1 overflow-hidden">
-        <NavigationSidebar />
-        
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="space-y-6">
-            {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                <BarChart3 className="h-8 w-8 text-primary" />
-                Analytics Dashboard
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Comprehensive healthcare analytics and performance metrics
-              </p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+          <BarChart3 className="h-8 w-8 text-primary" />
+          Analytics Dashboard
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Comprehensive healthcare analytics and performance metrics
+        </p>
+      </div>
+
+      {/* Key Performance Indicators */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <MetricCard
+          title="Patient Satisfaction"
+          value="94.2%"
+          change={{ value: 2.1, type: 'increase' }}
+          status="success"
+          icon={<TrendingUp className="h-4 w-4" />}
+        />
+        <MetricCard
+          title="Average Length of Stay"
+          value="3.2 days"
+          change={{ value: 0.5, type: 'decrease' }}
+          status="success"
+          icon={<Calendar className="h-4 w-4" />}
+        />
+        <MetricCard
+          title="Readmission Rate"
+          value="8.7%"
+          change={{ value: 1.2, type: 'decrease' }}
+          status="success"
+          icon={<Activity className="h-4 w-4" />}
+        />
+        <MetricCard
+          title="Cost per Patient"
+          value="$4,250"
+          change={{ value: 3.8, type: 'decrease' }}
+          status="success"
+          icon={<DollarSign className="h-4 w-4" />}
+        />
+      </div>
+
+      {/* Analytics Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Patient Flow Analysis</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Emergency Admissions</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-muted rounded-full h-2">
+                    <div className="bg-destructive h-2 rounded-full" style={{ width: '78%' }}></div>
+                  </div>
+                  <span className="text-sm font-medium">78%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Scheduled Procedures</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-muted rounded-full h-2">
+                    <div className="bg-primary h-2 rounded-full" style={{ width: '92%' }}></div>
+                  </div>
+                  <span className="text-sm font-medium">92%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Outpatient Visits</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-muted rounded-full h-2">
+                    <div className="bg-success h-2 rounded-full" style={{ width: '85%' }}></div>
+                  </div>
+                  <span className="text-sm font-medium">85%</span>
+                </div>
+              </div>
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Key Performance Indicators */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <MetricCard
-                title="Patient Satisfaction"
-                value="94.2%"
-                change={{ value: 2.1, type: 'increase' }}
-                status="success"
-                icon={<TrendingUp className="h-4 w-4" />}
-              />
-              <MetricCard
-                title="Average Length of Stay"
-                value="3.2 days"
-                change={{ value: 0.5, type: 'decrease' }}
-                status="success"
-                icon={<Calendar className="h-4 w-4" />}
-              />
-              <MetricCard
-                title="Readmission Rate"
-                value="8.7%"
-                change={{ value: 1.2, type: 'decrease' }}
-                status="success"
-                icon={<Activity className="h-4 w-4" />}
-              />
-              <MetricCard
-                title="Cost per Patient"
-                value="$2,847"
-                change={{ value: 5.3, type: 'decrease' }}
-                status="success"
-                icon={<DollarSign className="h-4 w-4" />}
-              />
+        <Card>
+          <CardHeader>
+            <CardTitle>Resource Utilization</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">ICU Beds</p>
+                  <p className="text-sm text-muted-foreground">18 of 24 occupied</p>
+                </div>
+                <Badge variant="secondary">75%</Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Operating Rooms</p>
+                  <p className="text-sm text-muted-foreground">6 of 8 in use</p>
+                </div>
+                <Badge variant="secondary">75%</Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Staff Coverage</p>
+                  <p className="text-sm text-muted-foreground">Full staffing achieved</p>
+                </div>
+                <Badge className="bg-green-500 text-white">100%</Badge>
+              </div>
             </div>
+          </CardContent>
+        </Card>
+      </div>
 
-            {/* Analytics Sections */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
-              {/* Patient Flow Analytics */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-primary" />
-                    Patient Flow Analysis
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                      <span className="font-medium">Emergency Department</span>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-success">-12%</Badge>
-                        <span className="text-sm">Average wait time: 23 min</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                      <span className="font-medium">ICU Utilization</span>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-warning">+8%</Badge>
-                        <span className="text-sm">Current capacity: 78%</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                      <span className="font-medium">Discharge Processing</span>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-success">-15%</Badge>
-                        <span className="text-sm">Average time: 2.1 hours</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Financial Analytics */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-primary" />
-                    Financial Performance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                      <span className="font-medium">Revenue per Patient</span>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-success">+7%</Badge>
-                        <span className="text-sm font-semibold">$4,234</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                      <span className="font-medium">Cost Reduction</span>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-success">-11%</Badge>
-                        <span className="text-sm font-semibold">$187K saved</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                      <span className="font-medium">Insurance Claims</span>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-success">98.2%</Badge>
-                        <span className="text-sm">Approval rate</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quality Metrics */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-primary" />
-                    Quality Indicators
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                      <span className="font-medium">Medication Adherence</span>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-success">92.1%</Badge>
-                        <TrendingUp className="h-4 w-4 text-success" />
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                      <span className="font-medium">Care Plan Compliance</span>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-success">88.7%</Badge>
-                        <TrendingUp className="h-4 w-4 text-success" />
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                      <span className="font-medium">Patient Safety Score</span>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-success">96.4%</Badge>
-                        <TrendingUp className="h-4 w-4 text-success" />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Predictive Analytics */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-accent" />
-                    Predictive Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="p-3 bg-muted/30 rounded-lg">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium">30-Day Readmission Risk</span>
-                        <Badge variant="outline">AI Prediction</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        23 patients at high risk identified
-                      </p>
-                      <div className="h-2 w-full bg-muted rounded-full">
-                        <div className="h-full bg-warning w-4/5 rounded-full" />
-                      </div>
-                    </div>
-                    <div className="p-3 bg-muted/30 rounded-lg">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium">Capacity Forecast</span>
-                        <Badge variant="outline">Next 7 Days</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Expected 15% increase in ED visits
-                      </p>
-                      <div className="h-2 w-full bg-muted rounded-full">
-                        <div className="h-full bg-primary w-3/4 rounded-full" />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+      {/* Detailed Analytics */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Patient Demographics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Age 0-18</span>
+                <span className="font-medium">12%</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Age 19-35</span>
+                <span className="font-medium">23%</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Age 36-65</span>
+                <span className="font-medium">45%</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Age 65+</span>
+                <span className="font-medium">20%</span>
+              </div>
             </div>
-          </div>
-        </main>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Conditions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Hypertension</span>
+                <Badge variant="outline">234 cases</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Diabetes</span>
+                <Badge variant="outline">189 cases</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Heart Disease</span>
+                <Badge variant="outline">156 cases</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">COPD</span>
+                <Badge variant="outline">98 cases</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Quality Metrics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Safety Score</span>
+                <span className="font-bold text-green-600">9.2/10</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Clinical Outcomes</span>
+                <span className="font-bold text-green-600">94.5%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Compliance Rate</span>
+                <span className="font-bold text-blue-600">97.8%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Error Rate</span>
+                <span className="font-bold text-green-600">0.3%</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
