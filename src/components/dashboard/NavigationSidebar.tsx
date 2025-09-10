@@ -6,13 +6,19 @@ import {
   LayoutDashboard, 
   Users, 
   Activity, 
-  MessageSquare, 
   Calendar,
   BarChart3,
   Package,
   Settings,
   HeartHandshake,
-  Brain
+  Brain,
+  UserRoundCheck,
+  Building2,
+  Pill,
+  Microscope,
+  Database,
+  Bell,
+  AlertTriangle
 } from "lucide-react";
 
 interface NavItem {
@@ -48,9 +54,20 @@ const navItems: NavItem[] = [
     badge: 5
   },
   {
-    label: "Real-time Feed", 
+    label: "Emergency Department",
     icon: <Activity className="h-4 w-4" />,
-    href: "/feed"
+    href: "/emergency"
+  },
+  {
+    label: "Hot-Spotter Teams",
+    icon: <UserRoundCheck className="h-4 w-4" />,
+    href: "/hot-spotters",
+    badge: 3
+  },
+  {
+    label: "Medical Homes",
+    icon: <Building2 className="h-4 w-4" />,
+    href: "/medical-homes"
   },
   {
     label: "Care Teams",
@@ -58,10 +75,20 @@ const navItems: NavItem[] = [
     href: "/teams"
   },
   {
-    label: "Messages",
-    icon: <MessageSquare className="h-4 w-4" />,
-    href: "/messages",
-    badge: 12
+    label: "Pharmacy AI",
+    icon: <Pill className="h-4 w-4" />,
+    href: "/pharmacy-ai",
+    badge: 2
+  },
+  {
+    label: "Drug Utilization",
+    icon: <Microscope className="h-4 w-4" />,
+    href: "/drug-utilization"
+  },
+  {
+    label: "FHIR Integration",
+    icon: <Database className="h-4 w-4" />,
+    href: "/fhir"
   },
   {
     label: "Inventory",
@@ -72,6 +99,12 @@ const navItems: NavItem[] = [
     label: "Schedule",
     icon: <Calendar className="h-4 w-4" />,
     href: "/schedule"
+  },
+  {
+    label: "Notifications",
+    icon: <Bell className="h-4 w-4" />,
+    href: "/notifications",
+    badge: 8
   },
   {
     label: "Settings",
@@ -127,7 +160,7 @@ export function NavigationSidebar() {
             Care Management
           </h3>
           <div className="space-y-1">
-            {navItems.slice(5, 9).map((item) => (
+            {navItems.slice(5, 11).map((item) => (
               <Button
                 key={item.href}
                 variant={isActive(item.href) ? "default" : "ghost"}
@@ -161,7 +194,7 @@ export function NavigationSidebar() {
             System
           </h3>
           <div className="space-y-1">
-            {navItems.slice(9).map((item) => (
+            {navItems.slice(11).map((item) => (
               <Button
                 key={item.href}
                 variant={isActive(item.href) ? "default" : "ghost"}
@@ -176,6 +209,14 @@ export function NavigationSidebar() {
                 <Link to={item.href}>
                   {item.icon}
                   <span className="flex-1 text-left">{item.label}</span>
+                  {item.badge && (
+                    <Badge 
+                      variant={isActive(item.href) ? "secondary" : "outline"} 
+                      className="h-5 px-1.5 text-xs"
+                    >
+                      {item.badge}
+                    </Badge>
+                  )}
                 </Link>
               </Button>
             ))}
