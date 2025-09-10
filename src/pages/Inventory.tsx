@@ -4,9 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AddInventoryItemModal } from "@/components/modals/AddInventoryItemModal";
+import { FilterModal } from "@/components/modals/FilterModal";
 import { Package, AlertTriangle, TrendingUp, Search, Plus, Filter } from "lucide-react";
+import { useState } from "react";
 
 const Inventory = () => {
+  const [showAddItemModal, setShowAddItemModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  
   const inventoryItems = [
     {
       id: "1",
@@ -114,11 +120,11 @@ const Inventory = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={() => setShowFilterModal(true)}>
                   <Filter className="h-4 w-4" />
                   Filters
                 </Button>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => setShowAddItemModal(true)}>
                   <Plus className="h-4 w-4" />
                   Add Item
                 </Button>
@@ -287,6 +293,16 @@ const Inventory = () => {
           </div>
         </main>
       </div>
+      
+      <AddInventoryItemModal 
+        open={showAddItemModal} 
+        onOpenChange={setShowAddItemModal} 
+      />
+      <FilterModal 
+        open={showFilterModal} 
+        onOpenChange={setShowFilterModal} 
+        type="inventory"
+      />
     </div>
   );
 };

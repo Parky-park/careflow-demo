@@ -4,9 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScheduleAppointmentModal } from "@/components/modals/ScheduleAppointmentModal";
+import { FilterModal } from "@/components/modals/FilterModal";
 import { Calendar, Clock, Users, Plus, Filter, MapPin, Phone } from "lucide-react";
+import { useState } from "react";
 
 const Schedule = () => {
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  
   const todaySchedule = [
     {
       id: "1",
@@ -154,11 +160,11 @@ const Schedule = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={() => setShowFilterModal(true)}>
                   <Filter className="h-4 w-4" />
                   Filter View
                 </Button>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => setShowScheduleModal(true)}>
                   <Plus className="h-4 w-4" />
                   Schedule Appointment
                 </Button>
@@ -327,6 +333,16 @@ const Schedule = () => {
           </div>
         </main>
       </div>
+      
+      <ScheduleAppointmentModal 
+        open={showScheduleModal} 
+        onOpenChange={setShowScheduleModal} 
+      />
+      <FilterModal 
+        open={showFilterModal} 
+        onOpenChange={setShowFilterModal} 
+        type="schedule"
+      />
     </div>
   );
 };

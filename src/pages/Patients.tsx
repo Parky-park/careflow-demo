@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { AddPatientModal } from "@/components/modals/AddPatientModal";
+import { FilterModal } from "@/components/modals/FilterModal";
 import { Users, Search, Filter, Plus, AlertTriangle, Heart, Clock, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
@@ -59,6 +61,8 @@ const mockPatients = [
 const Patients = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [localSearch, setLocalSearch] = useState("");
+  const [showAddPatientModal, setShowAddPatientModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
   
   // Get search query from URL params
   const urlSearch = searchParams.get("search") || "";
@@ -137,7 +141,7 @@ const Patients = () => {
                   Comprehensive patient tracking and care coordination
                 </p>
               </div>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowAddPatientModal(true)}>
                 <Plus className="h-4 w-4" />
                 Add Patient
               </Button>
@@ -166,7 +170,7 @@ const Patients = () => {
                       </Button>
                     )}
                   </div>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => setShowFilterModal(true)}>
                     <Filter className="h-4 w-4" />
                     Filters
                   </Button>
@@ -286,6 +290,16 @@ const Patients = () => {
           </div>
         </main>
       </div>
+      
+      <AddPatientModal 
+        open={showAddPatientModal} 
+        onOpenChange={setShowAddPatientModal} 
+      />
+      <FilterModal 
+        open={showFilterModal} 
+        onOpenChange={setShowFilterModal} 
+        type="patients"
+      />
     </div>
   );
 };

@@ -3,9 +3,14 @@ import { NavigationSidebar } from "@/components/dashboard/NavigationSidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AlertsPanel } from "@/components/modals/AlertsPanel";
 import { Activity, Clock, MapPin, Users, AlertTriangle, ArrowRight, Pause, Play } from "lucide-react";
+import { useState } from "react";
 
 const RealtimeFeed = () => {
+  const [feedPaused, setFeedPaused] = useState(false);
+  const [showAlertsPanel, setShowAlertsPanel] = useState(false);
+  
   const adtEvents = [
     {
       id: "1",
@@ -131,11 +136,16 @@ const RealtimeFeed = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Pause className="h-4 w-4" />
-                  Pause Feed
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={() => setFeedPaused(!feedPaused)}
+                >
+                  {feedPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+                  {feedPaused ? "Resume Feed" : "Pause Feed"}
                 </Button>
-                <Button size="sm" className="gap-2">
+                <Button size="sm" className="gap-2" onClick={() => setShowAlertsPanel(true)}>
                   <AlertTriangle className="h-4 w-4" />
                   Alerts (3)
                 </Button>
@@ -149,9 +159,11 @@ const RealtimeFeed = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">Feed Status</p>
-                      <p className="text-lg font-bold text-success">Live</p>
+                      <p className={`text-lg font-bold ${feedPaused ? 'text-warning' : 'text-success'}`}>
+                        {feedPaused ? "Paused" : "Live"}
+                      </p>
                     </div>
-                    <div className="h-3 w-3 bg-success rounded-full animate-pulse" />
+                    <div className={`h-3 w-3 rounded-full ${feedPaused ? 'bg-warning' : 'bg-success animate-pulse'}`} />
                   </div>
                 </CardContent>
               </Card>
@@ -282,6 +294,11 @@ const RealtimeFeed = () => {
           </div>
         </main>
       </div>
+      
+      <AlertsPanel 
+        open={showAlertsPanel} 
+        onOpenChange={setShowAlertsPanel} 
+      />
     </div>
   );
 };
