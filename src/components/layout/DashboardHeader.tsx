@@ -93,7 +93,7 @@ export function DashboardHeader() {
             <Button variant="ghost" size="sm" className="relative" asChild>
               <Link to="/messages">
                 <MessageCircle className="h-4 w-4" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-accent">
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-accent flex items-center justify-center">
                   3
                 </Badge>
               </Link>
@@ -103,12 +103,14 @@ export function DashboardHeader() {
               variant="ghost" 
               size="sm" 
               className="relative" 
-              onClick={() => console.log("Notifications clicked")}
+              asChild
             >
-              <Bell className="h-4 w-4" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-destructive">
-                5
-              </Badge>
+              <Link to="/notifications">
+                <Bell className="h-4 w-4" />
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-destructive flex items-center justify-center">
+                  5
+                </Badge>
+              </Link>
             </Button>
 
             <Button variant="ghost" size="sm" asChild>
