@@ -61,12 +61,13 @@ export function AddInventoryItemModal({ open, onOpenChange }: AddInventoryItemMo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Add New Inventory Item</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex-1 overflow-y-auto px-1">
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Item Name *</Label>
@@ -224,15 +225,16 @@ export function AddInventoryItemModal({ open, onOpenChange }: AddInventoryItemMo
             />
           </div>
 
-          <div className="flex gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              Add Item
-            </Button>
-          </div>
-        </form>
+            <div className="flex gap-2 pt-4 flex-shrink-0">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                Add Item
+              </Button>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
