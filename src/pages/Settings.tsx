@@ -6,11 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ChangePasswordModal } from "@/components/modals/ChangePasswordModal";
+import { SecurityLogModal } from "@/components/modals/SecurityLogModal";
+import { SystemLogsModal } from "@/components/modals/SystemLogsModal";
+import { ManageIntegrationsModal } from "@/components/modals/ManageIntegrationsModal";
 import { useToast } from "@/hooks/use-toast";
 import { Settings as SettingsIcon, Shield, Bell, User, Database, Zap, Lock, Key } from "lucide-react";
+import { useState } from "react";
 
 const Settings = () => {
   const { toast } = useToast();
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [showSecurityLogModal, setShowSecurityLogModal] = useState(false);
+  const [showSystemLogsModal, setShowSystemLogsModal] = useState(false);
+  const [showManageIntegrationsModal, setShowManageIntegrationsModal] = useState(false);
 
   const handleUpdateProfile = () => {
     toast({
@@ -19,39 +28,19 @@ const Settings = () => {
     });
   };
 
-  const handleChangePassword = () => {
-    toast({
-      title: "Password Change",
-      description: "Password change form opened. Please follow the security prompts.",
-    });
-  };
-
-  const handleSecurityLog = () => {
-    toast({
-      title: "Security Log",
-      description: "Security activity log has been opened for review.",
-    });
-  };
-
-  const handleManageIntegrations = () => {
-    toast({
-      title: "Integration Management",
-      description: "Integration management panel opened.",
-    });
-  };
-
   const handleExportData = () => {
     toast({
-      title: "Data Export",
-      description: "Data export process has been initiated. You will be notified when complete.",
+      title: "Data Export Started",
+      description: "Your data export is being prepared. You will receive an email when it's ready for download.",
     });
-  };
-
-  const handleSystemLogs = () => {
-    toast({
-      title: "System Logs",
-      description: "System logs viewer has been opened.",
-    });
+    
+    // Simulate export progress
+    setTimeout(() => {
+      toast({
+        title: "Data Export Complete",
+        description: "Your data has been exported successfully. Download link sent to your email.",
+      });
+    }, 3000);
   };
 
   return (
@@ -143,11 +132,11 @@ const Settings = () => {
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1 gap-2" onClick={handleChangePassword}>
+                    <Button variant="outline" className="flex-1 gap-2" onClick={() => setShowChangePasswordModal(true)}>
                       <Key className="h-4 w-4" />
                       Change Password
                     </Button>
-                    <Button variant="outline" className="flex-1 gap-2" onClick={handleSecurityLog}>
+                    <Button variant="outline" className="flex-1 gap-2" onClick={() => setShowSecurityLogModal(true)}>
                       <Lock className="h-4 w-4" />
                       Security Log
                     </Button>
@@ -298,7 +287,7 @@ const Settings = () => {
                     </div>
                   </div>
                   
-                  <Button variant="outline" className="w-full" onClick={handleManageIntegrations}>
+                  <Button variant="outline" className="w-full" onClick={() => setShowManageIntegrationsModal(true)}>
                     Manage Integrations
                   </Button>
                 </CardContent>
@@ -343,7 +332,7 @@ const Settings = () => {
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1" onClick={handleSystemLogs}>
+                    <Button variant="outline" className="flex-1" onClick={() => setShowSystemLogsModal(true)}>
                       System Logs
                     </Button>
                     <Button variant="outline" className="flex-1" onClick={handleExportData}>
@@ -356,6 +345,23 @@ const Settings = () => {
           </div>
         </main>
       </div>
+      
+      <ChangePasswordModal 
+        open={showChangePasswordModal} 
+        onOpenChange={setShowChangePasswordModal} 
+      />
+      <SecurityLogModal 
+        open={showSecurityLogModal} 
+        onOpenChange={setShowSecurityLogModal} 
+      />
+      <SystemLogsModal 
+        open={showSystemLogsModal} 
+        onOpenChange={setShowSystemLogsModal} 
+      />
+      <ManageIntegrationsModal 
+        open={showManageIntegrationsModal} 
+        onOpenChange={setShowManageIntegrationsModal} 
+      />
     </div>
   );
 };
