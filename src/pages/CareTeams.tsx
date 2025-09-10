@@ -46,272 +46,198 @@ const CareTeams = () => {
       specialty: "Interventional Cardiology",
       experience: "15 years",
       currentPatients: 23,
-      rating: 4.9,
-      status: "active"
+      availability: "Available",
+      rating: 4.9
     },
     {
       id: "2",
-      name: "Nurse Jennifer Lee",
-      role: "Charge Nurse",
-      specialty: "Critical Care Nursing", 
-      experience: "8 years",
-      currentPatients: 12,
-      rating: 4.8,
-      status: "active"
+      name: "Dr. Michael Chen",
+      role: "Emergency Physician",
+      specialty: "Emergency Medicine",
+      experience: "12 years",
+      currentPatients: 18,
+      availability: "In Surgery",
+      rating: 4.8
     },
     {
       id: "3",
-      name: "Dr. Raj Patel",
-      role: "Resident Physician",
-      specialty: "Internal Medicine",
-      experience: "3 years", 
-      currentPatients: 18,
-      rating: 4.6,
-      status: "active"
-    },
-    {
-      id: "4",
-      name: "Maria Santos",
-      role: "Clinical Coordinator", 
-      specialty: "Care Coordination",
-      experience: "6 years",
-      currentPatients: 45,
-      rating: 4.7,
-      status: "break"
+      name: "Nurse Jennifer Smith",
+      role: "Senior Nurse",
+      specialty: "Critical Care",
+      experience: "10 years",
+      currentPatients: 12,
+      availability: "Available",
+      rating: 4.7
     }
   ];
 
-  const getAvailabilityColor = (status: string) => {
-    switch (status) {
-      case 'Available': return 'bg-success text-success-foreground';
-      case 'Busy': return 'bg-warning text-warning-foreground';
-      case 'Unavailable': return 'bg-destructive text-destructive-foreground';
-      default: return 'bg-muted text-muted-foreground';
+  const getAvailabilityColor = (availability: string) => {
+    switch (availability) {
+      case 'Available': return 'bg-green-500 text-white';
+      case 'Busy': return 'bg-yellow-500 text-black';
+      case 'In Surgery': return 'bg-red-500 text-white';
+      case 'Off Duty': return 'bg-gray-500 text-white';
+      default: return 'bg-gray-500 text-white';
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-success';
-      case 'break': return 'bg-warning';
-      case 'off-duty': return 'bg-muted';
-      default: return 'bg-muted';
-    }
+  const getPerformanceColor = (performance: number) => {
+    if (performance >= 95) return 'text-green-600';
+    if (performance >= 90) return 'text-blue-600';
+    if (performance >= 85) return 'text-yellow-600';
+    return 'text-red-600';
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
-      <DashboardHeader />
-      
-      <div className="flex flex-1 overflow-hidden">
-        <NavigationSidebar />
-        
-        <main className="flex-1 p-6 overflow-y-auto">
-          <div className="space-y-6">
-            {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                <HeartHandshake className="h-8 w-8 text-primary" />
-                Care Teams
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Collaborative healthcare team management and coordination
-              </p>
-            </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+          <HeartHandshake className="h-8 w-8 text-primary" />
+          Care Teams
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Coordinate healthcare teams and manage collaborative care
+        </p>
+      </div>
 
-            {/* Team Overview */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {teams.map((team) => (
-                <Card key={team.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{team.name}</CardTitle>
-                      <Badge className={getAvailabilityColor(team.availability)}>
-                        {team.availability}
+      {/* Team Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {teams.map((team) => (
+          <Card key={team.id} className="hover:shadow-md transition-shadow">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">{team.name}</CardTitle>
+                <Badge className={getAvailabilityColor(team.availability)}>
+                  {team.availability}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">Led by {team.lead}</p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Team Members</span>
+                  <span className="font-medium">{team.members}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Active Patients</span>
+                  <span className="font-medium">{team.activePatients}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Performance</span>
+                  <span className={`font-bold ${getPerformanceColor(team.performance)}`}>
+                    {team.performance}%
+                  </span>
+                </div>
+                <div className="pt-2">
+                  <p className="text-xs text-muted-foreground mb-2">Specialties:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {team.specialties.map((specialty, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-xs">
+                        {specialty}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button size="sm" className="flex-1">
+                    <MessageSquare className="h-3 w-3 mr-1" />
+                    Message
+                  </Button>
+                  <Button size="sm" variant="outline" className="flex-1">
+                    View Details
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Team Members */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Team Members
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {teamMembers.map((member) => (
+              <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/20 transition-colors">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/personas/svg?seed=${member.name}`} />
+                    <AvatarFallback>
+                      {member.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                      <h3 className="font-semibold">{member.name}</h3>
+                      <Badge className={getAvailabilityColor(member.availability)}>
+                        {member.availability}
                       </Badge>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/personas/svg?seed=${team.lead}`} />
-                        <AvatarFallback>
-                          {team.lead.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-sm">{team.lead}</p>
-                        <p className="text-xs text-muted-foreground">Team Lead</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Members</p>
-                        <p className="font-medium">{team.members}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Active Patients</p>
-                        <p className="font-medium">{team.activePatients}</p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Specialties</p>
-                      <div className="flex flex-wrap gap-1">
-                        {team.specialties.map((specialty, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {specialty}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-muted-foreground">Performance</span>
-                        <span className="font-medium">{team.performance}%</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full">
-                        <div 
-                          className="h-full bg-success rounded-full transition-all"
-                          style={{ width: `${team.performance}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2 pt-2">
-                      <Button variant="outline" size="sm" className="flex-1 gap-1">
-                        <MessageSquare className="h-3 w-3" />
-                        Message
-                      </Button>
-                      <Button variant="outline" size="sm" className="flex-1 gap-1">
+                    <p className="text-sm text-muted-foreground">{member.role}</p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        Schedule
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Team Members */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  Team Members - Cardiology Unit A
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {teamMembers.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={`https://api.dicebear.com/7.x/personas/svg?seed=${member.name}`} />
-                            <AvatarFallback>
-                              {member.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white ${getStatusColor(member.status)}`} />
-                        </div>
-                        
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium">{member.name}</h3>
-                            <Badge variant="outline" className="text-xs">
-                              {member.role}
-                            </Badge>
-                          </div>
-                          
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>{member.specialty}</span>
-                            <span>•</span>
-                            <span>{member.experience}</span>
-                            <span>•</span>
-                            <div className="flex items-center gap-1">
-                              <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                              <span>{member.rating}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="text-sm text-muted-foreground">
-                            Current patients: {member.currentPatients}
-                          </div>
-                        </div>
+                        {member.experience}
                       </div>
-                      
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="gap-1">
-                          <MessageSquare className="h-3 w-3" />
-                          Message
-                        </Button>
-                        <Button variant="outline" size="sm" className="gap-1">
-                          <Phone className="h-3 w-3" />
-                          Call
-                        </Button>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {member.currentPatients} patients
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        {member.rating}
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+                
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline">
+                    <Phone className="h-3 w-3 mr-1" />
+                    Call
+                  </Button>
+                  <Button size="sm">
+                    <MessageSquare className="h-3 w-3 mr-1" />
+                    Message
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-            {/* Team Performance Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Average Response Time</p>
-                      <p className="text-2xl font-bold">4.2min</p>
-                      <p className="text-xs text-success flex items-center gap-1 mt-1">
-                        <Clock className="h-3 w-3" />
-                        12% faster than last month
-                      </p>
-                    </div>
-                    <Clock className="h-8 w-8 text-primary" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Patient Satisfaction</p>
-                      <p className="text-2xl font-bold">96.8%</p>
-                      <p className="text-xs text-success flex items-center gap-1 mt-1">
-                        <Star className="h-3 w-3" />
-                        +2.1% from last quarter
-                      </p>
-                    </div>
-                    <Star className="h-8 w-8 text-primary" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Care Coordination</p>
-                      <p className="text-2xl font-bold">94.1%</p>
-                      <p className="text-xs text-success flex items-center gap-1 mt-1">
-                        <HeartHandshake className="h-3 w-3" />
-                        Excellent collaboration
-                      </p>
-                    </div>
-                    <HeartHandshake className="h-8 w-8 text-primary" />
-                  </div>
-                </CardContent>
-              </Card>
+      {/* Team Performance */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Team Performance Metrics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-green-600">94.2%</p>
+              <p className="text-sm text-muted-foreground">Average Team Performance</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-blue-600">190</p>
+              <p className="text-sm text-muted-foreground">Total Active Patients</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-primary">35</p>
+              <p className="text-sm text-muted-foreground">Total Team Members</p>
             </div>
           </div>
-        </main>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
