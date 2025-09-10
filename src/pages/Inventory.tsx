@@ -4,15 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FilterModal } from "@/components/modals/FilterModal";
 import { Package, AlertTriangle, TrendingUp, Search, Plus, Filter } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 const Inventory = () => {
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const { toast } = useToast();
-
   const inventoryItems = [
     {
       id: "1",
@@ -99,49 +93,14 @@ const Inventory = () => {
     return 'bg-success';
   };
 
-  const filterOptions = [
-    {
-      id: 'category',
-      label: 'Category',
-      type: 'select' as const,
-      options: ['Critical Equipment', 'Monitoring Equipment', 'Medications', 'PPE', 'Controlled Substances']
-    },
-    {
-      id: 'status',
-      label: 'Status',
-      type: 'multiselect' as const,
-      options: ['Critical', 'Low', 'Adequate', 'Overstocked']
-    },
-    {
-      id: 'location',
-      label: 'Location',
-      type: 'select' as const,
-      options: ['ICU Storage', 'Equipment Room A', 'Pharmacy Vault', 'Pharmacy Refrigerator', 'PPE Storage']
-    }
-  ];
-
-  const handleAddItem = () => {
-    toast({
-      title: "Add Item",
-      description: "Add item functionality would open a detailed form.",
-    });
-  };
-
-  const handleApplyFilters = (filters: Record<string, any>) => {
-    toast({
-      title: "Filters Applied",
-      description: `Applied ${Object.keys(filters).length} filter(s) to inventory.`,
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <DashboardHeader />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex">
         <NavigationSidebar />
         
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-6">
           <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -155,11 +114,11 @@ const Inventory = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="gap-2" onClick={() => setShowFilterModal(true)}>
+                <Button variant="outline" className="gap-2">
                   <Filter className="h-4 w-4" />
                   Filters
                 </Button>
-                <Button className="gap-2" onClick={handleAddItem}>
+                <Button className="gap-2">
                   <Plus className="h-4 w-4" />
                   Add Item
                 </Button>
@@ -328,15 +287,6 @@ const Inventory = () => {
           </div>
         </main>
       </div>
-
-      <FilterModal
-        open={showFilterModal}
-        onOpenChange={setShowFilterModal}
-        title="Filter Inventory"
-        description="Apply filters to find specific items in your inventory."
-        filters={filterOptions}
-        onApplyFilters={handleApplyFilters}
-      />
     </div>
   );
 };

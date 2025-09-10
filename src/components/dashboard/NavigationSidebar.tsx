@@ -86,7 +86,7 @@ export function NavigationSidebar() {
   const isActive = (href: string) => location.pathname === href;
   
   return (
-    <nav className="w-64 border-r bg-card/30 backdrop-blur-sm flex flex-col h-screen">
+    <nav className="w-64 border-r bg-card/30 backdrop-blur-sm flex flex-col h-full">
       <div className="p-6 space-y-6 overflow-y-auto flex-1">
         <div className="space-y-2">
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">

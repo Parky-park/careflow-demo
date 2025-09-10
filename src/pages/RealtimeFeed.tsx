@@ -3,24 +3,9 @@ import { NavigationSidebar } from "@/components/dashboard/NavigationSidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertsPanel } from "@/components/modals/AlertsPanel";
 import { Activity, Clock, MapPin, Users, AlertTriangle, ArrowRight, Pause, Play } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 
 const RealtimeFeed = () => {
-  const [isPaused, setIsPaused] = useState(false);
-  const [showAlerts, setShowAlerts] = useState(false);
-  const { toast } = useToast();
-
-  const toggleFeed = () => {
-    setIsPaused(!isPaused);
-    toast({
-      title: isPaused ? "Feed Resumed" : "Feed Paused",
-      description: isPaused ? "Real-time ADT feed is now active." : "Real-time ADT feed has been paused.",
-    });
-  };
-
   const adtEvents = [
     {
       id: "1",
@@ -126,13 +111,13 @@ const RealtimeFeed = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <DashboardHeader />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex">
         <NavigationSidebar />
         
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-6">
           <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -146,20 +131,11 @@ const RealtimeFeed = () => {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="gap-2"
-                  onClick={toggleFeed}
-                >
-                  {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-                  {isPaused ? "Resume Feed" : "Pause Feed"}
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Pause className="h-4 w-4" />
+                  Pause Feed
                 </Button>
-                <Button 
-                  size="sm" 
-                  className="gap-2"
-                  onClick={() => setShowAlerts(true)}
-                >
+                <Button size="sm" className="gap-2">
                   <AlertTriangle className="h-4 w-4" />
                   Alerts (3)
                 </Button>
@@ -173,11 +149,9 @@ const RealtimeFeed = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">Feed Status</p>
-                      <p className={`text-lg font-bold ${isPaused ? 'text-warning' : 'text-success'}`}>
-                        {isPaused ? 'Paused' : 'Live'}
-                      </p>
+                      <p className="text-lg font-bold text-success">Live</p>
                     </div>
-                    <div className={`h-3 w-3 rounded-full ${isPaused ? 'bg-warning' : 'bg-success animate-pulse'}`} />
+                    <div className="h-3 w-3 bg-success rounded-full animate-pulse" />
                   </div>
                 </CardContent>
               </Card>
@@ -308,11 +282,6 @@ const RealtimeFeed = () => {
           </div>
         </main>
       </div>
-
-      <AlertsPanel 
-        open={showAlerts} 
-        onOpenChange={setShowAlerts} 
-      />
     </div>
   );
 };
