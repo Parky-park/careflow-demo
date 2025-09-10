@@ -3,7 +3,7 @@ import { PatientList } from "@/components/dashboard/PatientList";
 import { AnalyticsChart } from "@/components/dashboard/AnalyticsChart";
 import { MessagingPanel } from "@/components/dashboard/MessagingPanel";
 import { MovIntegrationStatus } from "@/components/dashboard/MovIntegrationStatus";
-import { Users, UserCheck, AlertTriangle, TrendingUp, Activity, Package } from "lucide-react";
+import { Users, UserCheck, AlertTriangle, TrendingUp, Activity, Package, Brain, Stethoscope, Pill, Clock } from "lucide-react";
 import heroImage from "@/assets/dashboard-hero.jpg";
 
 const Index = () => {
@@ -45,6 +45,38 @@ const Index = () => {
           change={{ value: 5, type: 'increase' }}
           status="success"
           icon={<UserCheck className="h-4 w-4" />}
+        />
+        <MetricCard
+          title="AI Risk Predictions"
+          value={15}
+          change={{ value: 3, type: 'increase' }}
+          status="warning"
+          icon={<Brain className="h-4 w-4" />}
+        />
+      </div>
+
+      {/* Secondary Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <MetricCard
+          title="Hot-Spotter Cases"
+          value={8}
+          change={{ value: 2, type: 'decrease' }}
+          status="success"
+          icon={<Stethoscope className="h-4 w-4" />}
+        />
+        <MetricCard
+          title="ED Wait Time"
+          value="24 min"
+          change={{ value: 5, type: 'decrease' }}
+          status="success"
+          icon={<Clock className="h-4 w-4" />}
+        />
+        <MetricCard
+          title="Pharmacy Processing"
+          value="98%"
+          change={{ value: 1, type: 'increase' }}
+          status="success"
+          icon={<Pill className="h-4 w-4" />}
         />
         <MetricCard
           title="Avg. Cost per Visit"
