@@ -18,6 +18,8 @@ import {
   Microscope,
   Database,
   Bell,
+  MessageCircle,
+  Radio,
   AlertTriangle
 } from "lucide-react";
 
@@ -101,10 +103,22 @@ const navItems: NavItem[] = [
     href: "/schedule"
   },
   {
+    label: "Messages",
+    icon: <MessageCircle className="h-4 w-4" />,
+    href: "/messages",
+    badge: 12
+  },
+  {
     label: "Notifications",
     icon: <Bell className="h-4 w-4" />,
     href: "/notifications",
     badge: 8
+  },
+  {
+    label: "Realtime Feed",
+    icon: <Radio className="h-4 w-4" />,
+    href: "/realtime-feed",
+    badge: 3
   },
   {
     label: "Settings",

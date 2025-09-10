@@ -13,7 +13,9 @@ import CareTeams from "./pages/CareTeams";
 import Inventory from "./pages/Inventory";
 import Schedule from "./pages/Schedule";
 import Settings from "./pages/Settings";
+import Messages from "./pages/Messages";
 import Notifications from "./pages/Notifications";
+import RealtimeFeed from "./pages/RealtimeFeed";
 import EmergencyDepartment from "./pages/EmergencyDepartment";
 import HotSpotters from "./pages/HotSpotters";
 import MedicalHomes from "./pages/MedicalHomes";
@@ -43,7 +45,9 @@ const App = () => (
                   <Route path="/inventory" element={<Inventory />} />
                   <Route path="/schedule" element={<Schedule />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/messages" element={<Messages />} />
                   <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/realtime-feed" element={<RealtimeFeed />} />
                   <Route path="/emergency" element={<EmergencyDepartment />} />
                   <Route path="/hot-spotters" element={<HotSpotters />} />
                   <Route path="/medical-homes" element={<MedicalHomes />} />

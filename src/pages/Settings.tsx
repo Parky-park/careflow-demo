@@ -27,7 +27,45 @@ const Settings = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>User Profile</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xl font-semibold text-primary">DR</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Dr. Richard Chen</h3>
+                <p className="text-sm text-muted-foreground">Chief Medical Officer</p>
+                <p className="text-sm text-muted-foreground">richard.chen@careflow.health</p>
+              </div>
+            </div>
+            <div className="space-y-2 pt-4 border-t">
+              <div className="flex justify-between text-sm">
+                <span>Department:</span>
+                <span className="font-medium">Cardiology</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Employee ID:</span>
+                <span className="font-medium">CMO-001</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>License:</span>
+                <span className="font-medium">MD-CAL-12345</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Last Login:</span>
+                <span className="font-medium">Today, 9:15 AM</span>
+              </div>
+            </div>
+            <Button className="w-full" variant="outline">
+              Edit Profile
+            </Button>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Account Security</CardTitle>
