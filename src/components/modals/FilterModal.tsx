@@ -95,12 +95,13 @@ export function FilterModal({ open, onOpenChange, type }: FilterModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
+      <DialogContent className="max-w-md max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>{filterConfig.title}</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div className="flex-1 overflow-y-auto px-1">
+          <div className="space-y-6">
           {filterConfig.options.map((option) => (
             <div key={option.key} className="space-y-2">
               <Label>{option.label}</Label>
@@ -177,7 +178,9 @@ export function FilterModal({ open, onOpenChange, type }: FilterModalProps) {
             </Select>
           </div>
 
-          <div className="flex gap-2 pt-4">
+          </div>
+
+          <div className="flex gap-2 pt-4 flex-shrink-0">
             <Button type="button" variant="outline" onClick={handleClearFilters}>
               Clear All
             </Button>
