@@ -27,7 +27,13 @@ import PatientChart from "./pages/PatientChart";
 import InsightDetail from "./pages/InsightDetail";
 import TeamDetail from "./pages/TeamDetail";
 import DrugUtilizationRules from "./pages/DrugUtilizationRules";
+import DrugUtilizationEvaluations from "./pages/DrugUtilizationEvaluations";
 import NotificationSettings from "./pages/NotificationSettings";
+import AddMedicalHome from "./pages/AddMedicalHome";
+import MatchPatients from "./pages/MatchPatients";
+import AddPatient from "./pages/AddPatient";
+import FHIRMessages from "./pages/FHIRMessages";
+import PharmacyProcessing from "./pages/PharmacyProcessing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,7 +71,13 @@ const App = () => (
                     <Route path="/insights/:id" element={<InsightDetail />} />
                     <Route path="/teams/:id" element={<TeamDetail />} />
                     <Route path="/drug-utilization/rules" element={<DrugUtilizationRules />} />
+                    <Route path="/drug-utilization/evaluations" element={<DrugUtilizationEvaluations />} />
                     <Route path="/notifications/settings" element={<NotificationSettings />} />
+                    <Route path="/medical-homes/add" element={<AddMedicalHome />} />
+                    <Route path="/medical-homes/match-patients" element={<MatchPatients />} />
+                    <Route path="/patients/add" element={<AddPatient />} />
+                    <Route path="/fhir/messages" element={<FHIRMessages />} />
+                    <Route path="/pharmacy-ai/processing" element={<PharmacyProcessing />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
