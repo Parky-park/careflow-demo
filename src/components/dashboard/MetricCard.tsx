@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Users, Activity, AlertTriangle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface MetricCardProps {
   title: string;
@@ -17,6 +18,8 @@ interface MetricCardProps {
 }
 
 export function MetricCard({ title, value, change, status = 'normal', icon, className, onClick, href }: MetricCardProps) {
+  const navigate = useNavigate();
+  
   const getStatusColor = () => {
     switch (status) {
       case 'warning': return 'border-l-warning';
@@ -37,7 +40,7 @@ export function MetricCard({ title, value, change, status = 'normal', icon, clas
 
   const handleClick = () => {
     if (href) {
-      window.location.href = href;
+      navigate(href);
     } else if (onClick) {
       onClick();
     }

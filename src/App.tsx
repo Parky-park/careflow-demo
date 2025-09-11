@@ -24,6 +24,10 @@ import PharmacyAI from "./pages/PharmacyAI";
 import DrugUtilization from "./pages/DrugUtilization";
 import FHIRIntegration from "./pages/FHIRIntegration";
 import PatientChart from "./pages/PatientChart";
+import InsightDetail from "./pages/InsightDetail";
+import TeamDetail from "./pages/TeamDetail";
+import DrugUtilizationRules from "./pages/DrugUtilizationRules";
+import NotificationSettings from "./pages/NotificationSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +62,10 @@ const App = () => (
                     <Route path="/pharmacy-ai" element={<PharmacyAI />} />
                     <Route path="/drug-utilization" element={<DrugUtilization />} />
                     <Route path="/fhir" element={<FHIRIntegration />} />
+                    <Route path="/insights/:id" element={<InsightDetail />} />
+                    <Route path="/teams/:id" element={<TeamDetail />} />
+                    <Route path="/drug-utilization/rules" element={<DrugUtilizationRules />} />
+                    <Route path="/notifications/settings" element={<NotificationSettings />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>

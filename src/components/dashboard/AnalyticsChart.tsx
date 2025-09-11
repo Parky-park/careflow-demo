@@ -1,8 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Users, Activity, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function AnalyticsChart() {
+  const navigate = useNavigate();
+  
   const insights = [
     {
       title: "Patient Risk Prediction",
@@ -36,7 +39,7 @@ export function AnalyticsChart() {
             AI-Driven Insights
           </CardTitle>
           <button 
-            onClick={() => window.location.href = '/insights'}
+            onClick={() => navigate('/insights')}
             className="text-sm text-primary hover:underline"
           >
             View All
@@ -48,7 +51,7 @@ export function AnalyticsChart() {
           <div 
             key={index} 
             className="flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors cursor-pointer"
-            onClick={() => window.location.href = '/insights'}
+            onClick={() => navigate('/insights')}
           >
             <div className="p-1.5 md:p-2 rounded-full bg-primary/10 text-primary flex-shrink-0">
               {insight.icon}

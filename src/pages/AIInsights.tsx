@@ -3,8 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Brain, Zap, TrendingUp, AlertTriangle, Users, Target, Clock, Lightbulb } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const AIInsights = () => {
+  const navigate = useNavigate();
+  
   const insights = [
     {
       id: 1,
@@ -184,11 +187,11 @@ const AIInsights = () => {
                       onClick={() => {
                         // Take action based on insight type
                         if (insight.type === "Risk Prediction") {
-                          window.location.href = `/patients?filter=high-risk`;
+                          navigate(`/patients?filter=high-risk`);
                         } else if (insight.type === "Resource Optimization") {
-                          window.location.href = `/emergency`;
+                          navigate(`/emergency`);
                         } else {
-                          window.location.href = `/patients`;
+                          navigate(`/patients`);
                         }
                       }}
                     >
@@ -199,7 +202,7 @@ const AIInsights = () => {
                       variant="outline"
                       onClick={() => {
                         // Navigate to detailed insight view
-                        window.location.href = `/insights/${insight.id}`;
+                        navigate(`/insights/${insight.id}`);
                       }}
                     >
                       View Details

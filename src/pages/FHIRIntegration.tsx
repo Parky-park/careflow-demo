@@ -2,8 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Database, Activity, CheckCircle, AlertCircle, RefreshCw, Link } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function FHIRIntegration() {
+  const navigate = useNavigate();
+  
   const integrationMetrics = [
     { label: "Active Connections", value: "8", icon: Link },
     { label: "Messages Today", value: "12,459", icon: Activity },
@@ -192,7 +195,7 @@ export default function FHIRIntegration() {
                       size="sm" 
                       variant="outline"
                       onClick={() => {
-                        window.location.href = `/fhir/connections/${connection.id}/configure`;
+                        navigate(`/fhir/connections/${connection.id}/configure`);
                       }}
                     >
                       Configure
@@ -215,7 +218,7 @@ export default function FHIRIntegration() {
             </CardTitle>
             <CardDescription>Latest FHIR message transactions</CardDescription>
           </div>
-          <Button variant="outline" onClick={() => window.location.href = '/fhir/messages'}>View Message Log</Button>
+          <Button variant="outline" onClick={() => navigate('/fhir/messages')}>View Message Log</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -239,7 +242,7 @@ export default function FHIRIntegration() {
                   size="sm" 
                   variant="outline"
                   onClick={() => {
-                    window.location.href = `/fhir/messages/${index}`;
+                    navigate(`/fhir/messages/${index}`);
                   }}
                 >
                   Details

@@ -3,8 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { HeartHandshake, Users, Calendar, MessageSquare, Phone, Star, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CareTeams = () => {
+  const navigate = useNavigate();
+  
   const teams = [
     {
       id: "1",
@@ -145,7 +148,7 @@ const CareTeams = () => {
                     size="sm" 
                     className="flex-1"
                     onClick={() => {
-                      window.location.href = `/messages?team=${team.id}`;
+                      navigate(`/messages?team=${team.id}`);
                     }}
                   >
                     <MessageSquare className="h-3 w-3 mr-1" />
@@ -156,7 +159,7 @@ const CareTeams = () => {
                     variant="outline" 
                     className="flex-1"
                     onClick={() => {
-                      window.location.href = `/teams/${team.id}`;
+                      navigate(`/teams/${team.id}`);
                     }}
                   >
                     View Details
@@ -227,7 +230,7 @@ const CareTeams = () => {
                   <Button 
                     size="sm"
                     onClick={() => {
-                      window.location.href = `/messages?user=${member.id}`;
+                      navigate(`/messages?user=${member.id}`);
                     }}
                   >
                     <MessageSquare className="h-3 w-3 mr-1" />

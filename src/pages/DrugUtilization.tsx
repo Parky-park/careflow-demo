@@ -2,8 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Microscope, TrendingUp, AlertTriangle, BarChart3, Filter } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function DrugUtilization() {
+  const navigate = useNavigate();
+  
   const utilizationMetrics = [
     { label: "Active DUE Rules", value: "47", icon: Microscope },
     { label: "Evaluations This Month", value: "2,834", icon: BarChart3 },
@@ -185,7 +188,7 @@ export default function DrugUtilization() {
                       size="sm" 
                       variant="outline"
                       onClick={() => {
-                        window.location.href = `/drug-utilization/rules/${rule.id}`;
+                        navigate(`/drug-utilization/rules/${rule.id}`);
                       }}
                     >
                       View Details
@@ -205,7 +208,7 @@ export default function DrugUtilization() {
             <CardTitle>Recent Evaluations</CardTitle>
             <CardDescription>Latest drug utilization evaluation alerts</CardDescription>
           </div>
-          <Button variant="outline" onClick={() => window.location.href = '/drug-utilization/evaluations'}>View All</Button>
+          <Button variant="outline" onClick={() => navigate('/drug-utilization/evaluations')}>View All</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -230,7 +233,7 @@ export default function DrugUtilization() {
                     size="sm" 
                     variant="outline"
                     onClick={() => {
-                      window.location.href = `/drug-utilization/evaluation/${index}`;
+                      navigate(`/drug-utilization/evaluation/${index}`);
                     }}
                   >
                     Review

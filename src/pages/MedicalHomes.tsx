@@ -111,7 +111,7 @@ export default function MedicalHomes() {
             </CardTitle>
             <CardDescription>Current capacity and performance of medical homes</CardDescription>
           </div>
-          <Button onClick={() => window.location.href = '/medical-homes/add'}>Add Medical Home</Button>
+          <Button onClick={() => navigate('/medical-homes/add')}>Add Medical Home</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -156,7 +156,7 @@ export default function MedicalHomes() {
                       size="sm" 
                       variant="outline"
                       onClick={() => {
-                        window.location.href = `/medical-homes/${home.id}`;
+                        navigate(`/medical-homes/${home.id}`);
                       }}
                     >
                       View Details
@@ -164,7 +164,7 @@ export default function MedicalHomes() {
                     <Button 
                       size="sm"
                       onClick={() => {
-                        window.location.href = `/medical-homes/${home.id}/capacity`;
+                        navigate(`/medical-homes/${home.id}/capacity`);
                       }}
                     >
                       Manage Capacity
@@ -187,7 +187,7 @@ export default function MedicalHomes() {
             </CardTitle>
             <CardDescription>Patients waiting for medical home attachment</CardDescription>
           </div>
-          <Button onClick={() => window.location.href = '/medical-homes/match-patients'}>Match Patients</Button>
+          <Button onClick={() => navigate('/medical-homes/match-patients')}>Match Patients</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -208,7 +208,7 @@ export default function MedicalHomes() {
                     size="sm" 
                     className="mt-1"
                     onClick={() => {
-                      window.location.href = `/medical-homes/assign-patient/${index}`;
+                      navigate(`/medical-homes/assign-patient/${index}`);
                     }}
                   >
                     Assign

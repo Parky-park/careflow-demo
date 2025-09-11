@@ -112,7 +112,7 @@ const Notifications = () => {
           <Button 
             variant="outline"
             onClick={() => {
-              window.location.href = '/notifications/settings';
+              navigate('/notifications/settings');
             }}
           >
             <MoreHorizontal className="h-4 w-4" />

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Clock, Heart, UserCheck, UserX, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface Patient {
   id: string;
@@ -58,6 +59,8 @@ const mockPatients: Patient[] = [
 ];
 
 export function PatientList() {
+  const navigate = useNavigate();
+  
   const getRiskColor = (level: string) => {
     switch (level) {
       case 'high': return 'bg-destructive text-destructive-foreground';
@@ -142,15 +145,19 @@ export function PatientList() {
               size="sm" 
               className="ml-2 flex-shrink-0 text-xs px-2 md:px-3"
               onClick={() => {
-                window.location.href = `/patients/${patient.id}/chart`;
+                navigate(`/patients/${patient.id}/chart`);
               }}
             >
               View
             </Button>
           </div>
         ))}
-        <Button variant="outline" className="w-full text-sm" asChild>
-          <a href="/patients">View All Patients</a>
+        <Button 
+          variant="outline" 
+          className="w-full text-sm"
+          onClick={() => navigate('/patients')}
+        >
+          View All Patients
         </Button>
       </CardContent>
     </Card>

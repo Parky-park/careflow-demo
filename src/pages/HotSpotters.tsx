@@ -2,8 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserRoundCheck, TrendingUp, DollarSign, Calendar, Phone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function HotSpotters() {
+  const navigate = useNavigate();
+  
   const hotSpotterMetrics = [
     { label: "High Utilizers", value: "47", icon: UserRoundCheck },
     { label: "Cost Impact", value: "$2.3M", icon: DollarSign },
@@ -102,7 +105,7 @@ export default function HotSpotters() {
             </CardTitle>
             <CardDescription>Patients requiring intensive care coordination and intervention</CardDescription>
           </div>
-          <Button onClick={() => window.location.href = '/patients/add?type=high-utilizer'}>Add Patient</Button>
+          <Button onClick={() => navigate('/patients/add?type=high-utilizer')}>Add Patient</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -153,7 +156,7 @@ export default function HotSpotters() {
                       size="sm" 
                       variant="outline"
                       onClick={() => {
-                        window.location.href = `tel:+1234567890`;
+                        window.open(`tel:+1234567890`);
                       }}
                     >
                       <Phone className="h-4 w-4 mr-1" />
@@ -162,7 +165,7 @@ export default function HotSpotters() {
                     <Button 
                       size="sm"
                       onClick={() => {
-                        window.location.href = `/patients/${patient.id}/care-plan`;
+                        navigate(`/patients/${patient.id}/care-plan`);
                       }}
                     >
                       View Care Plan

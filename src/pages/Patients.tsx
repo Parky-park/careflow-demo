@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { AddPatientModal } from "@/components/modals/AddPatientModal";
 import { FilterModal } from "@/components/modals/FilterModal";
 import { Users, Search, Filter, Plus, AlertTriangle, Heart, Clock, X } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 
 const mockPatients = [
@@ -46,6 +46,7 @@ const mockPatients = [
 ];
 
 const Patients = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [localSearch, setLocalSearch] = useState("");
   const [showAddPatientModal, setShowAddPatientModal] = useState(false);
@@ -176,7 +177,7 @@ const Patients = () => {
                     className="flex-1 lg:flex-none lg:min-w-[100px]"
                     onClick={() => {
                       // Navigate to patient chart view
-                      window.location.href = `/patients/${patient.id}/chart`;
+                      navigate(`/patients/${patient.id}/chart`);
                     }}
                   >
                     View Chart
@@ -186,7 +187,7 @@ const Patients = () => {
                     className="flex-1 lg:flex-none lg:min-w-[100px]"
                     onClick={() => {
                       // Navigate to schedule appointment
-                      window.location.href = `/schedule?patient=${patient.id}`;
+                      navigate(`/schedule?patient=${patient.id}`);
                     }}
                   >
                     Schedule
