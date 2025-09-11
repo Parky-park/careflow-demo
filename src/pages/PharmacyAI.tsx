@@ -2,8 +2,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pill, Scan, FileText, CheckCircle, AlertTriangle, Upload } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function PharmacyAI() {
+  const navigate = useNavigate();
   const aiMetrics = [
     { label: "Prescriptions Processed", value: "1,247", icon: FileText },
     { label: "OCR Accuracy", value: "98.5%", icon: Scan },
@@ -146,7 +148,7 @@ export default function PharmacyAI() {
             </CardTitle>
             <CardDescription>Latest AI-processed prescriptions</CardDescription>
           </div>
-          <Button variant="outline" onClick={() => window.location.href = '/pharmacy-ai/processing'}>View All</Button>
+          <Button variant="outline" onClick={() => navigate('/pharmacy-ai/processing')}>View All</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -184,7 +186,7 @@ export default function PharmacyAI() {
                     size="sm" 
                     variant="outline"
                     onClick={() => {
-                      window.location.href = `/pharmacy-ai/prescription/${rx.id}`;
+                      navigate(`/pharmacy-ai/prescription/${rx.id}`);
                     }}
                   >
                     View Details
@@ -193,7 +195,7 @@ export default function PharmacyAI() {
                     <Button 
                       size="sm"
                       onClick={() => {
-                        window.location.href = `/pharmacy-ai/review/${rx.id}`;
+                        navigate(`/pharmacy-ai/review/${rx.id}`);
                       }}
                     >
                       Review
@@ -234,7 +236,7 @@ export default function PharmacyAI() {
                   size="sm" 
                   variant="outline"
                   onClick={() => {
-                    window.location.href = `/pharmacy-ai/drugs/${drug.drug.toLowerCase()}`;
+                    navigate(`/pharmacy-ai/drugs/${drug.drug.toLowerCase()}`);
                   }}
                 >
                   View Details

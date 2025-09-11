@@ -74,7 +74,10 @@ export default function EmergencyDepartment() {
             </CardTitle>
             <CardDescription>Real-time patient status and triage information</CardDescription>
           </div>
-          <Button onClick={() => window.location.reload()}>Refresh</Button>
+          <Button onClick={() => {
+            // In a real app, this would trigger a data refresh
+            console.log('Refreshing emergency department data...');
+          }}>Refresh</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">

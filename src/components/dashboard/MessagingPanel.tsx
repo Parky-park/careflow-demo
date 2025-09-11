@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Clock, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -45,6 +46,7 @@ const mockMessages: Message[] = [
 ];
 
 export function MessagingPanel() {
+  const navigate = useNavigate();
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'bg-destructive text-destructive-foreground';
@@ -102,8 +104,8 @@ export function MessagingPanel() {
             </div>
           </div>
         ))}
-        <Button variant="outline" className="w-full text-sm" asChild>
-          <a href="/messages">View All Messages</a>
+        <Button variant="outline" className="w-full text-sm" onClick={() => navigate('/messages')}>
+          View All Messages
         </Button>
       </CardContent>
     </Card>

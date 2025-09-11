@@ -151,7 +151,7 @@ export default function DrugUtilization() {
             </CardTitle>
             <CardDescription>Clinical decision support rules and their performance</CardDescription>
           </div>
-          <Button onClick={() => window.location.href = '/drug-utilization/rules'}>
+          <Button onClick={() => navigate('/drug-utilization/rules')}>
             <Filter className="h-4 w-4 mr-2" />
             Manage Rules
           </Button>

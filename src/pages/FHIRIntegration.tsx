@@ -160,7 +160,10 @@ export default function FHIRIntegration() {
             </CardTitle>
             <CardDescription>Active healthcare system integrations</CardDescription>
           </div>
-          <Button onClick={() => window.location.reload()}>
+          <Button onClick={() => {
+            // In a real app, this would trigger a data refresh
+            console.log('Refreshing FHIR data...');
+          }}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh All
           </Button>

@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { AlertsPanel } from "@/components/modals/AlertsPanel";
 import { Activity, Clock, MapPin, Users, AlertTriangle, ArrowRight, Pause, Play } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const RealtimeFeed = () => {
+  const navigate = useNavigate();
   const [feedPaused, setFeedPaused] = useState(false);
   const [showAlertsPanel, setShowAlertsPanel] = useState(false);
   
@@ -160,7 +162,7 @@ const RealtimeFeed = () => {
                   size="sm" 
                   variant="outline"
                   onClick={() => {
-                    window.location.href = `/patients/${event.patientId}/chart`;
+                    navigate(`/patients/${event.patientId}/chart`);
                   }}
                 >
                   <ArrowRight className="h-3 w-3 mr-1" />
