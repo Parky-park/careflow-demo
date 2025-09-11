@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Send, Paperclip, Shield, Clock, Phone, Video, MoreVertical } from "lucide-react";
+import { ArrowLeft, Send, Paperclip, Shield, Clock, MoreVertical } from "lucide-react";
 
 const Chat = () => {
   const { id } = useParams();
@@ -75,6 +75,47 @@ const Chat = () => {
 
   const conversation = conversations[id as keyof typeof conversations];
 
+  // Handle new conversation
+  if (id === 'new') {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/messages')}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-2xl font-bold text-foreground">Start New Conversation</h1>
+        </div>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>New Secure Message</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">To:</label>
+              <Input placeholder="Search for healthcare professional..." className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Subject:</label>
+              <Input placeholder="Enter subject..." className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Message:</label>
+              <textarea 
+                className="w-full mt-1 p-3 border rounded-md min-h-[200px]" 
+                placeholder="Type your secure message..."
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button>Send Message</Button>
+              <Button variant="outline" onClick={() => navigate('/messages')}>Cancel</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (!conversation) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -133,12 +174,6 @@ const Chat = () => {
           {conversation.encrypted && (
             <Shield className="h-4 w-4 text-green-500" />
           )}
-          <Button variant="outline" size="sm">
-            <Phone className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm">
-            <Video className="h-4 w-4" />
-          </Button>
           <Button variant="outline" size="sm">
             <MoreVertical className="h-4 w-4" />
           </Button>
