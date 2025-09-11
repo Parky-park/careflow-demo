@@ -15,6 +15,7 @@ import Inventory from "./pages/Inventory";
 import Schedule from "./pages/Schedule";
 import Settings from "./pages/Settings";
 import Messages from "./pages/Messages";
+import Chat from "./pages/Chat";
 import Notifications from "./pages/Notifications";
 import RealtimeFeed from "./pages/RealtimeFeed";
 import EmergencyDepartment from "./pages/EmergencyDepartment";
@@ -60,6 +61,7 @@ const App = () => (
                     <Route path="/schedule" element={<Schedule />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/messages" element={<Messages />} />
+                    <Route path="/chat/:id" element={<Chat />} />
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/realtime-feed" element={<RealtimeFeed />} />
                     <Route path="/emergency" element={<EmergencyDepartment />} />

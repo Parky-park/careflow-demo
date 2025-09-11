@@ -1,11 +1,14 @@
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Send, Search, Shield, Clock, Paperclip, Star } from "lucide-react";
+import { MessageSquare, Send, Search, Shield, Clock, Paperclip, Star, Plus } from "lucide-react";
 
 const Messages = () => {
+  const navigate = useNavigate();
+  
   const conversations = [
     {
       id: "1",
@@ -68,7 +71,12 @@ const Messages = () => {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Conversations</span>
-              <Badge variant="secondary">{conversations.filter(c => c.unread > 0).length}</Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">{conversations.filter(c => c.unread > 0).length}</Badge>
+                <Button size="sm" onClick={() => navigate('/chat/new')}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </CardTitle>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -81,6 +89,7 @@ const Messages = () => {
                 <div
                   key={conversation.id}
                   className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 cursor-pointer border"
+                  onClick={() => navigate(`/chat/${conversation.id}`)}
                 >
                   <Avatar className="h-10 w-10">
                     <AvatarFallback>
