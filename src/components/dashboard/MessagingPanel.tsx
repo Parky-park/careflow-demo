@@ -102,8 +102,8 @@ export function MessagingPanel() {
             </div>
           </div>
         ))}
-        <Button variant="outline" className="w-full text-sm" asChild>
-          <a href="/messages">View All Messages</a>
+        <Button variant="outline" className="w-full text-sm">
+          View All Messages
         </Button>
       </CardContent>
     </Card>
