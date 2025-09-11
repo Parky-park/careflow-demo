@@ -130,7 +130,8 @@ export default function PharmacyAI() {
               onChange={(e) => {
                 const files = e.target.files;
                 if (files && files.length > 0) {
-                  alert(`${files.length} file(s) selected for processing`);
+                  console.log(`${files.length} file(s) selected for processing`);
+                  // In real app, this would upload and process the files
                 }
               }}
             />

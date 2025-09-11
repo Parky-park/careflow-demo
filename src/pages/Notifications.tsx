@@ -106,8 +106,8 @@ const Notifications = () => {
           <Button 
             variant="outline"
             onClick={() => {
-              // Mark all notifications as read
-              alert("All notifications marked as read");
+              // Mark all notifications as read - this would update state in real app
+              console.log("All notifications marked as read");
             }}
           >
             Mark all as read

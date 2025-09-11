@@ -220,9 +220,7 @@ const CareTeams = () => {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    onClick={() => {
-                      window.location.href = `tel:+1234567890`;
-                    }}
+                    onClick={() => window.open(`tel:+1234567890`)}
                   >
                     <Phone className="h-3 w-3 mr-1" />
                     Call

@@ -35,6 +35,12 @@ import MatchPatients from "./pages/MatchPatients";
 import AddPatient from "./pages/AddPatient";
 import FHIRMessages from "./pages/FHIRMessages";
 import PharmacyProcessing from "./pages/PharmacyProcessing";
+import DrugUtilizationRuleDetail from "./pages/DrugUtilizationRuleDetail";
+import DrugUtilizationRuleEdit from "./pages/DrugUtilizationRuleEdit";
+import DrugUtilizationRuleNew from "./pages/DrugUtilizationRuleNew";
+import DrugUtilizationEvaluationDetail from "./pages/DrugUtilizationEvaluationDetail";
+import FHIRMessageDetail from "./pages/FHIRMessageDetail";
+import PharmacyPrescriptionDetail from "./pages/PharmacyPrescriptionDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -79,7 +85,14 @@ const App = () => (
                     <Route path="/medical-homes/match-patients" element={<MatchPatients />} />
                     <Route path="/patients/add" element={<AddPatient />} />
                     <Route path="/fhir/messages" element={<FHIRMessages />} />
+                    <Route path="/fhir/messages/:id" element={<FHIRMessageDetail />} />
                     <Route path="/pharmacy-ai/processing" element={<PharmacyProcessing />} />
+                    <Route path="/pharmacy-ai/prescription/:id" element={<PharmacyPrescriptionDetail />} />
+                    <Route path="/drug-utilization/rules/:id" element={<DrugUtilizationRuleDetail />} />
+                    <Route path="/drug-utilization/rules/:id/edit" element={<DrugUtilizationRuleEdit />} />
+                    <Route path="/drug-utilization/rules/new" element={<DrugUtilizationRuleNew />} />
+                    <Route path="/drug-utilization/evaluation/:id" element={<DrugUtilizationEvaluationDetail />} />
+                    <Route path="/chat/new" element={<Chat />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>

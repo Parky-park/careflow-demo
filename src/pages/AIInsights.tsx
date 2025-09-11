@@ -241,8 +241,12 @@ const AIInsights = () => {
                 <Button 
                   size="sm"
                   onClick={() => {
-                    // Implement recommendation
-                    alert(`Implementing: ${rec.title}`);
+                    // Navigate to appropriate implementation page
+                    if (rec.category === "Care Coordination") {
+                      navigate('/patients');
+                    } else {
+                      navigate('/analytics');
+                    }
                   }}
                 >
                   Implement

@@ -242,7 +242,7 @@ export default function DrugUtilization() {
                     <Button 
                       size="sm"
                       onClick={() => {
-                        alert(`Intervening for ${evaluation.patient}`);
+                        navigate(`/drug-utilization/evaluation/${index}`);
                       }}
                     >
                       Intervene
