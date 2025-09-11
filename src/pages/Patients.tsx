@@ -80,10 +80,10 @@ const Patients = () => {
 
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'high': return 'bg-red-500 text-white';
-      case 'medium': return 'bg-yellow-500 text-black';
-      case 'low': return 'bg-green-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case 'high': return 'bg-destructive text-destructive-foreground';
+      case 'medium': return 'bg-warning text-warning-foreground';
+      case 'low': return 'bg-success text-success-foreground';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -96,26 +96,26 @@ const Patients = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <Users className="h-8 w-8 text-primary" />
-            Patient Registry
+    <div className="space-y-4 md:space-y-6 p-4 md:p-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2 md:gap-3">
+            <Users className="h-6 w-6 md:h-8 md:w-8 text-primary flex-shrink-0" />
+            <span className="truncate">Patient Registry</span>
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-sm md:text-base text-muted-foreground">
             Manage patient records, demographics, and care coordination
           </p>
         </div>
-        <Button className="gap-2" onClick={() => setShowAddPatientModal(true)}>
+        <Button className="gap-2 w-full md:w-auto" onClick={() => setShowAddPatientModal(true)}>
           <Plus className="h-4 w-4" />
-          Add Patient
+          <span className="sm:inline">Add Patient</span>
         </Button>
       </div>
 
       <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
+        <CardContent className="p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
@@ -125,35 +125,59 @@ const Patients = () => {
                 className="pl-10"
               />
             </div>
-            <Button variant="outline" className="gap-2" onClick={() => setShowFilterModal(true)}>
+            <Button variant="outline" className="gap-2 w-full sm:w-auto" onClick={() => setShowFilterModal(true)}>
               <Filter className="h-4 w-4" />
-              Filters
+              <span>Filters</span>
             </Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Patients ({filteredPatients.length})</CardTitle>
+        <CardHeader className="px-4 md:px-6">
+          <CardTitle className="text-lg md:text-xl">Patients ({filteredPatients.length})</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="px-4 md:px-6">
+          <div className="space-y-3 md:space-y-4">
             {filteredPatients.map((patient) => (
-              <div key={patient.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-4">
-                  <Avatar>
-                    <AvatarFallback>{patient.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+              <div key={patient.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 md:p-4 border rounded-lg bg-card hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
+                  <Avatar className="h-10 w-10 md:h-12 md:w-12 flex-shrink-0">
+                    <AvatarFallback className="text-sm">{patient.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
-                  <div>
-                    <h3 className="font-semibold">{patient.name}</h3>
-                    <p className="text-sm text-muted-foreground">{patient.age} years • {patient.mrn}</p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <h3 className="font-semibold text-sm md:text-base truncate">{patient.name}</h3>
+                      <Badge className={getRiskColor(patient.riskLevel)} variant="secondary">
+                        {patient.riskLevel} risk
+                      </Badge>
+                    </div>
+                    <p className="text-xs md:text-sm text-muted-foreground">
+                      {patient.age} years • {patient.mrn}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mt-2 sm:hidden">
+                      {patient.conditions.map((condition, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {condition}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                  <Badge className={getRiskColor(patient.riskLevel)}>{patient.riskLevel} risk</Badge>
+                  <div className="hidden sm:flex flex-wrap gap-1">
+                    {patient.conditions.map((condition, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {condition}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">View Chart</Button>
-                  <Button size="sm">Schedule</Button>
+                <div className="flex gap-2 sm:flex-shrink-0">
+                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none text-xs md:text-sm">
+                    View Chart
+                  </Button>
+                  <Button size="sm" className="flex-1 sm:flex-none text-xs md:text-sm">
+                    Schedule
+                  </Button>
                 </div>
               </div>
             ))}
