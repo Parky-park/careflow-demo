@@ -170,10 +170,25 @@ const Patients = () => {
                   </div>
                 </div>
                 <div className="flex gap-3 lg:flex-shrink-0 lg:flex-col xl:flex-row">
-                  <Button variant="outline" size="sm" className="flex-1 lg:flex-none lg:min-w-[100px]">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 lg:flex-none lg:min-w-[100px]"
+                    onClick={() => {
+                      // Navigate to patient chart view
+                      window.location.href = `/patients/${patient.id}/chart`;
+                    }}
+                  >
                     View Chart
                   </Button>
-                  <Button size="sm" className="flex-1 lg:flex-none lg:min-w-[100px]">
+                  <Button 
+                    size="sm" 
+                    className="flex-1 lg:flex-none lg:min-w-[100px]"
+                    onClick={() => {
+                      // Navigate to schedule appointment
+                      window.location.href = `/schedule?patient=${patient.id}`;
+                    }}
+                  >
                     Schedule
                   </Button>
                 </div>

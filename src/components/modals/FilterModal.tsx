@@ -3,157 +3,122 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 
 interface FilterModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  type: "patients" | "inventory" | "schedule";
+  type: "patients" | "messages" | "analytics" | "inventory" | "schedule";
 }
 
 export function FilterModal({ open, onOpenChange, type }: FilterModalProps) {
   const { toast } = useToast();
   const [filters, setFilters] = useState({
-    status: "all",
-    riskLevel: "all",
-    provider: "all",
-    location: "all",
-    dateRange: "all",
-    ageRange: [0, 100],
-    category: "all",
-    availability: "all",
-    priority: "all",
-    showOnlyActive: true,
-    showUnattached: false
+    riskLevel: "",
+    status: "",
+    provider: "",
+    conditions: [] as string[],
+    dateRange: "",
   });
 
-  const getFilterOptions = () => {
-    switch (type) {
-      case "patients":
-        return {
-          title: "Filter Patients",
-          options: [
-            { key: "status", label: "Status", values: ["active", "inactive", "unattached"] },
-            { key: "riskLevel", label: "Risk Level", values: ["low", "medium", "high"] },
-            { key: "provider", label: "Provider", values: ["Dr. Wilson", "Dr. Chen", "Dr. Patel", "Unassigned"] }
-          ]
-        };
-      case "inventory":
-        return {
-          title: "Filter Inventory",
-          options: [
-            { key: "category", label: "Category", values: ["Critical Equipment", "Medications", "PPE", "Monitoring Equipment"] },
-            { key: "status", label: "Stock Status", values: ["adequate", "low", "critical", "overstocked"] },
-            { key: "location", label: "Location", values: ["ICU Storage", "Pharmacy", "Equipment Room A"] }
-          ]
-        };
-      case "schedule":
-        return {
-          title: "Filter Schedule",
-          options: [
-            { key: "status", label: "Status", values: ["confirmed", "pending", "cancelled", "in-progress"] },
-            { key: "priority", label: "Priority", values: ["high", "medium", "low"] },
-            { key: "provider", label: "Provider", values: ["Dr. Wilson", "Dr. Chen", "Dr. Patel", "All Staff"] }
-          ]
-        };
-      default:
-        return { title: "Filter", options: [] };
-    }
-  };
-
-  const filterConfig = getFilterOptions();
-
-  const handleApplyFilters = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
     toast({
       title: "Filters Applied",
-      description: `${filterConfig.title.toLowerCase()} have been updated based on your selections.`,
+      description: `${type} have been filtered based on your criteria.`,
     });
+    
     onOpenChange(false);
   };
 
-  const handleClearFilters = () => {
+  const handleConditionChange = (condition: string, checked: boolean) => {
+    setFilters(prev => ({
+      ...prev,
+      conditions: checked 
+        ? [...prev.conditions, condition]
+        : prev.conditions.filter(c => c !== condition)
+    }));
+  };
+
+  const resetFilters = () => {
     setFilters({
-      status: "all",
-      riskLevel: "all",
-      provider: "all",
-      location: "all",
-      dateRange: "all",
-      ageRange: [0, 100],
-      category: "all",
-      availability: "all",
-      priority: "all",
-      showOnlyActive: true,
-      showUnattached: false
-    });
-    toast({
-      title: "Filters Cleared",
-      description: "All filters have been reset to default values.",
+      riskLevel: "",
+      status: "",
+      provider: "",
+      conditions: [],
+      dateRange: "",
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle>{filterConfig.title}</DialogTitle>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Filter {type === "patients" ? "Patients" : type}</DialogTitle>
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto px-1">
-          <div className="space-y-6">
-          {filterConfig.options.map((option) => (
-            <div key={option.key} className="space-y-2">
-              <Label>{option.label}</Label>
-              <Select 
-                value={filters[option.key as keyof typeof filters] as string} 
-                onValueChange={(value) => setFilters(prev => ({ ...prev, [option.key]: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={`Select ${option.label.toLowerCase()}`} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All {option.label}</SelectItem>
-                  {option.values.map((value) => (
-                    <SelectItem key={value} value={value}>
-                      {value.charAt(0).toUpperCase() + value.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
-
+        <form onSubmit={handleSubmit} className="space-y-4">
           {type === "patients" && (
             <>
-              <div className="space-y-3">
-                <Label>Age Range: {filters.ageRange[0]} - {filters.ageRange[1]} years</Label>
-                <Slider
-                  value={filters.ageRange}
-                  onValueChange={(value) => setFilters(prev => ({ ...prev, ageRange: value }))}
-                  max={100}
-                  step={1}
-                  className="w-full"
-                />
+              <div className="space-y-2">
+                <Label>Risk Level</Label>
+                <Select value={filters.riskLevel} onValueChange={(value) => setFilters(prev => ({ ...prev, riskLevel: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select risk level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Risk Levels</SelectItem>
+                    <SelectItem value="high">High Risk</SelectItem>
+                    <SelectItem value="medium">Medium Risk</SelectItem>
+                    <SelectItem value="low">Low Risk</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="showActive">Show only active patients</Label>
-                  <Switch
-                    id="showActive"
-                    checked={filters.showOnlyActive}
-                    onCheckedChange={(checked) => setFilters(prev => ({ ...prev, showOnlyActive: checked }))}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="showUnattached">Include unattached patients</Label>
-                  <Switch
-                    id="showUnattached"
-                    checked={filters.showUnattached}
-                    onCheckedChange={(checked) => setFilters(prev => ({ ...prev, showUnattached: checked }))}
-                  />
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Provider</Label>
+                <Select value={filters.provider} onValueChange={(value) => setFilters(prev => ({ ...prev, provider: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select provider" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Providers</SelectItem>
+                    <SelectItem value="dr-wilson">Dr. Wilson</SelectItem>
+                    <SelectItem value="dr-patel">Dr. Patel</SelectItem>
+                    <SelectItem value="dr-chen">Dr. Chen</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Medical Conditions</Label>
+                <div className="space-y-2">
+                  {["Diabetes", "Hypertension", "COPD", "Heart Disease", "Asthma"].map((condition) => (
+                    <div key={condition} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={condition}
+                        checked={filters.conditions.includes(condition)}
+                        onCheckedChange={(checked) => handleConditionChange(condition, checked as boolean)}
+                      />
+                      <Label htmlFor={condition} className="text-sm">{condition}</Label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </>
@@ -161,10 +126,7 @@ export function FilterModal({ open, onOpenChange, type }: FilterModalProps) {
 
           <div className="space-y-2">
             <Label>Date Range</Label>
-            <Select 
-              value={filters.dateRange} 
-              onValueChange={(value) => setFilters(prev => ({ ...prev, dateRange: value }))}
-            >
+            <Select value={filters.dateRange} onValueChange={(value) => setFilters(prev => ({ ...prev, dateRange: value }))}>
               <SelectTrigger>
                 <SelectValue placeholder="Select date range" />
               </SelectTrigger>
@@ -178,17 +140,18 @@ export function FilterModal({ open, onOpenChange, type }: FilterModalProps) {
             </Select>
           </div>
 
-          </div>
-
-          <div className="flex gap-2 pt-4 flex-shrink-0">
-            <Button type="button" variant="outline" onClick={handleClearFilters}>
-              Clear All
+          <div className="flex gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={resetFilters}>
+              Reset
             </Button>
-            <Button onClick={handleApplyFilters}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">
               Apply Filters
             </Button>
           </div>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

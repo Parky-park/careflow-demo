@@ -137,7 +137,14 @@ export function PatientList() {
                 </div>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="ml-2 flex-shrink-0 text-xs px-2 md:px-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="ml-2 flex-shrink-0 text-xs px-2 md:px-3"
+              onClick={() => {
+                window.location.href = `/patients/${patient.id}/chart`;
+              }}
+            >
               View
             </Button>
           </div>

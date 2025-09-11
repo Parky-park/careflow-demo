@@ -30,14 +30,26 @@ export function AnalyticsChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-accent" />
-          AI-Driven Insights
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-accent" />
+            AI-Driven Insights
+          </CardTitle>
+          <button 
+            onClick={() => window.location.href = '/insights'}
+            className="text-sm text-primary hover:underline"
+          >
+            View All
+          </button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3 md:space-y-4 px-4 md:px-6">
         {insights.map((insight, index) => (
-          <div key={index} className="flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors">
+          <div 
+            key={index} 
+            className="flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors cursor-pointer"
+            onClick={() => window.location.href = '/insights'}
+          >
             <div className="p-1.5 md:p-2 rounded-full bg-primary/10 text-primary flex-shrink-0">
               {insight.icon}
             </div>

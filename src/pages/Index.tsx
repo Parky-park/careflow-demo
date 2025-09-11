@@ -31,6 +31,7 @@ const Index = () => {
           change={{ value: 8, type: 'decrease' }}
           status="warning"
           icon={<Users className="h-4 w-4" />}
+          href="/patients?filter=unattached"
         />
         <MetricCard
           title="High Utilizers"
@@ -38,6 +39,7 @@ const Index = () => {
           change={{ value: 12, type: 'increase' }}
           status="critical"
           icon={<AlertTriangle className="h-4 w-4" />}
+          href="/patients?filter=high-utilizers"
         />
         <MetricCard
           title="Active Patients"
@@ -45,6 +47,7 @@ const Index = () => {
           change={{ value: 5, type: 'increase' }}
           status="success"
           icon={<UserCheck className="h-4 w-4" />}
+          href="/patients"
         />
         <MetricCard
           title="AI Risk Predictions"
@@ -52,6 +55,7 @@ const Index = () => {
           change={{ value: 3, type: 'increase' }}
           status="warning"
           icon={<Brain className="h-4 w-4" />}
+          href="/insights"
         />
       </div>
 
@@ -63,6 +67,7 @@ const Index = () => {
           change={{ value: 2, type: 'decrease' }}
           status="success"
           icon={<Stethoscope className="h-4 w-4" />}
+          href="/hot-spotters"
         />
         <MetricCard
           title="ED Wait Time"
@@ -70,6 +75,7 @@ const Index = () => {
           change={{ value: 5, type: 'decrease' }}
           status="success"
           icon={<Clock className="h-4 w-4" />}
+          href="/emergency"
         />
         <MetricCard
           title="Pharmacy Processing"
@@ -77,6 +83,7 @@ const Index = () => {
           change={{ value: 1, type: 'increase' }}
           status="success"
           icon={<Pill className="h-4 w-4" />}
+          href="/pharmacy-ai"
         />
         <MetricCard
           title="Avg. Cost per Visit"
@@ -84,6 +91,7 @@ const Index = () => {
           change={{ value: 3, type: 'decrease' }}
           status="success"
           icon={<TrendingUp className="h-4 w-4" />}
+          href="/analytics"
         />
       </div>
 
@@ -99,6 +107,7 @@ const Index = () => {
               change={{ value: 5, type: 'increase' }}
               status="warning"
               icon={<Activity className="h-4 w-4" />}
+              href="/emergency"
             />
             <MetricCard
               title="Inventory Status" 
@@ -106,6 +115,7 @@ const Index = () => {
               change={{ value: 2, type: 'increase' }}
               status="success"
               icon={<Package className="h-4 w-4" />}
+              href="/inventory"
             />
           </div>
         </div>

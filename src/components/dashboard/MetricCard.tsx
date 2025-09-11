@@ -12,9 +12,11 @@ interface MetricCardProps {
   status?: 'normal' | 'warning' | 'critical' | 'success';
   icon?: React.ReactNode;
   className?: string;
+  onClick?: () => void;
+  href?: string;
 }
 
-export function MetricCard({ title, value, change, status = 'normal', icon, className }: MetricCardProps) {
+export function MetricCard({ title, value, change, status = 'normal', icon, className, onClick, href }: MetricCardProps) {
   const getStatusColor = () => {
     switch (status) {
       case 'warning': return 'border-l-warning';
@@ -33,12 +35,26 @@ export function MetricCard({ title, value, change, status = 'normal', icon, clas
     }
   };
 
+  const handleClick = () => {
+    if (href) {
+      window.location.href = href;
+    } else if (onClick) {
+      onClick();
+    }
+  };
+
+  const isClickable = !!(onClick || href);
+
   return (
-    <Card className={cn(
-      "relative transition-all duration-300 hover:shadow-md border-l-4",
-      getStatusColor(),
-      className
-    )}>
+    <Card 
+      className={cn(
+        "relative transition-all duration-300 hover:shadow-md border-l-4",
+        getStatusColor(),
+        isClickable && "cursor-pointer hover:border-primary/50",
+        className
+      )}
+      onClick={isClickable ? handleClick : undefined}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 md:px-6 pt-4 md:pt-6">
         <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
           {title}

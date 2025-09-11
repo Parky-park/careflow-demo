@@ -23,6 +23,7 @@ import MedicalHomes from "./pages/MedicalHomes";
 import PharmacyAI from "./pages/PharmacyAI";
 import DrugUtilization from "./pages/DrugUtilization";
 import FHIRIntegration from "./pages/FHIRIntegration";
+import PatientChart from "./pages/PatientChart";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
                 <div className="p-4 md:p-6">
                   <Routes>
                     <Route path="/" element={<Index />} />
+                    <Route path="/patients/:id/chart" element={<PatientChart />} />
                     <Route path="/patients" element={<Patients />} />
                     <Route path="/analytics" element={<Analytics />} />
                     <Route path="/insights" element={<AIInsights />} />
