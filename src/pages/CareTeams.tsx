@@ -141,11 +141,24 @@ const CareTeams = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 pt-2">
-                  <Button size="sm" className="flex-1">
+                  <Button 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => {
+                      window.location.href = `/messages?team=${team.id}`;
+                    }}
+                  >
                     <MessageSquare className="h-3 w-3 mr-1" />
                     Message
                   </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => {
+                      window.location.href = `/teams/${team.id}`;
+                    }}
+                  >
                     View Details
                   </Button>
                 </div>
@@ -201,11 +214,22 @@ const CareTeams = () => {
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => {
+                      window.location.href = `tel:+1234567890`;
+                    }}
+                  >
                     <Phone className="h-3 w-3 mr-1" />
                     Call
                   </Button>
-                  <Button size="sm">
+                  <Button 
+                    size="sm"
+                    onClick={() => {
+                      window.location.href = `/messages?user=${member.id}`;
+                    }}
+                  >
                     <MessageSquare className="h-3 w-3 mr-1" />
                     Message
                   </Button>

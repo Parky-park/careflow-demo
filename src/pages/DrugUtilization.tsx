@@ -148,7 +148,7 @@ export default function DrugUtilization() {
             </CardTitle>
             <CardDescription>Clinical decision support rules and their performance</CardDescription>
           </div>
-          <Button>
+          <Button onClick={() => window.location.href = '/drug-utilization/rules'}>
             <Filter className="h-4 w-4 mr-2" />
             Manage Rules
           </Button>
@@ -181,7 +181,13 @@ export default function DrugUtilization() {
                     <p className="text-2xl font-bold text-primary">{rule.effectiveness}%</p>
                   </div>
                   <div className="flex items-end">
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        window.location.href = `/drug-utilization/rules/${rule.id}`;
+                      }}
+                    >
                       View Details
                     </Button>
                   </div>
@@ -199,7 +205,7 @@ export default function DrugUtilization() {
             <CardTitle>Recent Evaluations</CardTitle>
             <CardDescription>Latest drug utilization evaluation alerts</CardDescription>
           </div>
-          <Button variant="outline">View All</Button>
+          <Button variant="outline" onClick={() => window.location.href = '/drug-utilization/evaluations'}>View All</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -220,11 +226,22 @@ export default function DrugUtilization() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => {
+                      window.location.href = `/drug-utilization/evaluation/${index}`;
+                    }}
+                  >
                     Review
                   </Button>
                   {evaluation.status === "Intervention Required" && (
-                    <Button size="sm">
+                    <Button 
+                      size="sm"
+                      onClick={() => {
+                        alert(`Intervening for ${evaluation.patient}`);
+                      }}
+                    >
                       Intervene
                     </Button>
                   )}

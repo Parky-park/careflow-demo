@@ -157,7 +157,7 @@ export default function FHIRIntegration() {
             </CardTitle>
             <CardDescription>Active healthcare system integrations</CardDescription>
           </div>
-          <Button>
+          <Button onClick={() => window.location.reload()}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh All
           </Button>
@@ -188,7 +188,13 @@ export default function FHIRIntegration() {
                     <p className="text-lg font-medium">{connection.lastSync}</p>
                   </div>
                   <div className="flex items-end">
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        window.location.href = `/fhir/connections/${connection.id}/configure`;
+                      }}
+                    >
                       Configure
                     </Button>
                   </div>
@@ -209,7 +215,7 @@ export default function FHIRIntegration() {
             </CardTitle>
             <CardDescription>Latest FHIR message transactions</CardDescription>
           </div>
-          <Button variant="outline">View Message Log</Button>
+          <Button variant="outline" onClick={() => window.location.href = '/fhir/messages'}>View Message Log</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -229,7 +235,13 @@ export default function FHIRIntegration() {
                     </p>
                   </div>
                 </div>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    window.location.href = `/fhir/messages/${index}`;
+                  }}
+                >
                   Details
                 </Button>
               </div>

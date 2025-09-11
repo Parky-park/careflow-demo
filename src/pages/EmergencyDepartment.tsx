@@ -74,7 +74,7 @@ export default function EmergencyDepartment() {
             </CardTitle>
             <CardDescription>Real-time patient status and triage information</CardDescription>
           </div>
-          <Button>Refresh</Button>
+          <Button onClick={() => window.location.reload()}>Refresh</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -114,7 +114,13 @@ export default function EmergencyDepartment() {
             Emergency Department is at 85% capacity. Consider implementing surge protocols 
             and coordinating with inpatient units for admissions.
           </p>
-          <Button className="mt-3" variant="outline">
+          <Button 
+            className="mt-3" 
+            variant="outline"
+            onClick={() => {
+              window.open('/emergency/surge-protocols', '_blank');
+            }}
+          >
             View Surge Protocols
           </Button>
         </CardContent>

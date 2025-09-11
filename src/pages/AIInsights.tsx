@@ -179,8 +179,31 @@ const AIInsights = () => {
                 
                 {insight.actionable && (
                   <div className="flex gap-2">
-                    <Button size="sm">Take Action</Button>
-                    <Button size="sm" variant="outline">View Details</Button>
+                    <Button 
+                      size="sm"
+                      onClick={() => {
+                        // Take action based on insight type
+                        if (insight.type === "Risk Prediction") {
+                          window.location.href = `/patients?filter=high-risk`;
+                        } else if (insight.type === "Resource Optimization") {
+                          window.location.href = `/emergency`;
+                        } else {
+                          window.location.href = `/patients`;
+                        }
+                      }}
+                    >
+                      Take Action
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        // Navigate to detailed insight view
+                        window.location.href = `/insights/${insight.id}`;
+                      }}
+                    >
+                      View Details
+                    </Button>
                   </div>
                 )}
               </div>
@@ -212,7 +235,15 @@ const AIInsights = () => {
                   </div>
                 </div>
                 <p className="text-muted-foreground text-sm mb-3">{rec.description}</p>
-                <Button size="sm">Implement</Button>
+                <Button 
+                  size="sm"
+                  onClick={() => {
+                    // Implement recommendation
+                    alert(`Implementing: ${rec.title}`);
+                  }}
+                >
+                  Implement
+                </Button>
               </div>
             ))}
           </div>

@@ -115,10 +115,23 @@ export default function PharmacyAI() {
             <Scan className="h-12 w-12 mx-auto text-gray-400 mb-4" />
             <p className="text-lg font-medium mb-2">Drop prescription images here</p>
             <p className="text-muted-foreground mb-4">or click to browse files</p>
-            <Button>
+            <Button onClick={() => document.getElementById('file-upload')?.click()}>
               <Upload className="h-4 w-4 mr-2" />
               Upload Prescriptions
             </Button>
+            <input 
+              id="file-upload" 
+              type="file" 
+              className="hidden" 
+              multiple 
+              accept="image/*,.pdf"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  alert(`${files.length} file(s) selected for processing`);
+                }
+              }}
+            />
           </div>
         </CardContent>
       </Card>
@@ -133,7 +146,7 @@ export default function PharmacyAI() {
             </CardTitle>
             <CardDescription>Latest AI-processed prescriptions</CardDescription>
           </div>
-          <Button variant="outline">View All</Button>
+          <Button variant="outline" onClick={() => window.location.href = '/pharmacy-ai/processing'}>View All</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -167,11 +180,22 @@ export default function PharmacyAI() {
                 </div>
 
                 <div className="flex justify-end gap-2 mt-4">
-                  <Button size="sm" variant="outline">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => {
+                      window.location.href = `/pharmacy-ai/prescription/${rx.id}`;
+                    }}
+                  >
                     View Details
                   </Button>
                   {rx.status === "Needs Review" && (
-                    <Button size="sm">
+                    <Button 
+                      size="sm"
+                      onClick={() => {
+                        window.location.href = `/pharmacy-ai/review/${rx.id}`;
+                      }}
+                    >
                       Review
                     </Button>
                   )}
@@ -206,7 +230,13 @@ export default function PharmacyAI() {
                     </p>
                   </div>
                 </div>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    window.location.href = `/pharmacy-ai/drugs/${drug.drug.toLowerCase()}`;
+                  }}
+                >
                   View Details
                 </Button>
               </div>

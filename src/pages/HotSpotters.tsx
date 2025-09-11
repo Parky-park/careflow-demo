@@ -102,7 +102,7 @@ export default function HotSpotters() {
             </CardTitle>
             <CardDescription>Patients requiring intensive care coordination and intervention</CardDescription>
           </div>
-          <Button>Add Patient</Button>
+          <Button onClick={() => window.location.href = '/patients/add?type=high-utilizer'}>Add Patient</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -149,11 +149,22 @@ export default function HotSpotters() {
                     {patient.status}
                   </Badge>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        window.location.href = `tel:+1234567890`;
+                      }}
+                    >
                       <Phone className="h-4 w-4 mr-1" />
                       Contact
                     </Button>
-                    <Button size="sm">
+                    <Button 
+                      size="sm"
+                      onClick={() => {
+                        window.location.href = `/patients/${patient.id}/care-plan`;
+                      }}
+                    >
                       View Care Plan
                     </Button>
                   </div>

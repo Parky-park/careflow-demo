@@ -156,7 +156,13 @@ const RealtimeFeed = () => {
                     <p className="text-sm text-muted-foreground">{event.details}</p>
                   </div>
                 </div>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    window.location.href = `/patients/${event.patientId}/chart`;
+                  }}
+                >
                   <ArrowRight className="h-3 w-3 mr-1" />
                   View Details
                 </Button>

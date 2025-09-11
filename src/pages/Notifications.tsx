@@ -100,8 +100,21 @@ const Notifications = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">Mark all as read</Button>
-          <Button variant="outline">
+          <Button 
+            variant="outline"
+            onClick={() => {
+              // Mark all notifications as read
+              alert("All notifications marked as read");
+            }}
+          >
+            Mark all as read
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => {
+              window.location.href = '/notifications/settings';
+            }}
+          >
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </div>

@@ -111,7 +111,7 @@ export default function MedicalHomes() {
             </CardTitle>
             <CardDescription>Current capacity and performance of medical homes</CardDescription>
           </div>
-          <Button>Add Medical Home</Button>
+          <Button onClick={() => window.location.href = '/medical-homes/add'}>Add Medical Home</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -152,10 +152,21 @@ export default function MedicalHomes() {
                     <Badge variant="secondary">{home.continuityScore}%</Badge>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        window.location.href = `/medical-homes/${home.id}`;
+                      }}
+                    >
                       View Details
                     </Button>
-                    <Button size="sm">
+                    <Button 
+                      size="sm"
+                      onClick={() => {
+                        window.location.href = `/medical-homes/${home.id}/capacity`;
+                      }}
+                    >
                       Manage Capacity
                     </Button>
                   </div>
@@ -176,7 +187,7 @@ export default function MedicalHomes() {
             </CardTitle>
             <CardDescription>Patients waiting for medical home attachment</CardDescription>
           </div>
-          <Button>Match Patients</Button>
+          <Button onClick={() => window.location.href = '/medical-homes/match-patients'}>Match Patients</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -193,7 +204,13 @@ export default function MedicalHomes() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium">Waiting: {patient.waitTime}</p>
-                  <Button size="sm" className="mt-1">
+                  <Button 
+                    size="sm" 
+                    className="mt-1"
+                    onClick={() => {
+                      window.location.href = `/medical-homes/assign-patient/${index}`;
+                    }}
+                  >
                     Assign
                   </Button>
                 </div>
