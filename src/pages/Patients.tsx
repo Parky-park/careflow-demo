@@ -140,42 +140,40 @@ const Patients = () => {
         <CardContent className="px-4 md:px-6">
           <div className="space-y-3 md:space-y-4">
             {filteredPatients.map((patient) => (
-              <div key={patient.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 md:p-4 border rounded-lg bg-card hover:bg-muted/50 transition-colors">
-                <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
-                  <Avatar className="h-10 w-10 md:h-12 md:w-12 flex-shrink-0">
-                    <AvatarFallback className="text-sm">{patient.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+              <div key={patient.id} className="flex flex-col lg:flex-row lg:items-center gap-4 p-4 md:p-5 border rounded-lg bg-card hover:bg-muted/50 transition-colors">
+                <div className="flex items-start md:items-center gap-4 min-w-0 flex-1">
+                  <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
+                    <AvatarFallback className="text-sm md:text-base">{patient.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h3 className="font-semibold text-sm md:text-base truncate">{patient.name}</h3>
-                      <Badge className={getRiskColor(patient.riskLevel)} variant="secondary">
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-base md:text-lg leading-tight">{patient.name}</h3>
+                        <p className="text-sm md:text-base text-muted-foreground mt-1">
+                          {patient.age} years • {patient.mrn}
+                        </p>
+                      </div>
+                      <Badge className={`${getRiskColor(patient.riskLevel)} flex-shrink-0 self-start`} variant="secondary">
                         {patient.riskLevel} risk
                       </Badge>
                     </div>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      {patient.age} years • {patient.mrn}
-                    </p>
-                    <div className="flex flex-wrap gap-1 mt-2 sm:hidden">
+                    <div className="flex flex-wrap gap-2 mt-3">
                       {patient.conditions.map((condition, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
+                        <Badge key={index} variant="outline" className="text-xs md:text-sm">
                           {condition}
                         </Badge>
                       ))}
                     </div>
-                  </div>
-                  <div className="hidden sm:flex flex-wrap gap-1">
-                    {patient.conditions.map((condition, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {condition}
-                      </Badge>
-                    ))}
+                    <div className="text-sm text-muted-foreground pt-1">
+                      <span>Provider: {patient.provider}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-2 sm:flex-shrink-0">
-                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none text-xs md:text-sm">
+                <div className="flex gap-3 lg:flex-shrink-0 lg:flex-col xl:flex-row">
+                  <Button variant="outline" size="sm" className="flex-1 lg:flex-none lg:min-w-[100px]">
                     View Chart
                   </Button>
-                  <Button size="sm" className="flex-1 sm:flex-none text-xs md:text-sm">
+                  <Button size="sm" className="flex-1 lg:flex-none lg:min-w-[100px]">
                     Schedule
                   </Button>
                 </div>
