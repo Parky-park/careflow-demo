@@ -2,8 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building2, Users, TrendingUp, Clock, UserCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function MedicalHomes() {
+  const navigate = useNavigate();
+  
   const medicalHomeMetrics = [
     { label: "Active Medical Homes", value: "12", icon: Building2 },
     { label: "Attached Patients", value: "8,547", icon: Users },

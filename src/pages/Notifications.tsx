@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, AlertTriangle, Info, CheckCircle, Clock, MoreHorizontal } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const mockNotifications = [
   {
@@ -53,6 +54,8 @@ const mockNotifications = [
 ];
 
 const Notifications = () => {
+  const navigate = useNavigate();
+  
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'critical':
