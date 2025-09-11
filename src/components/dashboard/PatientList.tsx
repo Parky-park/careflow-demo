@@ -142,8 +142,8 @@ export function PatientList() {
             </Button>
           </div>
         ))}
-        <Button variant="outline" className="w-full text-sm">
-          View All Patients
+        <Button variant="outline" className="w-full text-sm" asChild>
+          <a href="/patients">View All Patients</a>
         </Button>
       </CardContent>
     </Card>
