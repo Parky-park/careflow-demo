@@ -42,7 +42,7 @@ const mainNavItems: NavItem[] = [
   {
     label: "Dashboard",
     icon: <LayoutDashboard className="h-4 w-4" />,
-    href: "/",
+    href: "/dashboard",
   },
   {
     label: "Patients",
