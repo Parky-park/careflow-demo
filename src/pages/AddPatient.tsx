@@ -8,20 +8,70 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AddPatient = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const patientType = searchParams.get('type');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast({
-      title: "Success",
-      description: "Patient added successfully!",
-    });
-    navigate('/patients');
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to add a patient",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      const { error } = await supabase.from("patients").insert({
+        user_id: user.id,
+        first_name: formData.get("firstName") as string,
+        last_name: formData.get("lastName") as string,
+        date_of_birth: formData.get("dateOfBirth") as string,
+        gender: formData.get("gender") as string,
+        phone: formData.get("phone") as string || null,
+        email: formData.get("email") as string || null,
+        address: formData.get("address") as string || null,
+        risk_score: formData.get("riskScore") ? parseInt(formData.get("riskScore") as string) : null,
+        emergency_contact_name: formData.get("emergencyContactName") as string || null,
+        emergency_contact_phone: formData.get("emergencyContactPhone") as string || null,
+        insurance_provider: formData.get("insuranceProvider") as string || null,
+        insurance_number: formData.get("insuranceNumber") as string || null,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Patient added successfully!",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
+      navigate('/patients');
+    } catch (error) {
+      console.error("Error adding patient:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add patient. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -58,22 +108,22 @@ const AddPatient = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" placeholder="Enter first name" required />
+                <Input id="firstName" name="firstName" placeholder="Enter first name" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" placeholder="Enter last name" required />
+                <Input id="lastName" name="lastName" placeholder="Enter last name" required />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="age">Age</Label>
-                <Input id="age" type="number" placeholder="Enter age" required />
+                <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                <Input id="dateOfBirth" name="dateOfBirth" type="date" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="gender">Gender</Label>
-                <Select required>
+                <Select name="gender" required>
                   <SelectTrigger>
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
@@ -86,67 +136,62 @@ const AddPatient = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" type="tel" placeholder="(555) 123-4567" />
+                <Input id="phone" name="phone" type="tel" placeholder="(555) 123-4567" />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="patient@email.com" />
+              <Input id="email" name="email" type="email" placeholder="patient@email.com" />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="address">Address</Label>
-              <Textarea id="address" placeholder="Enter full address" />
+              <Textarea id="address" name="address" placeholder="Enter full address" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="emergencyContactName">Emergency Contact Name</Label>
+                <Input id="emergencyContactName" name="emergencyContactName" placeholder="Contact name" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="emergencyContactPhone">Emergency Contact Phone</Label>
+                <Input id="emergencyContactPhone" name="emergencyContactPhone" type="tel" placeholder="(555) 123-4567" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="insuranceProvider">Insurance Provider</Label>
+                <Input id="insuranceProvider" name="insuranceProvider" placeholder="Insurance company" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="insuranceNumber">Insurance Number</Label>
+                <Input id="insuranceNumber" name="insuranceNumber" placeholder="Policy number" />
+              </div>
             </div>
 
             {patientType === 'high-utilizer' && (
-              <div className="space-y-4 p-4 border rounded-lg bg-yellow-50">
-                <h3 className="font-semibold text-yellow-800">High-Utilizer Information</h3>
+              <div className="space-y-4 p-4 border rounded-lg bg-muted">
+                <h3 className="font-semibold">High-Utilizer Information</h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="utilizationCount">Annual Visits</Label>
-                    <Input id="utilizationCount" type="number" placeholder="Number of visits" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="riskLevel">Risk Level</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select risk level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="very-high">Very High</SelectItem>
-                        <SelectItem value="critical">Critical</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="riskScore">Risk Score (0-100)</Label>
+                  <Input id="riskScore" name="riskScore" type="number" min="0" max="100" placeholder="Enter risk score" />
                 </div>
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="conditions">Medical Conditions</Label>
-              <Textarea id="conditions" placeholder="List medical conditions..." />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="medications">Current Medications</Label>
-              <Textarea id="medications" placeholder="List current medications..." />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="notes">Additional Notes</Label>
-              <Textarea id="notes" placeholder="Any additional information..." />
-            </div>
-
             <div className="flex gap-3 pt-4">
-              <Button type="submit">Add Patient</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Adding..." : "Add Patient"}
+              </Button>
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => navigate('/patients')}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
