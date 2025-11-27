@@ -6,9 +6,11 @@ import { UserRoundCheck, TrendingUp, DollarSign, Calendar, Phone, Package } from
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useHotSpotterMetrics } from "@/hooks/useHotSpotters";
 
 export default function HotSpotters() {
   const navigate = useNavigate();
+  const { data: metrics } = useHotSpotterMetrics();
   
   const { data: highUtilizers, isLoading } = useQuery({
     queryKey: ['high-utilizers'],
@@ -52,9 +54,19 @@ export default function HotSpotters() {
 
   const hotSpotterMetrics = [
     { label: "High Utilizers", value: highUtilizers?.length.toString() || "0", icon: UserRoundCheck },
-    { label: "Cost Impact", value: "$2.3M", icon: DollarSign },
-    { label: "Interventions Active", value: "23", icon: TrendingUp },
-    { label: "Next Reviews", value: "8", icon: Calendar },
+    { 
+      label: "Cost Impact", 
+      value: metrics?.costImpact 
+        ? `$${(metrics.costImpact / 1000000).toFixed(1)}M` 
+        : "—", 
+      icon: DollarSign 
+    },
+    { 
+      label: "Interventions Active", 
+      value: metrics?.activeInterventions?.toString() || "0", 
+      icon: TrendingUp 
+    },
+    { label: "Next Reviews", value: "—", icon: Calendar },
   ];
 
   if (isLoading) {
