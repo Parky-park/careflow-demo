@@ -97,6 +97,141 @@ export type Database = {
         }
         Relationships: []
       }
+      care_teams: {
+        Row: {
+          created_at: string | null
+          id: string
+          lead_id: string | null
+          name: string
+          specialty: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          lead_id?: string | null
+          name: string
+          specialty?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          lead_id?: string | null
+          name?: string
+          specialty?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_teams_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drug_evaluations: {
+        Row: {
+          created_at: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          prescription_id: string | null
+          resolved_at: string | null
+          rule_id: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          prescription_id?: string | null
+          resolved_at?: string | null
+          rule_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          prescription_id?: string | null
+          resolved_at?: string | null
+          rule_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drug_evaluations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drug_evaluations_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drug_evaluations_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "drug_utilization_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drug_utilization_rules: {
+        Row: {
+          active: boolean | null
+          category: string
+          created_at: string | null
+          description: string | null
+          effectiveness_rate: number | null
+          id: string
+          intervention_count: number | null
+          name: string
+          priority: string | null
+          trigger_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          category: string
+          created_at?: string | null
+          description?: string | null
+          effectiveness_rate?: number | null
+          id?: string
+          intervention_count?: number | null
+          name: string
+          priority?: string | null
+          trigger_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          effectiveness_rate?: number | null
+          id?: string
+          intervention_count?: number | null
+          name?: string
+          priority?: string | null
+          trigger_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       emergency_cases: {
         Row: {
           arrival_time: string
@@ -185,6 +320,86 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      fhir_connections: {
+        Row: {
+          connection_type: string
+          created_at: string | null
+          endpoint_url: string | null
+          fhir_version: string | null
+          id: string
+          last_sync: string | null
+          message_count: number | null
+          name: string
+          status: string | null
+        }
+        Insert: {
+          connection_type: string
+          created_at?: string | null
+          endpoint_url?: string | null
+          fhir_version?: string | null
+          id?: string
+          last_sync?: string | null
+          message_count?: number | null
+          name: string
+          status?: string | null
+        }
+        Update: {
+          connection_type?: string
+          created_at?: string | null
+          endpoint_url?: string | null
+          fhir_version?: string | null
+          id?: string
+          last_sync?: string | null
+          message_count?: number | null
+          name?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
+      fhir_messages: {
+        Row: {
+          connection_id: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          message_type: string
+          payload: Json | null
+          resource_id: string | null
+          resource_type: string | null
+          status: string | null
+        }
+        Insert: {
+          connection_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message_type: string
+          payload?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          status?: string | null
+        }
+        Update: {
+          connection_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message_type?: string
+          payload?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fhir_messages_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "fhir_connections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       patient_surveys: {
         Row: {
@@ -347,6 +562,63 @@ export type Database = {
         }
         Relationships: []
       }
+      prescriptions: {
+        Row: {
+          confidence_score: number | null
+          created_at: string | null
+          dosage: string | null
+          frequency: string | null
+          id: string
+          medication_name: string
+          ocr_processed: boolean | null
+          patient_id: string
+          prescriber_id: string | null
+          processed_at: string | null
+          status: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string | null
+          dosage?: string | null
+          frequency?: string | null
+          id?: string
+          medication_name: string
+          ocr_processed?: boolean | null
+          patient_id: string
+          prescriber_id?: string | null
+          processed_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string | null
+          dosage?: string | null
+          frequency?: string | null
+          id?: string
+          medication_name?: string
+          ocr_processed?: boolean | null
+          patient_id?: string
+          prescriber_id?: string | null
+          processed_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescriptions_prescriber_id_fkey"
+            columns: ["prescriber_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -442,6 +714,45 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string | null
+          role: string | null
+          staff_id: string
+          team_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          staff_id: string
+          team_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string | null
+          role?: string | null
+          staff_id?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "care_teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
