@@ -4,53 +4,31 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { AddPatientModal } from "@/components/modals/AddPatientModal";
-import { FilterModal } from "@/components/modals/FilterModal";
-import { Users, Search, Filter, Plus, AlertTriangle, Heart, Clock, X } from "lucide-react";
+import { Users, Search, Plus, AlertTriangle, Heart, Clock, X } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
-
-const mockPatients = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    age: 67,
-    mrn: "MRN-001234",
-    riskLevel: "high",
-    lastVisit: "2024-01-08",
-    conditions: ["Diabetes", "Hypertension", "COPD"],
-    provider: "Dr. Wilson",
-    status: "active"
-  },
-  {
-    id: "2",
-    name: "Michael Chen", 
-    age: 45,
-    mrn: "MRN-001235",
-    riskLevel: "medium",
-    lastVisit: "2024-01-07",
-    conditions: ["Asthma"],
-    provider: "Dr. Patel",
-    status: "active"
-  },
-  {
-    id: "3",
-    name: "Emma Rodriguez",
-    age: 72,
-    mrn: "MRN-001236", 
-    riskLevel: "high",
-    lastVisit: "2024-01-06",
-    conditions: ["Heart Disease", "Diabetes"],
-    provider: "Dr. Chen",
-    status: "active"
-  }
-];
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Patients = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [localSearch, setLocalSearch] = useState("");
   const [showAddPatientModal, setShowAddPatientModal] = useState(false);
-  const [showFilterModal, setShowFilterModal] = useState(false);
+
+  const { data: patients, isLoading } = useQuery({
+    queryKey: ['patients'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('*')
+        .order('last_name', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
 
   const activeSearch = searchParams.get("search") || localSearch;
 
@@ -67,140 +45,212 @@ const Patients = () => {
   };
 
   const filteredPatients = useMemo(() => {
-    if (!activeSearch) return mockPatients;
+    if (!patients) return [];
+    if (!activeSearch) return patients;
     
     const query = activeSearch.toLowerCase();
-    return mockPatients.filter(patient =>
-      patient.name.toLowerCase().includes(query) ||
-      patient.mrn.toLowerCase().includes(query) ||
-      patient.conditions.some(condition => condition.toLowerCase().includes(query)) ||
-      patient.provider.toLowerCase().includes(query) ||
-      patient.status.toLowerCase().includes(query)
+    return patients.filter(patient =>
+      patient.first_name?.toLowerCase().includes(query) ||
+      patient.last_name?.toLowerCase().includes(query) ||
+      patient.email?.toLowerCase().includes(query) ||
+      patient.phone?.toLowerCase().includes(query) ||
+      patient.medical_record_number?.toLowerCase().includes(query) ||
+      patient.status?.toLowerCase().includes(query)
     );
-  }, [activeSearch]);
+  }, [patients, activeSearch]);
 
-  const getRiskColor = (level: string) => {
-    switch (level) {
-      case 'high': return 'bg-destructive text-destructive-foreground';
-      case 'medium': return 'bg-warning text-warning-foreground';
-      case 'low': return 'bg-success text-success-foreground';
-      default: return 'bg-muted text-muted-foreground';
-    }
+  const getRiskColor = (score: number) => {
+    if (score >= 80) return 'bg-destructive text-destructive-foreground';
+    if (score >= 60) return 'bg-warning text-warning-foreground';
+    return 'bg-success text-success-foreground';
+  };
+
+  const getRiskIcon = (score: number) => {
+    if (score >= 80) return <AlertTriangle className="h-3 w-3" />;
+    if (score >= 60) return <Clock className="h-3 w-3" />;
+    return <Heart className="h-3 w-3" />;
+  };
+
+  const getRiskLabel = (score: number) => {
+    if (score >= 80) return 'High Risk';
+    if (score >= 60) return 'Medium Risk';
+    return 'Low Risk';
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'border-green-500 text-green-700';
-      case 'inactive': return 'border-gray-500 text-gray-700';
-      default: return 'border-gray-500 text-gray-700';
+      case 'active': return 'border-success text-success';
+      case 'inactive': return 'border-muted text-muted-foreground';
+      case 'critical': return 'border-destructive text-destructive';
+      case 'stable': return 'border-accent text-accent';
+      default: return 'border-muted text-muted-foreground';
     }
   };
 
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 md:space-y-6 p-4 md:p-6">
+        <Skeleton className="h-20 w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} className="h-40 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 md:space-y-6 p-4 md:p-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2 md:gap-3">
-            <Users className="h-6 w-6 md:h-8 md:w-8 text-primary flex-shrink-0" />
-            <span className="truncate">Patient Registry</span>
-          </h1>
-          <p className="text-sm md:text-base text-muted-foreground">
-            Manage patient records, demographics, and care coordination
-          </p>
-        </div>
-        <Button className="gap-2 w-full md:w-auto" onClick={() => setShowAddPatientModal(true)}>
-          <Plus className="h-4 w-4" />
-          <span className="sm:inline">Add Patient</span>
-        </Button>
-      </div>
-
       <Card>
-        <CardContent className="p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search patients..."
-                value={localSearch}
-                onChange={(e) => handleLocalSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button variant="outline" className="gap-2 w-full sm:w-auto" onClick={() => setShowFilterModal(true)}>
-              <Filter className="h-4 w-4" />
-              <span>Filters</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="px-4 md:px-6">
-          <CardTitle className="text-lg md:text-xl">Patients ({filteredPatients.length})</CardTitle>
-        </CardHeader>
-        <CardContent className="px-4 md:px-6">
-          <div className="space-y-3 md:space-y-4">
-            {filteredPatients.map((patient) => (
-              <div key={patient.id} className="flex flex-col lg:flex-row lg:items-center gap-4 p-4 md:p-5 border rounded-lg bg-card hover:bg-muted/50 transition-colors">
-                <div className="flex items-start md:items-center gap-4 min-w-0 flex-1">
-                  <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
-                    <AvatarFallback className="text-sm md:text-base">{patient.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                      <div className="min-w-0">
-                        <h3 className="font-semibold text-base md:text-lg leading-tight">{patient.name}</h3>
-                        <p className="text-sm md:text-base text-muted-foreground mt-1">
-                          {patient.age} years • {patient.mrn}
-                        </p>
-                      </div>
-                      <Badge className={`${getRiskColor(patient.riskLevel)} flex-shrink-0 self-start`} variant="secondary">
-                        {patient.riskLevel} risk
-                      </Badge>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {patient.conditions.map((condition, index) => (
-                        <Badge key={index} variant="outline" className="text-xs md:text-sm">
-                          {condition}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="text-sm text-muted-foreground pt-1">
-                      <span>Provider: {patient.provider}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-3 lg:flex-shrink-0 lg:flex-col xl:flex-row">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1 lg:flex-none lg:min-w-[100px]"
-                    onClick={() => {
-                      // Navigate to patient chart view
-                      navigate(`/patients/${patient.id}/chart`);
-                    }}
-                  >
-                    View Chart
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    className="flex-1 lg:flex-none lg:min-w-[100px]"
-                    onClick={() => {
-                      // Navigate to schedule appointment
-                      navigate(`/schedule?patient=${patient.id}`);
-                    }}
-                  >
-                    Schedule
-                  </Button>
-                </div>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Users className="h-5 w-5 text-primary" />
               </div>
-            ))}
+              <div>
+                <CardTitle className="text-xl md:text-2xl">Patient Management</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {filteredPatients.length} {filteredPatients.length === 1 ? 'patient' : 'patients'} found
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <Button onClick={() => setShowAddPatientModal(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Patient
+              </Button>
+            </div>
           </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search by name, MRN, email, phone..."
+              value={activeSearch}
+              onChange={(e) => handleLocalSearch(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {activeSearch && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearSearch}
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {filteredPatients.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredPatients.map((patient) => {
+                const age = calculateAge(patient.date_of_birth);
+                
+                return (
+                  <Card 
+                    key={patient.id} 
+                    className="hover:shadow-md transition-shadow cursor-pointer group"
+                    onClick={() => navigate(`/patients/${patient.id}/chart`)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={`https://api.dicebear.com/7.x/personas/svg?seed=${patient.id}`} />
+                          <AvatarFallback>
+                            {patient.first_name[0]}{patient.last_name[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
+                                {patient.first_name} {patient.last_name}
+                              </h3>
+                              <p className="text-xs text-muted-foreground">
+                                {age} years • {patient.gender || 'N/A'}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-3 space-y-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge className={`text-xs ${getRiskColor(patient.risk_score)}`}>
+                                {getRiskIcon(patient.risk_score)}
+                                {getRiskLabel(patient.risk_score)}
+                              </Badge>
+                              <Badge 
+                                variant="outline" 
+                                className={`text-xs ${getStatusColor(patient.status)}`}
+                              >
+                                {patient.status}
+                              </Badge>
+                            </div>
+                            
+                            {patient.medical_record_number && (
+                              <p className="text-xs text-muted-foreground">
+                                MRN: {patient.medical_record_number}
+                              </p>
+                            )}
+                            
+                            {patient.last_visit && (
+                              <p className="text-xs text-muted-foreground">
+                                Last visit: {new Date(patient.last_visit).toLocaleDateString()}
+                              </p>
+                            )}
+
+                            {patient.phone && (
+                              <p className="text-xs text-muted-foreground truncate">
+                                📞 {patient.phone}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No patients found</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {activeSearch 
+                  ? "Try adjusting your search criteria"
+                  : "Get started by adding your first patient"
+                }
+              </p>
+              {!activeSearch && (
+                <Button onClick={() => setShowAddPatientModal(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Patient
+                </Button>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
-      
-      <AddPatientModal open={showAddPatientModal} onOpenChange={setShowAddPatientModal} />
-      <FilterModal open={showFilterModal} onOpenChange={setShowFilterModal} type="patients" />
+
+      <AddPatientModal 
+        open={showAddPatientModal}
+        onOpenChange={setShowAddPatientModal}
+      />
     </div>
   );
 };

@@ -14,6 +14,255 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_insights: {
+        Row: {
+          category: string | null
+          confidence_score: number | null
+          created_at: string | null
+          description: string
+          id: string
+          patient_id: string | null
+          recommended_actions: string[] | null
+          resolved_at: string | null
+          severity: string | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          description: string
+          id?: string
+          patient_id?: string | null
+          recommended_actions?: string[] | null
+          resolved_at?: string | null
+          severity?: string | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          category?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          patient_id?: string | null
+          recommended_actions?: string[] | null
+          resolved_at?: string | null
+          severity?: string | null
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_insights_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          metric_name: string
+          metric_type: string | null
+          metric_value: number
+          period_end: string
+          period_start: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          metric_name: string
+          metric_type?: string | null
+          metric_value: number
+          period_end: string
+          period_start: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          metric_name?: string
+          metric_type?: string | null
+          metric_value?: number
+          period_end?: string
+          period_start?: string
+        }
+        Relationships: []
+      }
+      emergency_cases: {
+        Row: {
+          arrival_time: string
+          assigned_provider: string | null
+          bed_number: string | null
+          chief_complaint: string
+          created_at: string | null
+          discharge_time: string | null
+          id: string
+          patient_id: string
+          status: string | null
+          triage_level: number
+          vitals: Json | null
+          wait_time_minutes: number | null
+        }
+        Insert: {
+          arrival_time?: string
+          assigned_provider?: string | null
+          bed_number?: string | null
+          chief_complaint: string
+          created_at?: string | null
+          discharge_time?: string | null
+          id?: string
+          patient_id: string
+          status?: string | null
+          triage_level: number
+          vitals?: Json | null
+          wait_time_minutes?: number | null
+        }
+        Update: {
+          arrival_time?: string
+          assigned_provider?: string | null
+          bed_number?: string | null
+          chief_complaint?: string
+          created_at?: string | null
+          discharge_time?: string | null
+          id?: string
+          patient_id?: string
+          status?: string | null
+          triage_level?: number
+          vitals?: Json | null
+          wait_time_minutes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_cases_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_visits: {
+        Row: {
+          cost: number | null
+          created_at: string | null
+          diagnosis: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          provider_name: string | null
+          treatment: string | null
+          visit_date: string
+          visit_type: string | null
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string | null
+          diagnosis?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          provider_name?: string | null
+          treatment?: string | null
+          visit_date?: string
+          visit_type?: string | null
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string | null
+          diagnosis?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          provider_name?: string | null
+          treatment?: string | null
+          visit_date?: string
+          visit_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_visits_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          date_of_birth: string
+          email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          first_name: string
+          gender: string | null
+          id: string
+          insurance_number: string | null
+          insurance_provider: string | null
+          last_name: string
+          last_visit: string | null
+          medical_record_number: string | null
+          phone: string | null
+          risk_score: number | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          date_of_birth: string
+          email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          first_name: string
+          gender?: string | null
+          id?: string
+          insurance_number?: string | null
+          insurance_provider?: string | null
+          last_name: string
+          last_visit?: string | null
+          medical_record_number?: string | null
+          phone?: string | null
+          risk_score?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          date_of_birth?: string
+          email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          first_name?: string
+          gender?: string | null
+          id?: string
+          insurance_number?: string | null
+          insurance_provider?: string | null
+          last_name?: string
+          last_visit?: string | null
+          medical_record_number?: string | null
+          phone?: string | null
+          risk_score?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -46,7 +295,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_ed_wait_time: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never

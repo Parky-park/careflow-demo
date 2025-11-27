@@ -5,8 +5,24 @@ import { MessagingPanel } from "@/components/dashboard/MessagingPanel";
 import { MovIntegrationStatus } from "@/components/dashboard/MovIntegrationStatus";
 import { Users, UserCheck, AlertTriangle, TrendingUp, Activity, Package, Brain, Stethoscope, Pill, Clock } from "lucide-react";
 import heroImage from "@/assets/dashboard-hero.jpg";
+import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
+  const { data: metrics, isLoading } = useDashboardMetrics();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 md:space-y-6">
+        <Skeleton className="h-32 w-full rounded-xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Hero Section */}
@@ -26,33 +42,29 @@ const Index = () => {
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <MetricCard
-          title="Unattached Patients"
-          value={247}
-          change={{ value: 8, type: 'decrease' }}
-          status="warning"
-          icon={<Users className="h-4 w-4" />}
-          href="/patients?filter=unattached"
-        />
-        <MetricCard
-          title="High Utilizers"
-          value={23}
-          change={{ value: 12, type: 'increase' }}
+          title="Critical Patients"
+          value={metrics?.criticalPatients || 0}
           status="critical"
           icon={<AlertTriangle className="h-4 w-4" />}
-          href="/patients?filter=high-utilizers"
+          href="/patients?filter=critical"
+        />
+        <MetricCard
+          title="High Risk"
+          value={metrics?.highRiskPatients || 0}
+          status="warning"
+          icon={<AlertTriangle className="h-4 w-4" />}
+          href="/patients?filter=high-risk"
         />
         <MetricCard
           title="Active Patients"
-          value="1,247"
-          change={{ value: 5, type: 'increase' }}
+          value={metrics?.activePatients || 0}
           status="success"
           icon={<UserCheck className="h-4 w-4" />}
           href="/patients"
         />
         <MetricCard
           title="AI Risk Predictions"
-          value={15}
-          change={{ value: 3, type: 'increase' }}
+          value={metrics?.activeInsights || 0}
           status="warning"
           icon={<Brain className="h-4 w-4" />}
           href="/insights"
@@ -62,33 +74,29 @@ const Index = () => {
       {/* Secondary Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <MetricCard
-          title="Hot-Spotter Cases"
-          value={8}
-          change={{ value: 2, type: 'decrease' }}
-          status="success"
+          title="Waiting in ED"
+          value={metrics?.waitingInED || 0}
+          status={metrics && metrics.waitingInED > 5 ? "warning" : "success"}
           icon={<Stethoscope className="h-4 w-4" />}
-          href="/hot-spotters"
+          href="/emergency"
         />
         <MetricCard
           title="ED Wait Time"
-          value="24 min"
-          change={{ value: 5, type: 'decrease' }}
-          status="success"
+          value={`${metrics?.avgWaitTime || 0} min`}
+          status={metrics && metrics.avgWaitTime > 30 ? "warning" : "success"}
           icon={<Clock className="h-4 w-4" />}
           href="/emergency"
         />
         <MetricCard
-          title="Pharmacy Processing"
-          value="98%"
-          change={{ value: 1, type: 'increase' }}
+          title="In Treatment"
+          value={metrics?.inTreatment || 0}
           status="success"
-          icon={<Pill className="h-4 w-4" />}
-          href="/pharmacy-ai"
+          icon={<Activity className="h-4 w-4" />}
+          href="/emergency"
         />
         <MetricCard
           title="Avg. Cost per Visit"
-          value="$342"
-          change={{ value: 3, type: 'decrease' }}
+          value={`$${metrics?.avgCost || 0}`}
           status="success"
           icon={<TrendingUp className="h-4 w-4" />}
           href="/analytics"
@@ -102,20 +110,18 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <MetricCard
-              title="ICU Capacity"
-              value="78%"
-              change={{ value: 5, type: 'increase' }}
-              status="warning"
-              icon={<Activity className="h-4 w-4" />}
-              href="/emergency"
+              title="Total Patients"
+              value={metrics?.totalPatients || 0}
+              status="normal"
+              icon={<Users className="h-4 w-4" />}
+              href="/patients"
             />
             <MetricCard
-              title="Inventory Status" 
-              value="94%"
-              change={{ value: 2, type: 'increase' }}
-              status="success"
-              icon={<Package className="h-4 w-4" />}
-              href="/inventory"
+              title="Emergency Cases" 
+              value={(metrics?.waitingInED || 0) + (metrics?.inTreatment || 0)}
+              status="normal"
+              icon={<Activity className="h-4 w-4" />}
+              href="/emergency"
             />
           </div>
         </div>
