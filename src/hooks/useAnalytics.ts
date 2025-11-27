@@ -10,24 +10,39 @@ export const useAnalytics = () => {
         patientsResult,
         visitsResult,
         emergencyCasesResult,
-        metricsResult
+        metricsResult,
+        facilitiesResult,
+        qualityMetricsResult,
+        surveysResult
       ] = await Promise.all([
         supabase.from('patients').select('date_of_birth'),
         supabase.from('patient_visits').select('cost, diagnosis, visit_type, visit_date'),
         supabase.from('emergency_cases').select('status, arrival_time'),
         supabase.from('analytics_metrics').select('*')
-          .gte('period_start', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+          .gte('period_start', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+        supabase.from('facilities').select('facility_type, status, current_occupancy, capacity'),
+        supabase.from('quality_metrics').select('metric_type, metric_name, metric_value')
+          .gte('recorded_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+          .order('recorded_at', { ascending: false }),
+        supabase.from('patient_surveys').select('satisfaction_score')
+          .gte('survey_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
       ]);
 
       if (patientsResult.error) throw patientsResult.error;
       if (visitsResult.error) throw visitsResult.error;
       if (emergencyCasesResult.error) throw emergencyCasesResult.error;
       if (metricsResult.error) throw metricsResult.error;
+      if (facilitiesResult.error) throw facilitiesResult.error;
+      if (qualityMetricsResult.error) throw qualityMetricsResult.error;
+      if (surveysResult.error) throw surveysResult.error;
 
       const patients = patientsResult.data || [];
       const visits = visitsResult.data || [];
       const emergencyCases = emergencyCasesResult.data || [];
       const metrics = metricsResult.data || [];
+      const facilities = facilitiesResult.data || [];
+      const qualityMetrics = qualityMetricsResult.data || [];
+      const surveys = surveysResult.data || [];
 
       // Calculate cost per patient
       const avgCost = visits.length > 0
@@ -102,27 +117,49 @@ export const useAnalytics = () => {
         outpatient: Math.round((outpatientVisits / totalFlow) * 100),
       };
 
-      // Get metrics from analytics_metrics table
-      const getMetric = (name: string) => 
-        metrics.find(m => m.metric_name === name)?.metric_value || 0;
+      // Calculate real-time facility metrics
+      const icuBeds = facilities.filter(f => f.facility_type === 'icu_bed');
+      const icuBedsOccupied = icuBeds.filter(f => f.status === 'occupied').length;
+      const icuBedsTotal = icuBeds.length;
+
+      const operatingRooms = facilities.filter(f => f.facility_type === 'operating_room');
+      const operatingRoomsInUse = operatingRooms.filter(f => f.status === 'occupied').length;
+      const operatingRoomsTotal = operatingRooms.length;
+
+      // Calculate patient satisfaction from surveys
+      const avgSatisfaction = surveys.length > 0
+        ? surveys.reduce((sum, s) => sum + s.satisfaction_score, 0) / surveys.length
+        : 94.2;
+
+      // Get latest quality metrics
+      const getLatestQualityMetric = (type: string, name: string, defaultValue: number) => {
+        const metric = qualityMetrics.find(m => m.metric_type === type && m.metric_name === name);
+        return metric ? Number(metric.metric_value) : defaultValue;
+      };
+
+      // Get metrics from analytics_metrics table as fallback
+      const getMetric = (name: string, defaultValue: number) => {
+        const metric = metrics.find(m => m.metric_name === name);
+        return metric ? Number(metric.metric_value) : defaultValue;
+      };
 
       return {
         avgCost,
         demographics,
         topConditions,
         patientFlow,
-        patientSatisfaction: getMetric('patient_satisfaction') || 94.2,
-        avgLengthOfStay: getMetric('avg_length_of_stay') || 3.2,
-        readmissionRate: getMetric('readmission_rate') || 8.7,
-        icuBeds: getMetric('icu_beds_occupied') || 18,
-        icuBedsTotal: getMetric('icu_beds_total') || 24,
-        operatingRooms: getMetric('operating_rooms_in_use') || 6,
-        operatingRoomsTotal: getMetric('operating_rooms_total') || 8,
-        staffCoverage: getMetric('staff_coverage') || 100,
-        safetyScore: getMetric('safety_score') || 9.2,
-        clinicalOutcomes: getMetric('clinical_outcomes') || 94.5,
-        complianceRate: getMetric('compliance_rate') || 97.8,
-        errorRate: getMetric('error_rate') || 0.3,
+        patientSatisfaction: Math.round(avgSatisfaction * 10) / 10,
+        avgLengthOfStay: getMetric('avg_length_of_stay', 3.2),
+        readmissionRate: getMetric('readmission_rate', 8.7),
+        icuBeds: icuBedsOccupied,
+        icuBedsTotal: icuBedsTotal,
+        operatingRooms: operatingRoomsInUse,
+        operatingRoomsTotal: operatingRoomsTotal,
+        staffCoverage: getMetric('staff_coverage', 100),
+        safetyScore: getLatestQualityMetric('safety', 'Safety Score', 9.2),
+        clinicalOutcomes: getLatestQualityMetric('clinical_outcome', 'Clinical Outcomes Rate', 94.5),
+        complianceRate: getLatestQualityMetric('compliance', 'Compliance Rate', 97.8),
+        errorRate: getLatestQualityMetric('error', 'Medical Error Rate', 0.3),
       };
     },
     refetchInterval: 30000, // Refetch every 30 seconds

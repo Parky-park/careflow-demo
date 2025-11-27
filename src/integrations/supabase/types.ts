@@ -150,6 +150,90 @@ export type Database = {
           },
         ]
       }
+      facilities: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          current_occupancy: number | null
+          facility_type: string
+          id: string
+          location: string | null
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          current_occupancy?: number | null
+          facility_type: string
+          id?: string
+          location?: string | null
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          current_occupancy?: number | null
+          facility_type?: string
+          id?: string
+          location?: string | null
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      patient_surveys: {
+        Row: {
+          comments: string | null
+          created_at: string
+          id: string
+          patient_id: string
+          satisfaction_score: number
+          survey_date: string
+          visit_id: string | null
+          would_recommend: boolean | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string
+          id?: string
+          patient_id: string
+          satisfaction_score: number
+          survey_date?: string
+          visit_id?: string | null
+          would_recommend?: boolean | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string
+          id?: string
+          patient_id?: string
+          satisfaction_score?: number
+          survey_date?: string
+          visit_id?: string | null
+          would_recommend?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_surveys_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_surveys_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "patient_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_visits: {
         Row: {
           cost: number | null
@@ -287,6 +371,75 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      quality_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          notes: string | null
+          recorded_at: string
+          recorded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          notes?: string | null
+          recorded_at?: string
+          recorded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_name?: string
+          metric_type?: string
+          metric_value?: number
+          notes?: string | null
+          recorded_at?: string
+          recorded_by?: string | null
+        }
+        Relationships: []
+      }
+      staff: {
+        Row: {
+          created_at: string
+          department: string | null
+          full_name: string
+          id: string
+          role: string
+          shift: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          full_name: string
+          id?: string
+          role: string
+          shift?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          full_name?: string
+          id?: string
+          role?: string
+          shift?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
