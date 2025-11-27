@@ -1,79 +1,74 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, Users, TrendingUp, Clock, UserCheck } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Building2, Users, TrendingUp, Clock, UserCheck, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function MedicalHomes() {
   const navigate = useNavigate();
   
+  const { data: facilities, isLoading: facilitiesLoading } = useQuery({
+    queryKey: ['medical-homes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('facilities')
+        .select('*')
+        .eq('facility_type', 'medical_home')
+        .order('name');
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const { data: patients } = useQuery({
+    queryKey: ['patients-count'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('id');
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const totalPatients = patients?.length || 0;
+  const attachedPatients = 0; // Would need a facility_id column in patients table
+  const unattachedPatients = totalPatients - attachedPatients;
+
   const medicalHomeMetrics = [
-    { label: "Active Medical Homes", value: "12", icon: Building2 },
-    { label: "Attached Patients", value: "8,547", icon: Users },
-    { label: "Unattached Patients", value: "1,203", icon: UserCheck },
+    { label: "Active Medical Homes", value: facilities?.length.toString() || "0", icon: Building2 },
+    { label: "Attached Patients", value: attachedPatients.toString(), icon: Users },
+    { label: "Unattached Patients", value: unattachedPatients.toString(), icon: UserCheck },
     { label: "Avg. Attachment Time", value: "14 days", icon: Clock },
-  ];
-
-  const medicalHomes = [
-    {
-      id: "MH001",
-      name: "Downtown Family Health Centre",
-      location: "Downtown",
-      patients: 1247,
-      providers: 8,
-      attachmentRate: 94,
-      continuityScore: 87,
-      status: "Accepting",
-      waitTime: "12 days"
-    },
-    {
-      id: "MH002",
-      name: "Riverside Community Clinic",
-      location: "Riverside",
-      patients: 982,
-      providers: 6,
-      attachmentRate: 89,
-      continuityScore: 91,
-      status: "Limited",
-      waitTime: "18 days"
-    },
-    {
-      id: "MH003",
-      name: "North End Medical Centre",
-      location: "North End",
-      patients: 1456,
-      providers: 10,
-      attachmentRate: 97,
-      continuityScore: 85,
-      status: "Full",
-      waitTime: "25 days"
-    },
-  ];
-
-  const unattachedPatients = [
-    { name: "Jennifer Adams", age: 34, priority: "High", reason: "Chronic Conditions", waitTime: "45 days" },
-    { name: "Michael Brown", age: 67, priority: "High", reason: "Recent Discharge", waitTime: "32 days" },
-    { name: "Sarah Davis", age: 28, priority: "Medium", reason: "Routine Care", waitTime: "12 days" },
-    { name: "Robert Lee", age: 52, priority: "High", reason: "Multiple ED Visits", waitTime: "67 days" },
   ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Accepting": return "bg-green-100 text-green-800 border-green-200";
-      case "Limited": return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "Full": return "bg-red-100 text-red-800 border-red-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
+      case "available": return "bg-success/10 text-success border-success/20";
+      case "limited": return "bg-warning/10 text-warning border-warning/20";
+      case "unavailable": return "bg-destructive/10 text-destructive border-destructive/20";
+      default: return "bg-muted text-muted-foreground border-border";
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "High": return "bg-red-500 text-white";
-      case "Medium": return "bg-yellow-500 text-black";
-      case "Low": return "bg-green-500 text-white";
-      default: return "bg-gray-500 text-white";
-    }
-  };
+  if (facilitiesLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
+        </div>
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -117,109 +112,69 @@ export default function MedicalHomes() {
           <Button onClick={() => navigate('/medical-homes/add')}>Add Medical Home</Button>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {medicalHomes.map((home) => (
-              <div key={home.id} className="border rounded-lg p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold">{home.name}</h3>
-                    <p className="text-muted-foreground">{home.location} • {home.id}</p>
+          {facilities && facilities.length > 0 ? (
+            <div className="space-y-4">
+              {facilities.map((home) => (
+                <div key={home.id} className="border rounded-lg p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold">{home.name}</h3>
+                      <p className="text-muted-foreground">{home.location || 'Location not specified'}</p>
+                    </div>
+                    <Badge className={getStatusColor(home.status)} variant="outline">
+                      {home.status}
+                    </Badge>
                   </div>
-                  <Badge className={getStatusColor(home.status)} variant="outline">
-                    {home.status}
-                  </Badge>
-                </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Patients</p>
-                    <p className="text-2xl font-bold">{home.patients.toLocaleString()}</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Capacity</p>
+                      <p className="text-2xl font-bold">{home.capacity || 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Current Occupancy</p>
+                      <p className="text-2xl font-bold">{home.current_occupancy || 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Occupancy Rate</p>
+                      <p className="text-2xl font-bold text-primary">
+                        {home.capacity > 0 ? Math.round((home.current_occupancy / home.capacity) * 100) : 0}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Type</p>
+                      <Badge variant="secondary">{home.facility_type}</Badge>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Providers</p>
-                    <p className="text-2xl font-bold">{home.providers}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Attachment Rate</p>
-                    <p className="text-2xl font-bold text-green-600">{home.attachmentRate}%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Wait Time</p>
-                    <p className="text-lg font-medium">{home.waitTime}</p>
-                  </div>
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-sm text-muted-foreground">Continuity Score: </span>
-                    <Badge variant="secondary">{home.continuityScore}%</Badge>
-                  </div>
-                  <div className="flex gap-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-sm text-muted-foreground">Created: </span>
+                      <span className="text-sm">{new Date(home.created_at).toLocaleDateString()}</span>
+                    </div>
                     <Button 
                       size="sm" 
                       variant="outline"
-                      onClick={() => {
-                        navigate(`/medical-homes/${home.id}`);
-                      }}
+                      onClick={() => navigate(`/medical-homes/${home.id}`)}
                     >
                       View Details
                     </Button>
-                    <Button 
-                      size="sm"
-                      onClick={() => {
-                        navigate(`/medical-homes/${home.id}/capacity`);
-                      }}
-                    >
-                      Manage Capacity
-                    </Button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Unattached Patients */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <UserCheck className="h-5 w-5" />
-              Unattached Patients Queue
-            </CardTitle>
-            <CardDescription>Patients waiting for medical home attachment</CardDescription>
-          </div>
-          <Button onClick={() => navigate('/medical-homes/match-patients')}>Match Patients</Button>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {unattachedPatients.map((patient, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-4">
-                  <Badge className={getPriorityColor(patient.priority)}>
-                    {patient.priority}
-                  </Badge>
-                  <div>
-                    <p className="font-medium">{patient.name}</p>
-                    <p className="text-sm text-muted-foreground">Age: {patient.age} • {patient.reason}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">Waiting: {patient.waitTime}</p>
-                  <Button 
-                    size="sm" 
-                    className="mt-1"
-                    onClick={() => {
-                      navigate(`/medical-homes/assign-patient/${index}`);
-                    }}
-                  >
-                    Assign
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No medical homes found</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Create your first medical home to get started
+              </p>
+              <Button onClick={() => navigate('/medical-homes/add')}>
+                Add Medical Home
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -235,16 +190,20 @@ export default function MedicalHomes() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span>This Month</span>
-                <span className="font-bold text-green-600">+127 attachments</span>
+                <span>Total Facilities</span>
+                <span className="font-bold text-primary">{facilities?.length || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Average Wait Time</span>
-                <span className="font-bold">14 days</span>
+                <span>Total Capacity</span>
+                <span className="font-bold">
+                  {facilities?.reduce((sum, f) => sum + (f.capacity || 0), 0) || 0}
+                </span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Success Rate</span>
-                <span className="font-bold text-green-600">92%</span>
+                <span>Current Occupancy</span>
+                <span className="font-bold text-success">
+                  {facilities?.reduce((sum, f) => sum + (f.current_occupancy || 0), 0) || 0}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -252,21 +211,25 @@ export default function MedicalHomes() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Continuity Insights</CardTitle>
+            <CardTitle>System Overview</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span>Same Provider Visits</span>
-                <span className="font-bold text-blue-600">78%</span>
+                <span>Available Homes</span>
+                <span className="font-bold text-success">
+                  {facilities?.filter(f => f.status === 'available').length || 0}
+                </span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Care Plan Adherence</span>
-                <span className="font-bold text-green-600">85%</span>
+                <span>At Capacity</span>
+                <span className="font-bold text-warning">
+                  {facilities?.filter(f => f.status === 'unavailable').length || 0}
+                </span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Patient Satisfaction</span>
-                <span className="font-bold text-green-600">4.2/5</span>
+                <span>Total Patients</span>
+                <span className="font-bold text-blue-600">{totalPatients}</span>
               </div>
             </div>
           </CardContent>

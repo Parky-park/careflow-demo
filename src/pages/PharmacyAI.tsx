@@ -1,78 +1,52 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pill, Scan, FileText, CheckCircle, AlertTriangle, Upload } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Pill, Scan, FileText, CheckCircle, AlertTriangle, Upload, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { usePrescriptions, usePharmacyMetrics } from "@/hooks/usePharmacy";
+import { formatDistanceToNow } from "date-fns";
 
 export default function PharmacyAI() {
   const navigate = useNavigate();
+  const { data: prescriptions, isLoading: prescriptionsLoading } = usePrescriptions();
+  const { data: metrics } = usePharmacyMetrics();
+
   const aiMetrics = [
-    { label: "Prescriptions Processed", value: "1,247", icon: FileText },
-    { label: "OCR Accuracy", value: "98.5%", icon: Scan },
-    { label: "Auto-Validated", value: "89%", icon: CheckCircle },
-    { label: "Flagged for Review", value: "23", icon: AlertTriangle },
-  ];
-
-  const recentProcessing = [
-    {
-      id: "RX001",
-      patient: "John Smith",
-      medication: "Metformin 500mg",
-      frequency: "Twice daily",
-      status: "Validated",
-      confidence: 98,
-      processedTime: "2 min ago"
-    },
-    {
-      id: "RX002", 
-      patient: "Sarah Johnson",
-      medication: "Lisinopril 10mg",
-      frequency: "Once daily",
-      status: "Needs Review",
-      confidence: 73,
-      processedTime: "5 min ago"
-    },
-    {
-      id: "RX003",
-      patient: "Mike Davis",
-      medication: "Atorvastatin 20mg", 
-      frequency: "Once daily at bedtime",
-      status: "Validated",
-      confidence: 95,
-      processedTime: "8 min ago"
-    },
-  ];
-
-  const drugValidation = [
-    { drug: "Metformin", interactions: 0, contraindications: 0, status: "Safe" },
-    { drug: "Warfarin", interactions: 3, contraindications: 1, status: "Caution" },
-    { drug: "Amoxicillin", interactions: 1, contraindications: 0, status: "Safe" },
-    { drug: "Hydrochlorothiazide", interactions: 2, contraindications: 0, status: "Monitor" },
+    { label: "Prescriptions Processed", value: metrics?.total.toString() || "0", icon: FileText },
+    { label: "OCR Accuracy", value: `${metrics?.ocrAccuracy || 0}%`, icon: Scan },
+    { label: "Auto-Validated", value: `${metrics?.autoValidated || 0}%`, icon: CheckCircle },
+    { label: "Flagged for Review", value: metrics?.needsReview.toString() || "0", icon: AlertTriangle },
   ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Validated": return "bg-green-100 text-green-800 border-green-200";
-      case "Needs Review": return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "Error": return "bg-red-100 text-red-800 border-red-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getSafetyColor = (status: string) => {
-    switch (status) {
-      case "Safe": return "bg-green-500 text-white";
-      case "Monitor": return "bg-yellow-500 text-black";
-      case "Caution": return "bg-red-500 text-white";
-      default: return "bg-gray-500 text-white";
+      case "validated": return "bg-success/10 text-success border-success/20";
+      case "needs_review": return "bg-warning/10 text-warning border-warning/20";
+      case "pending": return "bg-muted text-muted-foreground border-border";
+      default: return "bg-muted text-muted-foreground border-border";
     }
   };
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 95) return "text-green-600";
-    if (confidence >= 85) return "text-yellow-600";
-    return "text-red-600";
+    if (confidence >= 95) return "text-success";
+    if (confidence >= 85) return "text-warning";
+    return "text-destructive";
   };
+
+  if (prescriptionsLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
+        </div>
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -113,8 +87,8 @@ export default function PharmacyAI() {
           <CardDescription>Upload prescription images for AI processing</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-            <Scan className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+          <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+            <Scan className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-lg font-medium mb-2">Drop prescription images here</p>
             <p className="text-muted-foreground mb-4">or click to browse files</p>
             <Button onClick={() => document.getElementById('file-upload')?.click()}>
@@ -131,7 +105,6 @@ export default function PharmacyAI() {
                 const files = e.target.files;
                 if (files && files.length > 0) {
                   console.log(`${files.length} file(s) selected for processing`);
-                  // In real app, this would upload and process the files
                 }
               }}
             />
@@ -152,99 +125,70 @@ export default function PharmacyAI() {
           <Button variant="outline" onClick={() => navigate('/pharmacy-ai/processing')}>View All</Button>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {recentProcessing.map((rx) => (
-              <div key={rx.id} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h4 className="font-semibold">{rx.patient}</h4>
-                    <p className="text-sm text-muted-foreground">{rx.id} • {rx.processedTime}</p>
+          {prescriptions && prescriptions.length > 0 ? (
+            <div className="space-y-4">
+              {prescriptions.map((rx: any) => (
+                <div key={rx.id} className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold">
+                        {rx.patient?.first_name} {rx.patient?.last_name}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {formatDistanceToNow(new Date(rx.created_at), { addSuffix: true })}
+                      </p>
+                    </div>
+                    <Badge className={getStatusColor(rx.status)} variant="outline">
+                      {rx.status?.replace('_', ' ')}
+                    </Badge>
                   </div>
-                  <Badge className={getStatusColor(rx.status)} variant="outline">
-                    {rx.status}
-                  </Badge>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Medication</p>
-                    <p className="font-medium">{rx.medication}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Medication</p>
+                      <p className="font-medium">{rx.medication_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Dosage</p>
+                      <p className="font-medium">{rx.dosage || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">AI Confidence</p>
+                      <p className={`font-bold ${getConfidenceColor(rx.confidence_score || 0)}`}>
+                        {rx.confidence_score || 0}%
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Frequency</p>
-                    <p className="font-medium">{rx.frequency}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">AI Confidence</p>
-                    <p className={`font-bold ${getConfidenceColor(rx.confidence)}`}>
-                      {rx.confidence}%
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => {
-                      navigate(`/pharmacy-ai/prescription/${rx.id}`);
-                    }}
-                  >
-                    View Details
-                  </Button>
-                  {rx.status === "Needs Review" && (
+                  <div className="flex justify-end gap-2 mt-4">
                     <Button 
-                      size="sm"
-                      onClick={() => {
-                        navigate(`/pharmacy-ai/review/${rx.id}`);
-                      }}
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => navigate(`/pharmacy-ai/prescription/${rx.id}`)}
                     >
-                      Review
+                      View Details
                     </Button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Drug Validation Database */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Pill className="h-5 w-5" />
-            Drug Validation Database
-          </CardTitle>
-          <CardDescription>Real-time drug interaction and contraindication checking</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {drugValidation.map((drug, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-4">
-                  <Badge className={getSafetyColor(drug.status)}>
-                    {drug.status}
-                  </Badge>
-                  <div>
-                    <p className="font-medium">{drug.drug}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {drug.interactions} interactions • {drug.contraindications} contraindications
-                    </p>
+                    {rx.status === "needs_review" && (
+                      <Button 
+                        size="sm"
+                        onClick={() => navigate(`/pharmacy-ai/review/${rx.id}`)}
+                      >
+                        Review
+                      </Button>
+                    )}
                   </div>
                 </div>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => {
-                    navigate(`/pharmacy-ai/drugs/${drug.drug.toLowerCase()}`);
-                  }}
-                >
-                  View Details
-                </Button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No prescriptions found</h3>
+              <p className="text-sm text-muted-foreground">
+                Upload prescription images to get started
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -257,16 +201,16 @@ export default function PharmacyAI() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span>Handwritten Prescriptions</span>
-                <span className="font-bold text-blue-600">94.2%</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Printed Prescriptions</span>
-                <span className="font-bold text-green-600">99.8%</span>
-              </div>
-              <div className="flex justify-between items-center">
                 <span>Overall Accuracy</span>
-                <span className="font-bold text-green-600">98.5%</span>
+                <span className="font-bold text-success">{metrics?.ocrAccuracy || 0}%</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Auto-Validated</span>
+                <span className="font-bold text-primary">{metrics?.autoValidated || 0}%</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Average Confidence</span>
+                <span className="font-bold">{metrics?.avgConfidence || 0}%</span>
               </div>
             </div>
           </CardContent>
@@ -274,21 +218,21 @@ export default function PharmacyAI() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Processing Efficiency</CardTitle>
+            <CardTitle>Processing Statistics</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span>Average Processing Time</span>
-                <span className="font-bold">2.3 seconds</span>
+                <span>Total Processed</span>
+                <span className="font-bold text-primary">{metrics?.total || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Auto-Validation Rate</span>
-                <span className="font-bold text-green-600">89%</span>
+                <span>Validated</span>
+                <span className="font-bold text-success">{metrics?.validated || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Error Reduction</span>
-                <span className="font-bold text-green-600">76%</span>
+                <span>Needs Review</span>
+                <span className="font-bold text-warning">{metrics?.needsReview || 0}</span>
               </div>
             </div>
           </CardContent>

@@ -1,125 +1,56 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Database, Activity, CheckCircle, AlertCircle, RefreshCw, Link } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Database, Activity, CheckCircle, AlertCircle, RefreshCw, Link as LinkIcon, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useFHIRConnections, useFHIRMessages, useFHIRMetrics } from "@/hooks/useFHIR";
+import { formatDistanceToNow } from "date-fns";
 
 export default function FHIRIntegration() {
   const navigate = useNavigate();
+  const { data: connections, isLoading: connectionsLoading } = useFHIRConnections();
+  const { data: messages, isLoading: messagesLoading } = useFHIRMessages();
+  const { data: metrics } = useFHIRMetrics();
   
   const integrationMetrics = [
-    { label: "Active Connections", value: "8", icon: Link },
-    { label: "Messages Today", value: "12,459", icon: Activity },
-    { label: "Success Rate", value: "99.2%", icon: CheckCircle },
-    { label: "Failed Transactions", value: "23", icon: AlertCircle },
-  ];
-
-  const fhirConnections = [
-    {
-      id: "FHIR001",
-      name: "Provincial Health Registry",
-      type: "Patient Registry",
-      status: "Connected",
-      lastSync: "2 min ago",
-      messages: 4567,
-      version: "R4"
-    },
-    {
-      id: "FHIR002",
-      name: "Regional Hospital Network",
-      type: "ADT Feed",
-      status: "Connected", 
-      lastSync: "1 min ago",
-      messages: 2843,
-      version: "R4"
-    },
-    {
-      id: "FHIR003",
-      name: "Laboratory Information System",
-      type: "Lab Results",
-      status: "Connected",
-      lastSync: "5 min ago", 
-      messages: 1956,
-      version: "R4"
-    },
-    {
-      id: "FHIR004",
-      name: "Pharmacy Management System",
-      type: "Medication Orders",
-      status: "Warning",
-      lastSync: "15 min ago",
-      messages: 892,
-      version: "R4"
-    },
-  ];
-
-  const recentMessages = [
-    {
-      timestamp: "14:23:45",
-      source: "Provincial Registry",
-      type: "Patient Update",
-      resource: "Patient/12345",
-      status: "Success",
-      details: "Demographics updated for John Smith"
-    },
-    {
-      timestamp: "14:22:12",
-      source: "Hospital Network",
-      type: "ADT Admission", 
-      resource: "Encounter/67890",
-      status: "Success",
-      details: "Patient admitted to ICU"
-    },
-    {
-      timestamp: "14:21:30",
-      source: "Lab System",
-      type: "Observation",
-      resource: "Observation/24680",
-      status: "Failed",
-      details: "Invalid observation code"
-    },
-    {
-      timestamp: "14:20:45",
-      source: "Pharmacy System",
-      type: "MedicationRequest",
-      resource: "MedicationRequest/13579",
-      status: "Success", 
-      details: "New prescription for Metformin"
-    },
-  ];
-
-  const dataStatistics = [
-    { resource: "Patient", count: 124567, growth: "+2.3%" },
-    { resource: "Encounter", count: 89234, growth: "+5.7%" },
-    { resource: "Observation", count: 456789, growth: "+8.1%" },
-    { resource: "MedicationRequest", count: 34567, growth: "+1.9%" },
-    { resource: "Condition", count: 67890, growth: "+3.4%" },
-    { resource: "Procedure", count: 23456, growth: "+4.2%" },
+    { label: "Active Connections", value: metrics?.activeConnections.toString() || "0", icon: LinkIcon },
+    { label: "Messages Today", value: metrics?.totalMessages.toString() || "0", icon: Activity },
+    { label: "Success Rate", value: `${metrics?.successRate || 0}%`, icon: CheckCircle },
+    { label: "Failed Transactions", value: metrics?.failedMessages.toString() || "0", icon: AlertCircle },
   ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Connected": return "bg-green-100 text-green-800 border-green-200";
-      case "Warning": return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "Disconnected": return "bg-red-100 text-red-800 border-red-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
+      case "active": return "bg-success/10 text-success border-success/20";
+      case "warning": return "bg-warning/10 text-warning border-warning/20";
+      case "inactive": return "bg-destructive/10 text-destructive border-destructive/20";
+      default: return "bg-muted text-muted-foreground border-border";
     }
   };
 
   const getMessageStatusColor = (status: string) => {
     switch (status) {
-      case "Success": return "bg-green-500 text-white";
-      case "Failed": return "bg-red-500 text-white";
-      case "Warning": return "bg-yellow-500 text-black";
-      default: return "bg-gray-500 text-white";
+      case "success": return "bg-success text-success-foreground";
+      case "failed": return "bg-destructive text-destructive-foreground";
+      case "warning": return "bg-warning text-warning-foreground";
+      default: return "bg-muted text-muted-foreground";
     }
   };
 
-  const getGrowthColor = (growth: string) => {
-    if (growth.startsWith('+')) return "text-green-600";
-    if (growth.startsWith('-')) return "text-red-600";
-    return "text-gray-600";
-  };
+  if (connectionsLoading || messagesLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
+        </div>
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -160,54 +91,66 @@ export default function FHIRIntegration() {
             </CardTitle>
             <CardDescription>Active healthcare system integrations</CardDescription>
           </div>
-          <Button onClick={() => {
-            // In a real app, this would trigger a data refresh
-            console.log('Refreshing FHIR data...');
-          }}>
+          <Button onClick={() => console.log('Refreshing FHIR data...')}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh All
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {fhirConnections.map((connection) => (
-              <div key={connection.id} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h4 className="font-semibold">{connection.name}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {connection.id} • {connection.type} • FHIR {connection.version}
-                    </p>
+          {connections && connections.length > 0 ? (
+            <div className="space-y-4">
+              {connections.map((connection: any) => (
+                <div key={connection.id} className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold">{connection.name}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {connection.connection_type} • FHIR {connection.fhir_version}
+                      </p>
+                    </div>
+                    <Badge className={getStatusColor(connection.status)} variant="outline">
+                      {connection.status}
+                    </Badge>
                   </div>
-                  <Badge className={getStatusColor(connection.status)} variant="outline">
-                    {connection.status}
-                  </Badge>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Messages Today</p>
-                    <p className="text-2xl font-bold text-blue-600">{connection.messages.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Last Sync</p>
-                    <p className="text-lg font-medium">{connection.lastSync}</p>
-                  </div>
-                  <div className="flex items-end">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => {
-                        navigate(`/fhir/connections/${connection.id}/configure`);
-                      }}
-                    >
-                      Configure
-                    </Button>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Messages Today</p>
+                      <p className="text-2xl font-bold text-blue-600">{connection.message_count?.toLocaleString() || 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Last Sync</p>
+                      <p className="text-lg font-medium">
+                        {connection.last_sync 
+                          ? formatDistanceToNow(new Date(connection.last_sync), { addSuffix: true })
+                          : 'Never'}
+                      </p>
+                    </div>
+                    <div className="flex items-end">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => navigate(`/fhir/connections/${connection.id}/configure`)}
+                      >
+                        Configure
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No FHIR connections found</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Create FHIR connections to integrate with healthcare systems
+              </p>
+              <Button>
+                Add Connection
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -224,66 +167,43 @@ export default function FHIRIntegration() {
           <Button variant="outline" onClick={() => navigate('/fhir/messages')}>View Message Log</Button>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {recentMessages.map((message, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-4">
-                  <Badge className={getMessageStatusColor(message.status)}>
-                    {message.status}
-                  </Badge>
-                  <div>
-                    <p className="font-medium">{message.type}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {message.source} • {message.resource} • {message.timestamp}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {message.details}
-                    </p>
+          {messages && messages.length > 0 ? (
+            <div className="space-y-3">
+              {messages.map((message: any) => (
+                <div key={message.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <Badge className={getMessageStatusColor(message.status)}>
+                      {message.status}
+                    </Badge>
+                    <div>
+                      <p className="font-medium">{message.message_type}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {message.connection?.name} • {message.resource_type}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
+                      </p>
+                    </div>
                   </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => navigate(`/fhir/messages/${message.id}`)}
+                  >
+                    Details
+                  </Button>
                 </div>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => {
-                    navigate(`/fhir/messages/${index}`);
-                  }}
-                >
-                  Details
-                </Button>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Data Statistics */}
-      <Card>
-        <CardHeader>
-          <CardTitle>FHIR Resource Statistics</CardTitle>
-          <CardDescription>Current data volumes by FHIR resource type</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {dataStatistics.map((stat, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">{stat.resource}</h4>
-                  <Badge variant="secondary">FHIR R4</Badge>
-                </div>
-                <div className="flex items-end justify-between">
-                  <div>
-                    <p className="text-2xl font-bold text-primary">
-                      {stat.count.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Resources</p>
-                  </div>
-                  <p className={`text-sm font-medium ${getGrowthColor(stat.growth)}`}>
-                    {stat.growth}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No messages found</h3>
+              <p className="text-sm text-muted-foreground">
+                FHIR messages will appear here as they are processed
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -296,16 +216,16 @@ export default function FHIRIntegration() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span>Overall Uptime</span>
-                <span className="font-bold text-green-600">99.8%</span>
+                <span>Active Connections</span>
+                <span className="font-bold text-success">{metrics?.activeConnections || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Average Response Time</span>
-                <span className="font-bold">245ms</span>
+                <span>Total Messages</span>
+                <span className="font-bold text-primary">{metrics?.totalMessages || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Error Rate</span>
-                <span className="font-bold text-green-600">0.2%</span>
+                <span>Success Rate</span>
+                <span className="font-bold text-success">{metrics?.successRate || 0}%</span>
               </div>
             </div>
           </CardContent>
@@ -313,21 +233,25 @@ export default function FHIRIntegration() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Compliance Status</CardTitle>
+            <CardTitle>Message Statistics</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span>FHIR R4 Compliance</span>
-                <span className="font-bold text-green-600">100%</span>
+                <span>Successful</span>
+                <span className="font-bold text-success">
+                  {messages?.filter((m: any) => m.status === 'success').length || 0}
+                </span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Security Standards</span>
-                <span className="font-bold text-green-600">Compliant</span>
+                <span>Failed</span>
+                <span className="font-bold text-destructive">{metrics?.failedMessages || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span>Data Validation</span>
-                <span className="font-bold text-green-600">98.7%</span>
+                <span>Pending</span>
+                <span className="font-bold text-warning">
+                  {messages?.filter((m: any) => m.status === 'pending').length || 0}
+                </span>
               </div>
             </div>
           </CardContent>
