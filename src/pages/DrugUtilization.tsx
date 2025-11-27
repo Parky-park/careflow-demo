@@ -16,7 +16,7 @@ export default function DrugUtilization() {
     { label: "Active DUE Rules", value: metrics?.activeRules.toString() || "0", icon: Microscope },
     { label: "Evaluations This Month", value: metrics?.totalEvals.toString() || "0", icon: BarChart3 },
     { label: "Flagged Prescriptions", value: metrics?.flagged.toString() || "0", icon: AlertTriangle },
-    { label: "Cost Savings", value: "$89,240", icon: TrendingUp },
+    { label: "Cost Savings", value: "—", icon: TrendingUp },
   ];
 
   const getPriorityColor = (priority: string) => {
