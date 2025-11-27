@@ -16,11 +16,23 @@ export const useMedicalHomesMetrics = () => {
       const activeHomes = facilitiesRes.data?.length || 0;
       const totalAttachments = attachmentsRes.data?.length || 0;
       
-      // Calculate average attachment time from completed attachments
-      const completedAttachments = attachmentsRes.data?.filter(a => a.attachment_days !== null) || [];
-      const avgAttachmentDays = completedAttachments.length > 0
-        ? Math.round(completedAttachments.reduce((sum, a) => sum + (a.attachment_days || 0), 0) / completedAttachments.length)
-        : null;
+      // Calculate average attachment time dynamically
+      const attachments = attachmentsRes.data || [];
+      let totalDays = 0;
+      let count = 0;
+      
+      attachments.forEach(attachment => {
+        const startDate = new Date(attachment.attached_at);
+        const endDate = attachment.detached_at 
+          ? new Date(attachment.detached_at) 
+          : new Date();
+        
+        const days = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        totalDays += days;
+        count++;
+      });
+      
+      const avgAttachmentDays = count > 0 ? Math.round(totalDays / count) : null;
 
       return {
         activeHomes,
