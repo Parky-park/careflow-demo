@@ -43,29 +43,29 @@ const Analytics = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
           title="Patient Satisfaction"
-          value={`${analytics.patientSatisfaction}%`}
-          change={{ value: 2.1, type: 'increase' }}
+          value={analytics.patientSatisfaction > 0 ? `${analytics.patientSatisfaction}%` : 'No data'}
+          change={analytics.patientSatisfaction > 0 ? { value: 2.1, type: 'increase' } : undefined}
           status="success"
           icon={<TrendingUp className="h-4 w-4" />}
         />
         <MetricCard
           title="Average Length of Stay"
-          value={`${analytics.avgLengthOfStay} days`}
-          change={{ value: 0.5, type: 'decrease' }}
+          value={analytics.avgLengthOfStay > 0 ? `${analytics.avgLengthOfStay} days` : 'No data'}
+          change={analytics.avgLengthOfStay > 0 ? { value: 0.5, type: 'decrease' } : undefined}
           status="success"
           icon={<Calendar className="h-4 w-4" />}
         />
         <MetricCard
           title="Readmission Rate"
-          value={`${analytics.readmissionRate}%`}
-          change={{ value: 1.2, type: 'decrease' }}
+          value={analytics.readmissionRate > 0 ? `${analytics.readmissionRate}%` : 'No data'}
+          change={analytics.readmissionRate > 0 ? { value: 1.2, type: 'decrease' } : undefined}
           status="success"
           icon={<Activity className="h-4 w-4" />}
         />
         <MetricCard
           title="Cost per Patient"
-          value={`$${analytics.avgCost.toLocaleString()}`}
-          change={{ value: 3.8, type: 'decrease' }}
+          value={analytics.avgCost > 0 ? `$${analytics.avgCost.toLocaleString()}` : 'No data'}
+          change={analytics.avgCost > 0 ? { value: 3.8, type: 'decrease' } : undefined}
           status="success"
           icon={<DollarSign className="h-4 w-4" />}
         />
@@ -116,27 +116,35 @@ const Analytics = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">ICU Beds</p>
-                  <p className="text-sm text-muted-foreground">{analytics.icuBeds} of {analytics.icuBedsTotal} occupied</p>
+              {analytics.icuBedsTotal > 0 ? (
+                <>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">ICU Beds</p>
+                      <p className="text-sm text-muted-foreground">{analytics.icuBeds} of {analytics.icuBedsTotal} occupied</p>
+                    </div>
+                    <Badge variant="secondary">{Math.round((analytics.icuBeds / analytics.icuBedsTotal) * 100)}%</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Operating Rooms</p>
+                      <p className="text-sm text-muted-foreground">{analytics.operatingRooms} of {analytics.operatingRoomsTotal} in use</p>
+                    </div>
+                    <Badge variant="secondary">{analytics.operatingRoomsTotal > 0 ? Math.round((analytics.operatingRooms / analytics.operatingRoomsTotal) * 100) : 0}%</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Staff Coverage</p>
+                      <p className="text-sm text-muted-foreground">{analytics.staffCoverage === 100 ? 'Full staffing achieved' : analytics.staffCoverage > 0 ? `${analytics.staffCoverage}% staffed` : 'No data'}</p>
+                    </div>
+                    <Badge className={analytics.staffCoverage === 100 ? "bg-green-500 text-white" : ""}>{analytics.staffCoverage}%</Badge>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground col-span-full">
+                  <p className="text-sm">No facility data available</p>
                 </div>
-                <Badge variant="secondary">{Math.round((analytics.icuBeds / analytics.icuBedsTotal) * 100)}%</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">Operating Rooms</p>
-                  <p className="text-sm text-muted-foreground">{analytics.operatingRooms} of {analytics.operatingRoomsTotal} in use</p>
-                </div>
-                <Badge variant="secondary">{Math.round((analytics.operatingRooms / analytics.operatingRoomsTotal) * 100)}%</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">Staff Coverage</p>
-                  <p className="text-sm text-muted-foreground">{analytics.staffCoverage === 100 ? 'Full staffing achieved' : `${analytics.staffCoverage}% staffed`}</p>
-                </div>
-                <Badge className="bg-green-500 text-white">{analytics.staffCoverage}%</Badge>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -198,22 +206,38 @@ const Analytics = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Safety Score</span>
-                <span className="font-bold text-green-600">{analytics.safetyScore}/10</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Clinical Outcomes</span>
-                <span className="font-bold text-green-600">{analytics.clinicalOutcomes}%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Compliance Rate</span>
-                <span className="font-bold text-blue-600">{analytics.complianceRate}%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Error Rate</span>
-                <span className="font-bold text-green-600">{analytics.errorRate}%</span>
-              </div>
+              {analytics.safetyScore > 0 || analytics.clinicalOutcomes > 0 || analytics.complianceRate > 0 || analytics.errorRate > 0 ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Safety Score</span>
+                    <span className={`font-bold ${analytics.safetyScore > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      {analytics.safetyScore > 0 ? `${analytics.safetyScore}/10` : 'No data'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Clinical Outcomes</span>
+                    <span className={`font-bold ${analytics.clinicalOutcomes > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      {analytics.clinicalOutcomes > 0 ? `${analytics.clinicalOutcomes}%` : 'No data'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Compliance Rate</span>
+                    <span className={`font-bold ${analytics.complianceRate > 0 ? 'text-blue-600' : 'text-muted-foreground'}`}>
+                      {analytics.complianceRate > 0 ? `${analytics.complianceRate}%` : 'No data'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Error Rate</span>
+                    <span className={`font-bold ${analytics.errorRate > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      {analytics.errorRate > 0 ? `${analytics.errorRate}%` : 'No data'}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-sm">No quality metrics available</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

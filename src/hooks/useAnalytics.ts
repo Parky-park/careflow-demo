@@ -129,18 +129,18 @@ export const useAnalytics = () => {
       // Calculate patient satisfaction from surveys
       const avgSatisfaction = surveys.length > 0
         ? surveys.reduce((sum, s) => sum + s.satisfaction_score, 0) / surveys.length
-        : 94.2;
+        : 0;
 
-      // Get latest quality metrics
-      const getLatestQualityMetric = (type: string, name: string, defaultValue: number) => {
+      // Get latest quality metrics (no defaults - real data only)
+      const getLatestQualityMetric = (type: string, name: string) => {
         const metric = qualityMetrics.find(m => m.metric_type === type && m.metric_name === name);
-        return metric ? Number(metric.metric_value) : defaultValue;
+        return metric ? Number(metric.metric_value) : 0;
       };
 
-      // Get metrics from analytics_metrics table as fallback
-      const getMetric = (name: string, defaultValue: number) => {
+      // Get metrics from analytics_metrics table (no defaults - real data only)
+      const getMetric = (name: string) => {
         const metric = metrics.find(m => m.metric_name === name);
-        return metric ? Number(metric.metric_value) : defaultValue;
+        return metric ? Number(metric.metric_value) : 0;
       };
 
       return {
@@ -148,18 +148,18 @@ export const useAnalytics = () => {
         demographics,
         topConditions,
         patientFlow,
-        patientSatisfaction: Math.round(avgSatisfaction * 10) / 10,
-        avgLengthOfStay: getMetric('avg_length_of_stay', 3.2),
-        readmissionRate: getMetric('readmission_rate', 8.7),
+        patientSatisfaction: avgSatisfaction > 0 ? Math.round(avgSatisfaction * 10) / 10 : 0,
+        avgLengthOfStay: getMetric('avg_length_of_stay'),
+        readmissionRate: getMetric('readmission_rate'),
         icuBeds: icuBedsOccupied,
-        icuBedsTotal: icuBedsTotal,
+        icuBedsTotal: icuBedsTotal || 0,
         operatingRooms: operatingRoomsInUse,
-        operatingRoomsTotal: operatingRoomsTotal,
-        staffCoverage: getMetric('staff_coverage', 100),
-        safetyScore: getLatestQualityMetric('safety', 'Safety Score', 9.2),
-        clinicalOutcomes: getLatestQualityMetric('clinical_outcome', 'Clinical Outcomes Rate', 94.5),
-        complianceRate: getLatestQualityMetric('compliance', 'Compliance Rate', 97.8),
-        errorRate: getLatestQualityMetric('error', 'Medical Error Rate', 0.3),
+        operatingRoomsTotal: operatingRoomsTotal || 0,
+        staffCoverage: getMetric('staff_coverage'),
+        safetyScore: getLatestQualityMetric('safety', 'Safety Score'),
+        clinicalOutcomes: getLatestQualityMetric('clinical_outcome', 'Clinical Outcomes Rate'),
+        complianceRate: getLatestQualityMetric('compliance', 'Compliance Rate'),
+        errorRate: getLatestQualityMetric('error', 'Medical Error Rate'),
       };
     },
     refetchInterval: 30000, // Refetch every 30 seconds
