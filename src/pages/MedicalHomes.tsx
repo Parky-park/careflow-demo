@@ -6,9 +6,11 @@ import { Building2, Users, TrendingUp, Clock, UserCheck, Package } from "lucide-
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useMedicalHomesMetrics } from "@/hooks/useMedicalHomes";
 
 export default function MedicalHomes() {
   const navigate = useNavigate();
+  const { data: metrics } = useMedicalHomesMetrics();
   
   const { data: facilities, isLoading: facilitiesLoading } = useQuery({
     queryKey: ['medical-homes'],
@@ -37,14 +39,18 @@ export default function MedicalHomes() {
   });
 
   const totalPatients = patients?.length || 0;
-  const attachedPatients = 0; // Would need a facility_id column in patients table
+  const attachedPatients = metrics?.totalAttachments || 0;
   const unattachedPatients = totalPatients - attachedPatients;
 
   const medicalHomeMetrics = [
     { label: "Active Medical Homes", value: facilities?.length.toString() || "0", icon: Building2 },
     { label: "Attached Patients", value: attachedPatients.toString(), icon: Users },
     { label: "Unattached Patients", value: unattachedPatients.toString(), icon: UserCheck },
-    { label: "Avg. Attachment Time", value: "—", icon: Clock },
+    { 
+      label: "Avg. Attachment Time", 
+      value: metrics?.avgAttachmentDays ? `${metrics.avgAttachmentDays} days` : "—", 
+      icon: Clock 
+    },
   ];
 
   const getStatusColor = (status: string) => {
