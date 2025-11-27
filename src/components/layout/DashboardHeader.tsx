@@ -3,15 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Bell, Search, Settings, MessageCircle } from "lucide-react";
+import { Bell, Search, Settings, MessageCircle, LogOut, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function DashboardHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,14 +126,37 @@ export function DashboardHeader() {
           </div>
 
           <div className="flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l">
-            <div className="text-right hidden md:block">
-              <p className="text-sm font-medium">Dr. Sarah Wilson</p>
-              <p className="text-xs text-muted-foreground">Primary Care Provider</p>
-            </div>
-            <Avatar className="h-7 w-7 md:h-8 md:w-8">
-              <AvatarImage src="https://api.dicebear.com/7.x/personas/svg?seed=DrSarahWilson" />
-              <AvatarFallback>SW</AvatarFallback>
-            </Avatar>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity">
+                  <div className="text-right hidden md:block">
+                    <p className="text-sm font-medium">
+                      {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Healthcare Provider</p>
+                  </div>
+                  <Avatar className="h-7 w-7 md:h-8 md:w-8">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/personas/svg?seed=${user?.id}`} />
+                    <AvatarFallback>
+                      {(user?.user_metadata?.full_name || user?.email || 'U')[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/settings')}>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
