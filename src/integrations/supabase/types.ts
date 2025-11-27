@@ -137,6 +137,7 @@ export type Database = {
       }
       drug_evaluations: {
         Row: {
+          cost_savings: number | null
           created_at: string | null
           id: string
           notes: string | null
@@ -147,6 +148,7 @@ export type Database = {
           status: string | null
         }
         Insert: {
+          cost_savings?: number | null
           created_at?: string | null
           id?: string
           notes?: string | null
@@ -157,6 +159,7 @@ export type Database = {
           status?: string | null
         }
         Update: {
+          cost_savings?: number | null
           created_at?: string | null
           id?: string
           notes?: string | null
@@ -397,6 +400,51 @@ export type Database = {
             columns: ["connection_id"]
             isOneToOne: false
             referencedRelation: "fhir_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_facility_attachments: {
+        Row: {
+          attached_at: string
+          attachment_days: number | null
+          created_at: string | null
+          detached_at: string | null
+          facility_id: string
+          id: string
+          patient_id: string
+        }
+        Insert: {
+          attached_at?: string
+          attachment_days?: number | null
+          created_at?: string | null
+          detached_at?: string | null
+          facility_id: string
+          id?: string
+          patient_id: string
+        }
+        Update: {
+          attached_at?: string
+          attachment_days?: number | null
+          created_at?: string | null
+          detached_at?: string | null
+          facility_id?: string
+          id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_facility_attachments_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_facility_attachments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
         ]
