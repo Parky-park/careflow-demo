@@ -1,9 +1,31 @@
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart3, TrendingUp, Users, Activity, DollarSign, Calendar } from "lucide-react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const Analytics = () => {
+  const { data: analytics, isLoading } = useAnalytics();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-4 w-96 mt-2" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!analytics) return null;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -21,28 +43,28 @@ const Analytics = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
           title="Patient Satisfaction"
-          value="94.2%"
+          value={`${analytics.patientSatisfaction}%`}
           change={{ value: 2.1, type: 'increase' }}
           status="success"
           icon={<TrendingUp className="h-4 w-4" />}
         />
         <MetricCard
           title="Average Length of Stay"
-          value="3.2 days"
+          value={`${analytics.avgLengthOfStay} days`}
           change={{ value: 0.5, type: 'decrease' }}
           status="success"
           icon={<Calendar className="h-4 w-4" />}
         />
         <MetricCard
           title="Readmission Rate"
-          value="8.7%"
+          value={`${analytics.readmissionRate}%`}
           change={{ value: 1.2, type: 'decrease' }}
           status="success"
           icon={<Activity className="h-4 w-4" />}
         />
         <MetricCard
           title="Cost per Patient"
-          value="$4,250"
+          value={`$${analytics.avgCost.toLocaleString()}`}
           change={{ value: 3.8, type: 'decrease' }}
           status="success"
           icon={<DollarSign className="h-4 w-4" />}
@@ -61,27 +83,27 @@ const Analytics = () => {
                 <span className="text-sm text-muted-foreground">Emergency Admissions</span>
                 <div className="flex items-center gap-2">
                   <div className="w-32 bg-muted rounded-full h-2">
-                    <div className="bg-destructive h-2 rounded-full" style={{ width: '78%' }}></div>
+                    <div className="bg-destructive h-2 rounded-full" style={{ width: `${analytics.patientFlow.emergency}%` }}></div>
                   </div>
-                  <span className="text-sm font-medium">78%</span>
+                  <span className="text-sm font-medium">{analytics.patientFlow.emergency}%</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Scheduled Procedures</span>
                 <div className="flex items-center gap-2">
                   <div className="w-32 bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full" style={{ width: '92%' }}></div>
+                    <div className="bg-primary h-2 rounded-full" style={{ width: `${analytics.patientFlow.scheduled}%` }}></div>
                   </div>
-                  <span className="text-sm font-medium">92%</span>
+                  <span className="text-sm font-medium">{analytics.patientFlow.scheduled}%</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Outpatient Visits</span>
                 <div className="flex items-center gap-2">
                   <div className="w-32 bg-muted rounded-full h-2">
-                    <div className="bg-success h-2 rounded-full" style={{ width: '85%' }}></div>
+                    <div className="bg-success h-2 rounded-full" style={{ width: `${analytics.patientFlow.outpatient}%` }}></div>
                   </div>
-                  <span className="text-sm font-medium">85%</span>
+                  <span className="text-sm font-medium">{analytics.patientFlow.outpatient}%</span>
                 </div>
               </div>
             </div>
@@ -97,23 +119,23 @@ const Analytics = () => {
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">ICU Beds</p>
-                  <p className="text-sm text-muted-foreground">18 of 24 occupied</p>
+                  <p className="text-sm text-muted-foreground">{analytics.icuBeds} of {analytics.icuBedsTotal} occupied</p>
                 </div>
-                <Badge variant="secondary">75%</Badge>
+                <Badge variant="secondary">{Math.round((analytics.icuBeds / analytics.icuBedsTotal) * 100)}%</Badge>
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">Operating Rooms</p>
-                  <p className="text-sm text-muted-foreground">6 of 8 in use</p>
+                  <p className="text-sm text-muted-foreground">{analytics.operatingRooms} of {analytics.operatingRoomsTotal} in use</p>
                 </div>
-                <Badge variant="secondary">75%</Badge>
+                <Badge variant="secondary">{Math.round((analytics.operatingRooms / analytics.operatingRoomsTotal) * 100)}%</Badge>
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">Staff Coverage</p>
-                  <p className="text-sm text-muted-foreground">Full staffing achieved</p>
+                  <p className="text-sm text-muted-foreground">{analytics.staffCoverage === 100 ? 'Full staffing achieved' : `${analytics.staffCoverage}% staffed`}</p>
                 </div>
-                <Badge className="bg-green-500 text-white">100%</Badge>
+                <Badge className="bg-green-500 text-white">{analytics.staffCoverage}%</Badge>
               </div>
             </div>
           </CardContent>
@@ -130,19 +152,19 @@ const Analytics = () => {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm">Age 0-18</span>
-                <span className="font-medium">12%</span>
+                <span className="font-medium">{analytics.demographics['0-18']}%</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Age 19-35</span>
-                <span className="font-medium">23%</span>
+                <span className="font-medium">{analytics.demographics['19-35']}%</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Age 36-65</span>
-                <span className="font-medium">45%</span>
+                <span className="font-medium">{analytics.demographics['36-65']}%</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Age 65+</span>
-                <span className="font-medium">20%</span>
+                <span className="font-medium">{analytics.demographics['65+']}%</span>
               </div>
             </div>
           </CardContent>
@@ -154,22 +176,18 @@ const Analytics = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Hypertension</span>
-                <Badge variant="outline">234 cases</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Diabetes</span>
-                <Badge variant="outline">189 cases</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Heart Disease</span>
-                <Badge variant="outline">156 cases</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">COPD</span>
-                <Badge variant="outline">98 cases</Badge>
-              </div>
+              {analytics.topConditions.length > 0 ? (
+                analytics.topConditions.map(({ condition, count }) => (
+                  <div key={condition} className="flex justify-between items-center">
+                    <span className="text-sm">{condition}</span>
+                    <Badge variant="outline">{count} cases</Badge>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No condition data available
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -182,19 +200,19 @@ const Analytics = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm">Safety Score</span>
-                <span className="font-bold text-green-600">9.2/10</span>
+                <span className="font-bold text-green-600">{analytics.safetyScore}/10</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">Clinical Outcomes</span>
-                <span className="font-bold text-green-600">94.5%</span>
+                <span className="font-bold text-green-600">{analytics.clinicalOutcomes}%</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">Compliance Rate</span>
-                <span className="font-bold text-blue-600">97.8%</span>
+                <span className="font-bold text-blue-600">{analytics.complianceRate}%</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">Error Rate</span>
-                <span className="font-bold text-green-600">0.3%</span>
+                <span className="font-bold text-green-600">{analytics.errorRate}%</span>
               </div>
             </div>
           </CardContent>
