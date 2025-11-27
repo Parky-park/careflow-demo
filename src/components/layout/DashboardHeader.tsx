@@ -46,7 +46,7 @@ export function DashboardHeader() {
       <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4">
         <div className="flex items-center gap-2 md:gap-4">
           <SidebarTrigger className="md:hidden" />
-          <Link to="/" className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity">
+          <Link to="/dashboard" className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity">
             <div className="p-1.5 md:p-2 rounded-lg bg-gradient-to-br from-primary to-accent">
               <div className="w-5 h-5 md:w-6 md:h-6 bg-white/90 rounded flex items-center justify-center">
                 <span className="text-xs font-bold text-primary">CF</span>
