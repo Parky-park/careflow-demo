@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -52,23 +54,25 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+        <AuthProvider>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
-          {/* Protected Routes with Dashboard Layout */}
-          <Route path="/*" element={
-            <SidebarProvider>
-              <div className="min-h-screen flex w-full bg-background">
-                <AppSidebar />
-                <SidebarInset className="flex-1">
-                  <DashboardHeader />
-                  <main className="flex-1 overflow-auto">
-                    <div className="p-4 md:p-6">
-                      <Routes>
-                        <Route path="/dashboard" element={<Dashboard />} />
+            {/* Protected Routes with Dashboard Layout */}
+            <Route path="/*" element={
+              <ProtectedRoute>
+                <SidebarProvider>
+                  <div className="min-h-screen flex w-full bg-background">
+                    <AppSidebar />
+                    <SidebarInset className="flex-1">
+                      <DashboardHeader />
+                      <main className="flex-1 overflow-auto">
+                        <div className="p-4 md:p-6">
+                          <Routes>
+                            <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/patients/:id/chart" element={<PatientChart />} />
                         <Route path="/patients" element={<Patients />} />
                         <Route path="/analytics" element={<Analytics />} />
@@ -104,18 +108,20 @@ const App = () => (
                         <Route path="/drug-utilization/rules/new" element={<DrugUtilizationRuleNew />} />
                         <Route path="/drug-utilization/evaluation/:id" element={<DrugUtilizationEvaluationDetail />} />
                         <Route path="/chat/new" element={<Chat />} />
-                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </div>
-                  </main>
-                </SidebarInset>
-              </div>
-              <Toaster />
-              <Sonner />
-            </SidebarProvider>
-          } />
-        </Routes>
+                            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                            <Route path="*" element={<NotFound />} />
+                          </Routes>
+                        </div>
+                      </main>
+                    </SidebarInset>
+                  </div>
+                  <Toaster />
+                  <Sonner />
+                </SidebarProvider>
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

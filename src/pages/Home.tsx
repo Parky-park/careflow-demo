@@ -1,9 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Activity, Users, BarChart3, Shield, Clock, HeartPulse } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
 
 const Home = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
