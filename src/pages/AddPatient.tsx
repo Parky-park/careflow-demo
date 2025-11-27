@@ -177,8 +177,19 @@ const AddPatient = () => {
                 <h3 className="font-semibold">High-Utilizer Information</h3>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="riskScore">Risk Score (0-100)</Label>
-                  <Input id="riskScore" name="riskScore" type="number" min="0" max="100" placeholder="Enter risk score" />
+                  <Label htmlFor="riskScore">Risk Level</Label>
+                  <Select name="riskScore">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select risk level" />
+                    </SelectTrigger>
+                    <SelectContent className="z-50 bg-popover">
+                      <SelectItem value="20">Low Risk (20)</SelectItem>
+                      <SelectItem value="50">Medium Risk (50)</SelectItem>
+                      <SelectItem value="70">High Risk (70)</SelectItem>
+                      <SelectItem value="90">Very High Risk (90)</SelectItem>
+                      <SelectItem value="95">Critical Risk (95)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             )}
