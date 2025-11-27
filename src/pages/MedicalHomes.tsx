@@ -44,7 +44,7 @@ export default function MedicalHomes() {
     { label: "Active Medical Homes", value: facilities?.length.toString() || "0", icon: Building2 },
     { label: "Attached Patients", value: attachedPatients.toString(), icon: Users },
     { label: "Unattached Patients", value: unattachedPatients.toString(), icon: UserCheck },
-    { label: "Avg. Attachment Time", value: "14 days", icon: Clock },
+    { label: "Avg. Attachment Time", value: "—", icon: Clock },
   ];
 
   const getStatusColor = (status: string) => {
