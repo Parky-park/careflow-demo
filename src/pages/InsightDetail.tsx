@@ -2,37 +2,57 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, ArrowLeft, TrendingUp, AlertTriangle, Users } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Brain, ArrowLeft, Users, Calendar } from "lucide-react";
+import { useInsight } from "@/hooks/useInsights";
+import { formatDistanceToNow, format } from "date-fns";
 
 const InsightDetail = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { data: insight, isLoading } = useInsight(id!);
 
-  // Mock insight data - in real app this would come from API
-  const insight = {
-    id: id,
-    type: "Risk Prediction",
-    title: "High Readmission Risk Identified",
-    description: "Sarah Johnson (67y) shows 87% probability of 30-day readmission based on medication adherence patterns and recent vitals.",
-    confidence: 87,
-    priority: "high",
-    timestamp: "2 hours ago",
-    details: "Based on analysis of patient medication adherence (45% over past 30 days), recent vitals showing irregular patterns, and historical readmission data from similar patient profiles.",
-    recommendations: [
-      "Schedule follow-up appointment within 48 hours",
-      "Implement medication reminder system",
-      "Assign care coordinator for daily check-ins"
-    ]
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-500 text-white';
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'bg-red-500 text-white';
+      case 'high': return 'bg-orange-500 text-white';
       case 'medium': return 'bg-yellow-500 text-black';
       case 'low': return 'bg-green-500 text-white';
       default: return 'bg-gray-500 text-white';
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  if (!insight) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/insights')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Insights
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground">Insight not found</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -59,51 +79,98 @@ const InsightDetail = () => {
       {/* Insight Detail */}
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <Badge className={getPriorityColor(insight.priority)}>
-                {insight.priority} priority
+          <div className="flex items-start justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <Badge className={getSeverityColor(insight.severity || 'medium')}>
+                {insight.severity || 'medium'} severity
               </Badge>
-              <Badge variant="outline">{insight.type}</Badge>
+              <Badge variant="outline">{insight.category || 'General'}</Badge>
+              {insight.status === 'resolved' && (
+                <Badge variant="secondary">Resolved</Badge>
+              )}
             </div>
             <div className="text-right">
               <p className="text-sm font-bold text-green-600">
-                {insight.confidence}% confidence
+                {Math.round((insight.confidence_score || 0) * 100)}% confidence
               </p>
-              <p className="text-xs text-muted-foreground">{insight.timestamp}</p>
+              <p className="text-xs text-muted-foreground">
+                {insight.created_at && formatDistanceToNow(new Date(insight.created_at), { addSuffix: true })}
+              </p>
             </div>
           </div>
           <CardTitle className="text-xl mt-4">{insight.title}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <h3 className="font-semibold mb-2">Description</h3>
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Brain className="h-4 w-4" />
+              Description
+            </h3>
             <p className="text-muted-foreground">{insight.description}</p>
           </div>
           
-          <div>
-            <h3 className="font-semibold mb-2">Detailed Analysis</h3>
-            <p className="text-muted-foreground">{insight.details}</p>
-          </div>
+          {insight.patients && (
+            <div className="p-4 rounded-lg bg-muted/30">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Patient Information
+              </h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Name</p>
+                  <p className="font-medium">
+                    {insight.patients.first_name} {insight.patients.last_name}
+                  </p>
+                </div>
+                {insight.patients.date_of_birth && (
+                  <div>
+                    <p className="text-muted-foreground">Date of Birth</p>
+                    <p className="font-medium">
+                      {format(new Date(insight.patients.date_of_birth), 'MMM dd, yyyy')}
+                    </p>
+                  </div>
+                )}
+                {insight.patients.medical_record_number && (
+                  <div>
+                    <p className="text-muted-foreground">MRN</p>
+                    <p className="font-medium">{insight.patients.medical_record_number}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           
-          <div>
-            <h3 className="font-semibold mb-2">Recommendations</h3>
-            <ul className="space-y-2">
-              {insight.recommendations.map((rec, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2" />
-                  <span className="text-muted-foreground">{rec}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {insight.recommended_actions && insight.recommended_actions.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-2">Recommended Actions</h3>
+              <ul className="space-y-2">
+                {insight.recommended_actions.map((action, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
+                    <span className="text-muted-foreground">{action}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           
-          <div className="flex gap-3 pt-4">
-            <Button onClick={() => navigate('/patients')}>
-              <Users className="h-4 w-4 mr-2" />
-              View Patient
-            </Button>
+          {insight.resolved_at && (
+            <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/10">
+              <p className="text-sm text-green-700 dark:text-green-400">
+                Resolved on {format(new Date(insight.resolved_at), 'MMM dd, yyyy HH:mm')}
+              </p>
+            </div>
+          )}
+          
+          <div className="flex gap-3 pt-4 flex-wrap">
+            {insight.patient_id && (
+              <Button onClick={() => navigate(`/patient-chart/${insight.patient_id}`)}>
+                <Users className="h-4 w-4 mr-2" />
+                View Patient Chart
+              </Button>
+            )}
             <Button variant="outline" onClick={() => navigate('/schedule')}>
+              <Calendar className="h-4 w-4 mr-2" />
               Schedule Follow-up
             </Button>
           </div>
