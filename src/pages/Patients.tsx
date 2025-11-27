@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { AddPatientModal } from "@/components/modals/AddPatientModal";
 import { Users, Search, Plus, AlertTriangle, Heart, Clock, X } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
@@ -15,7 +14,6 @@ const Patients = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [localSearch, setLocalSearch] = useState("");
-  const [showAddPatientModal, setShowAddPatientModal] = useState(false);
 
   const { data: patients, isLoading } = useQuery({
     queryKey: ['patients'],
@@ -128,7 +126,7 @@ const Patients = () => {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <Button onClick={() => setShowAddPatientModal(true)} className="gap-2">
+              <Button onClick={() => navigate('/patients/add')} className="gap-2">
                 <Plus className="h-4 w-4" />
                 Add Patient
               </Button>
@@ -237,7 +235,7 @@ const Patients = () => {
                 }
               </p>
               {!activeSearch && (
-                <Button onClick={() => setShowAddPatientModal(true)}>
+                <Button onClick={() => navigate('/patients/add')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Patient
                 </Button>
@@ -246,11 +244,6 @@ const Patients = () => {
           )}
         </CardContent>
       </Card>
-
-      <AddPatientModal 
-        open={showAddPatientModal}
-        onOpenChange={setShowAddPatientModal}
-      />
     </div>
   );
 };
