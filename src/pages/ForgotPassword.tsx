@@ -1,58 +1,37 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Activity, ArrowLeft, AlertCircle } from "lucide-react";
+import { Activity, ArrowLeft, Mail, CheckCircle, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 
-const Login = () => {
+const ForgotPassword = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { user } = useAuth();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user) {
-      navigate("/dashboard");
-    }
-  }, [user, navigate]);
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
+    setStatus("idle");
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
       if (error) throw error;
 
-      toast({
-        title: "Login Successful",
-        description: "Welcome back!",
-      });
-      
-      navigate("/dashboard");
+      setStatus("success");
+      setMessage("Check your email for a password reset link. It may take a few minutes to arrive.");
     } catch (error: any) {
-      const errorMessage = error.message || "Invalid email or password";
-      setError(errorMessage);
-      toast({
-        title: "Login Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      setStatus("error");
+      setMessage(error.message || "Failed to send reset email. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -70,31 +49,44 @@ const Login = () => {
             <Activity className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold text-foreground">CareFlow</span>
           </button>
-          <Button variant="ghost" onClick={() => navigate("/")}>
+          <Button variant="ghost" onClick={() => navigate("/login")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
+            Back to Login
           </Button>
         </div>
       </div>
 
-      {/* Login Card */}
+      {/* Forgot Password Card */}
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+          <div className="flex items-center gap-2">
+            <Mail className="h-6 w-6 text-primary" />
+            <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
+          </div>
           <CardDescription>
-            Enter your credentials to access your account
+            Enter your email address and we'll send you a link to reset your password
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+            {status === "success" && (
+              <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <AlertDescription className="text-green-800 dark:text-green-200">
+                  {message}
+                </AlertDescription>
               </Alert>
             )}
+            
+            {status === "error" && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{message}</AlertDescription>
+              </Alert>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
                 type="email"
@@ -102,25 +94,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <button 
-                  type="button"
-                  className="text-sm text-primary hover:underline"
-                  onClick={() => navigate("/forgot-password")}
-                >
-                  Forgot password?
-                </button>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                disabled={status === "success"}
               />
             </div>
           </CardContent>
@@ -128,18 +102,18 @@ const Login = () => {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isLoading}
+              disabled={isLoading || status === "success"}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? "Sending..." : status === "success" ? "Email Sent" : "Send Reset Link"}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
-              Don't have an account?{" "}
+              Remember your password?{" "}
               <button
                 type="button"
-                onClick={() => navigate("/signup")}
+                onClick={() => navigate("/login")}
                 className="text-primary hover:underline font-medium"
               >
-                Sign up
+                Sign in
               </button>
             </div>
           </CardFooter>
@@ -149,4 +123,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ForgotPassword;

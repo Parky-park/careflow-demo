@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, ArrowLeft } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Activity, ArrowLeft, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,7 @@ const Signup = () => {
     confirmPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Redirect if already logged in
   useEffect(() => {
@@ -30,20 +32,25 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     
     if (formData.password !== formData.confirmPassword) {
+      const errorMsg = "Passwords do not match";
+      setError(errorMsg);
       toast({
         title: "Error",
-        description: "Passwords do not match",
+        description: errorMsg,
         variant: "destructive",
       });
       return;
     }
 
     if (formData.password.length < 6) {
+      const errorMsg = "Password must be at least 6 characters";
+      setError(errorMsg);
       toast({
         title: "Error",
-        description: "Password must be at least 6 characters",
+        description: errorMsg,
         variant: "destructive",
       });
       return;
@@ -72,9 +79,11 @@ const Signup = () => {
       
       navigate("/dashboard");
     } catch (error: any) {
+      const errorMessage = error.message || "Unable to create account";
+      setError(errorMessage);
       toast({
         title: "Signup Failed",
-        description: error.message || "Unable to create account",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -118,6 +127,12 @@ const Signup = () => {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
               <Input
