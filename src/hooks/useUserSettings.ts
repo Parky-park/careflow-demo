@@ -158,11 +158,25 @@ export const useChangePassword = () => {
 
   return useMutation({
     mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
-      const { error } = await supabase.auth.updateUser({
+      // First, verify the current password by attempting to sign in
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) throw new Error("User email not found");
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: data.currentPassword,
+      });
+
+      if (signInError) {
+        throw new Error("Current password is incorrect");
+      }
+
+      // If current password is correct, update to new password
+      const { error: updateError } = await supabase.auth.updateUser({
         password: data.newPassword,
       });
 
-      if (error) throw error;
+      if (updateError) throw updateError;
     },
     onSuccess: () => {
       toast({
@@ -170,13 +184,12 @@ export const useChangePassword = () => {
         description: "Your password has been successfully updated.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to change password",
+        description: error.message || "Failed to change password",
         variant: "destructive",
       });
-      console.error("Change password error:", error);
     },
   });
 };
