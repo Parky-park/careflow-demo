@@ -13,13 +13,15 @@ import { LanguageModal } from "@/components/modals/LanguageModal";
 import { TimezoneModal } from "@/components/modals/TimezoneModal";
 import { useToast } from "@/hooks/use-toast";
 import { useUserProfile, useUserPreferences, useUpdatePreferences } from "@/hooks/useUserSettings";
-import { Settings as SettingsIcon } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Settings as SettingsIcon, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const { data: profile, isLoading: profileLoading } = useUserProfile();
   const { data: preferences, isLoading: preferencesLoading } = useUserPreferences();
   const updatePreferences = useUpdatePreferences();
@@ -117,6 +119,16 @@ const Settings = () => {
             >
               Two-Factor Authentication
             </Button>
+            <div className="pt-2 border-t">
+              <Button 
+                variant="destructive" 
+                className="w-full justify-start gap-2"
+                onClick={signOut}
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
