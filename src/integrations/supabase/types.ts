@@ -544,6 +544,45 @@ export type Database = {
           },
         ]
       }
+      integrations: {
+        Row: {
+          created_at: string
+          data_types: string[] | null
+          description: string | null
+          enabled: boolean | null
+          endpoint: string | null
+          id: string
+          last_sync: string | null
+          name: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_types?: string[] | null
+          description?: string | null
+          enabled?: boolean | null
+          endpoint?: string | null
+          id?: string
+          last_sync?: string | null
+          name: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_types?: string[] | null
+          description?: string | null
+          enabled?: boolean | null
+          endpoint?: string | null
+          id?: string
+          last_sync?: string | null
+          name?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inventory_items: {
         Row: {
           category: string
@@ -977,6 +1016,42 @@ export type Database = {
         }
         Relationships: []
       }
+      security_logs: {
+        Row: {
+          created_at: string
+          device: string | null
+          device_type: string | null
+          event: string
+          id: string
+          ip_address: string | null
+          location: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device?: string | null
+          device_type?: string | null
+          event: string
+          id?: string
+          ip_address?: string | null
+          location?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device?: string | null
+          device_type?: string | null
+          event?: string
+          id?: string
+          ip_address?: string | null
+          location?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       staff: {
         Row: {
           created_at: string
@@ -1010,6 +1085,36 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      system_logs: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          level: string
+          message: string
+          service: string
+          timestamp: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          level?: string
+          message: string
+          service: string
+          timestamp?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          level?: string
+          message?: string
+          service?: string
+          timestamp?: string
         }
         Relationships: []
       }
