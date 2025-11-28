@@ -1,275 +1,297 @@
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Send, Paperclip, Shield, Clock, MoreVertical } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, Send, Shield, Clock, Paperclip } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-const Chat = () => {
+export default function Chat() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [messageText, setMessageText] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Mock data - in a real app, this would be fetched based on the conversation ID
-  const conversations = {
-    "1": {
-      participant: "Dr. Michael Chen",
-      role: "Cardiologist",
-      priority: "high",
-      encrypted: true,
-      messages: [
+  // Get current user
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setCurrentUserId(user?.id || null);
+    });
+  }, []);
+
+  // Fetch conversation details
+  const { data: conversation, isLoading: conversationLoading } = useQuery({
+    queryKey: ["conversation", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("conversations")
+        .select("*")
+        .eq("id", id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  // Fetch messages
+  const { data: messages, isLoading: messagesLoading } = useQuery({
+    queryKey: ["messages", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("conversation_id", id)
+        .order("created_at", { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
+  // Send message mutation
+  const sendMessageMutation = useMutation({
+    mutationFn: async (content: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const { error } = await supabase
+        .from("messages")
+        .insert({
+          conversation_id: id,
+          sender_id: user.id,
+          sender_name: profile?.full_name || user.email || "You",
+          content,
+        });
+
+      if (error) throw error;
+
+      // Update conversation's last message
+      await supabase
+        .from("conversations")
+        .update({
+          last_message: content,
+          last_message_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messages", id] });
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      setMessageText("");
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+      console.error("Send message error:", error);
+    },
+  });
+
+  // Real-time subscription for new messages
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel(`messages:${id}`)
+      .on(
+        'postgres_changes',
         {
-          id: "1",
-          sender: "Dr. Michael Chen",
-          senderId: "mc",
-          text: "Patient in Room 302 needs immediate cardiac consultation. Elevated troponin levels and EKG changes noted.",
-          timestamp: "3 minutes ago",
-          isOwn: false
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${id}`,
         },
-        {
-          id: "2",
-          sender: "You",
-          senderId: "you",
-          text: "On my way to Room 302 now. Will assess and provide recommendations.",
-          timestamp: "Just now",
-          isOwn: true
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["messages", id] });
         }
-      ]
-    },
-    "2": {
-      participant: "Nurse Jennifer Lee",
-      role: "ICU Supervisor",
-      priority: "medium",
-      encrypted: true,
-      messages: [
-        {
-          id: "1",
-          sender: "Nurse Jennifer Lee",
-          senderId: "jl",
-          text: "Medication order completed for patient Johnson. All vitals stable.",
-          timestamp: "8 minutes ago",
-          isOwn: false
-        }
-      ]
-    },
-    "3": {
-      participant: "Dr. Sarah Wilson",
-      role: "Emergency Medicine",
-      priority: "high",
-      encrypted: true,
-      messages: [
-        {
-          id: "1",
-          sender: "Dr. Sarah Wilson",
-          senderId: "sw",
-          text: "New admission requires immediate attention. Multiple trauma patient incoming.",
-          timestamp: "12 minutes ago",
-          isOwn: false
-        }
-      ]
-    }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, queryClient]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!messageText.trim()) return;
+    sendMessageMutation.mutate(messageText);
   };
 
-  const conversation = conversations[id as keyof typeof conversations];
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+    if (diffInMinutes < 1440) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleDateString();
+  };
 
-  // Handle new conversation
-  if (id === 'new') {
+  if (conversationLoading || messagesLoading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/messages')}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-2xl font-bold text-foreground">Start New Conversation</h1>
-        </div>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>New Secure Message</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">To:</label>
-              <Input placeholder="Search for healthcare professional..." className="mt-1" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Subject:</label>
-              <Input placeholder="Enter subject..." className="mt-1" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Message:</label>
-              <textarea 
-                className="w-full mt-1 p-3 border rounded-md min-h-[200px]" 
-                placeholder="Type your secure message..."
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button>Send Message</Button>
-              <Button variant="outline" onClick={() => navigate('/messages')}>Cancel</Button>
-            </div>
-          </CardContent>
-        </Card>
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
 
   if (!conversation) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-muted-foreground">Conversation not found</h2>
-          <Button onClick={() => navigate('/messages')} className="mt-4">
-            Back to Messages
-          </Button>
-        </div>
+      <div className="text-center py-12">
+        <h3 className="text-lg font-semibold mb-2">Conversation not found</h3>
+        <Button onClick={() => navigate('/messages')}>Back to Messages</Button>
       </div>
     );
   }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-destructive text-destructive-foreground';
-      case 'medium': return 'bg-warning text-warning-foreground';
-      case 'low': return 'bg-success text-success-foreground';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const handleSendMessage = () => {
-    if (messageText.trim()) {
-      // In a real app, this would send the message to the backend
-      console.log("Sending message:", messageText);
-      setMessageText("");
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/messages')}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarFallback>
-                {conversation.participant.split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">{conversation.participant}</h1>
-              <p className="text-muted-foreground">{conversation.role}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Badge className={getPriorityColor(conversation.priority)}>
-            {conversation.priority} priority
-          </Badge>
-          {conversation.encrypted && (
-            <Shield className="h-4 w-4 text-green-500" />
-          )}
-          <Button variant="outline" size="sm">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/messages')}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold">Secure Messages</h1>
+          <p className="text-muted-foreground">HIPAA-compliant secure messaging</p>
         </div>
       </div>
 
       {/* Chat Interface */}
-      <Card className="h-[600px] flex flex-col">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Secure Conversation</CardTitle>
-            {conversation.encrypted && (
-              <div className="flex items-center gap-2 text-green-600">
-                <Shield className="h-4 w-4" />
-                <span className="text-sm">End-to-end encrypted</span>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Avatar>
+                <AvatarFallback>
+                  {conversation.participant_name.split(' ').map(n => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h3>{conversation.participant_name}</h3>
+                <p className="text-sm text-muted-foreground">{conversation.participant_role}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge className={
+                conversation.priority === 'high' ? 'bg-destructive text-destructive-foreground' :
+                conversation.priority === 'medium' ? 'bg-warning text-warning-foreground' :
+                'bg-success text-success-foreground'
+              }>
+                {conversation.priority} priority
+              </Badge>
+              {conversation.encrypted && <Shield className="h-4 w-4 text-green-500" />}
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Messages */}
+          <div className="space-y-4 min-h-[400px] max-h-[500px] overflow-y-auto mb-4">
+            {messages && messages.length > 0 ? (
+              messages.map((message: any) => {
+                const isCurrentUser = message.sender_id === currentUserId;
+                
+                return (
+                  <div key={message.id} className={`flex gap-3 ${isCurrentUser ? 'justify-end' : ''}`}>
+                    {!isCurrentUser && (
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          {message.sender_name.split(' ').map((n: string) => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div className={`flex-1 max-w-xs ${isCurrentUser ? 'ml-auto' : ''}`}>
+                      <div className={`rounded-lg p-3 ${
+                        isCurrentUser ? 'bg-primary/10 ml-auto' : 'bg-muted/50'
+                      }`}>
+                        {!isCurrentUser && (
+                          <p className="text-xs font-medium text-muted-foreground mb-1">
+                            {message.sender_name}
+                          </p>
+                        )}
+                        <p className="text-sm">{message.content}</p>
+                      </div>
+                      <div className={`flex items-center gap-2 mt-1 text-xs text-muted-foreground ${
+                        isCurrentUser ? 'justify-end' : ''
+                      }`}>
+                        <Clock className="h-3 w-3" />
+                        <span>{formatTimestamp(message.created_at)}</span>
+                        {message.encrypted && <Shield className="h-3 w-3 text-green-500" />}
+                      </div>
+                    </div>
+                    {isCurrentUser && (
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>You</AvatarFallback>
+                      </Avatar>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                No messages yet. Start the conversation!
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
-        </CardHeader>
-        
-        <CardContent className="flex-1 flex flex-col">
-          {/* Messages */}
-          <ScrollArea className="flex-1 pr-4">
-            <div className="space-y-4">
-              {conversation.messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex gap-3 ${message.isOwn ? 'justify-end' : ''}`}
-                >
-                  {!message.isOwn && (
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>{message.senderId.toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  )}
-                  
-                  <div className={`flex-1 max-w-xs ${message.isOwn ? 'ml-auto' : ''}`}>
-                    <div className={`rounded-lg p-3 ${
-                      message.isOwn 
-                        ? 'bg-primary text-primary-foreground ml-auto' 
-                        : 'bg-muted'
-                    }`}>
-                      <p className="text-sm">{message.text}</p>
-                    </div>
-                    <div className={`flex items-center gap-2 mt-1 text-xs text-muted-foreground ${
-                      message.isOwn ? 'justify-end' : ''
-                    }`}>
-                      <Clock className="h-3 w-3" />
-                      <span>{message.timestamp}</span>
-                      {conversation.encrypted && (
-                        <Shield className="h-3 w-3 text-green-500" />
-                      )}
-                    </div>
-                  </div>
-
-                  {message.isOwn && (
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>YOU</AvatarFallback>
-                    </Avatar>
-                  )}
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
           
           {/* Message Input */}
-          <div className="flex gap-2 pt-4 border-t mt-4">
-            <Button variant="outline" size="sm">
+          <form onSubmit={handleSendMessage} className="flex gap-2 pt-4 border-t">
+            <Button variant="outline" size="sm" type="button">
               <Paperclip className="h-4 w-4" />
             </Button>
-            <Input
-              placeholder="Type your secure message..."
+            <Input 
+              placeholder="Type your secure message..." 
               className="flex-1"
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              disabled={sendMessageMutation.isPending}
             />
-            <Button size="sm" onClick={handleSendMessage}>
+            <Button 
+              size="sm" 
+              type="submit"
+              disabled={!messageText.trim() || sendMessageMutation.isPending}
+            >
               <Send className="h-4 w-4" />
             </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </form>
 
-      {/* Security Notice */}
-      <Card className="border-green-200 bg-green-50">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 text-green-800">
+          {/* Security Notice */}
+          <div className="flex items-center gap-2 text-green-800 bg-green-50 dark:bg-green-950 dark:text-green-200 p-3 rounded-lg mt-4">
             <Shield className="h-4 w-4" />
             <span className="text-sm font-medium">
-              This conversation is HIPAA-compliant and end-to-end encrypted
+              All messages are HIPAA-compliant and end-to-end encrypted
             </span>
           </div>
         </CardContent>
       </Card>
     </div>
   );
-};
-
-export default Chat;
+}
