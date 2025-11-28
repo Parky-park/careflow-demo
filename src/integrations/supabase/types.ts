@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      adt_events: {
+        Row: {
+          created_at: string | null
+          details: string | null
+          event_type: string
+          from_location: string | null
+          id: string
+          location: string
+          patient_id: string | null
+          to_location: string | null
+          urgency: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: string | null
+          event_type: string
+          from_location?: string | null
+          id?: string
+          location: string
+          patient_id?: string | null
+          to_location?: string | null
+          urgency?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: string | null
+          event_type?: string
+          from_location?: string | null
+          id?: string
+          location?: string
+          patient_id?: string | null
+          to_location?: string | null
+          urgency?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adt_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_insights: {
         Row: {
           category: string | null
@@ -97,6 +141,66 @@ export type Database = {
         }
         Relationships: []
       }
+      appointments: {
+        Row: {
+          appointment_date: string
+          appointment_type: string
+          created_at: string | null
+          duration_minutes: number | null
+          id: string
+          notes: string | null
+          patient_id: string | null
+          provider_id: string | null
+          provider_name: string
+          room: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          appointment_date: string
+          appointment_type: string
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          provider_id?: string | null
+          provider_name: string
+          room?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          appointment_date?: string
+          appointment_type?: string
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          provider_id?: string | null
+          provider_name?: string
+          room?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       care_teams: {
         Row: {
           created_at: string | null
@@ -134,6 +238,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      conversations: {
+        Row: {
+          created_at: string | null
+          encrypted: boolean | null
+          id: string
+          last_message: string | null
+          last_message_at: string | null
+          participant_id: string
+          participant_name: string
+          participant_role: string | null
+          priority: string | null
+          unread_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          encrypted?: boolean | null
+          id?: string
+          last_message?: string | null
+          last_message_at?: string | null
+          participant_id: string
+          participant_name: string
+          participant_role?: string | null
+          priority?: string | null
+          unread_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          encrypted?: boolean | null
+          id?: string
+          last_message?: string | null
+          last_message_at?: string | null
+          participant_id?: string
+          participant_name?: string
+          participant_role?: string | null
+          priority?: string | null
+          unread_count?: number | null
+        }
+        Relationships: []
       }
       drug_evaluations: {
         Row: {
@@ -400,6 +543,119 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      inventory_items: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: string
+          name: string
+          quantity: number
+          reorder_level: number | null
+          sku: string
+          status: string | null
+          unit_price: number
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: string
+          name: string
+          quantity?: number
+          reorder_level?: number | null
+          sku: string
+          status?: string | null
+          unit_price?: number
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          quantity?: number
+          reorder_level?: number | null
+          sku?: string
+          status?: string | null
+          unit_price?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string | null
+          created_at: string | null
+          encrypted: boolean | null
+          id: string
+          read: boolean | null
+          sender_id: string
+          sender_name: string
+        }
+        Insert: {
+          content: string
+          conversation_id?: string | null
+          created_at?: string | null
+          encrypted?: boolean | null
+          id?: string
+          read?: boolean | null
+          sender_id: string
+          sender_name: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string | null
+          created_at?: string | null
+          encrypted?: boolean | null
+          id?: string
+          read?: boolean | null
+          sender_id?: string
+          sender_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          title?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       patient_facility_attachments: {
         Row: {

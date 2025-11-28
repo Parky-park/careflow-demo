@@ -1,58 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AlertsPanel } from "@/components/modals/AlertsPanel";
-import { Activity, Clock, MapPin, Users, AlertTriangle, ArrowRight, Pause, Play } from "lucide-react";
+import { Activity, Clock, MapPin, Users, AlertTriangle, ArrowRight, Pause, Play, Package } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useADTEvents, useADTMetrics } from "@/hooks/useADTFeed";
 
 const RealtimeFeed = () => {
   const navigate = useNavigate();
   const [feedPaused, setFeedPaused] = useState(false);
   const [showAlertsPanel, setShowAlertsPanel] = useState(false);
+  const { data: events, isLoading } = useADTEvents();
+  const { data: metrics } = useADTMetrics();
   
-  const adtEvents = [
-    {
-      id: "1",
-      type: "admission",
-      patient: "John Smith",
-      patientId: "MRN-12345",
-      location: "Emergency Department", 
-      timestamp: "Just now",
-      urgency: "high",
-      details: "Chest pain, stable vitals"
-    },
-    {
-      id: "2", 
-      type: "transfer",
-      patient: "Maria Garcia", 
-      patientId: "MRN-12346",
-      location: "ICU → Ward 3A",
-      timestamp: "2 min ago",
-      urgency: "medium",
-      details: "Post-surgical transfer"
-    },
-    {
-      id: "3",
-      type: "discharge",
-      patient: "Robert Johnson",
-      patientId: "MRN-12347", 
-      location: "Ward 2B",
-      timestamp: "5 min ago",
-      urgency: "low",
-      details: "Recovery complete"
-    },
-    {
-      id: "4",
-      type: "admission",
-      patient: "Sarah Davis",
-      patientId: "MRN-12348",
-      location: "ICU",
-      timestamp: "12 min ago", 
-      urgency: "high",
-      details: "Respiratory distress"
-    }
-  ];
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+    return `${Math.floor(diffInMinutes / 60)} hours ago`;
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -126,51 +106,69 @@ const RealtimeFeed = () => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Live ADT Events</span>
-            <Badge variant="secondary">{adtEvents.length} events today</Badge>
+            <Badge variant="secondary">{events?.length || 0} events today</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {adtEvents.map((event) => (
-              <div key={event.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/20 transition-colors">
-                <div className="flex items-center gap-4">
-                  <Badge className={getTypeColor(event.type)}>
-                    {event.type.toUpperCase()}
-                  </Badge>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">{event.patient}</h3>
-                      <span className="text-sm text-muted-foreground">({event.patientId})</span>
-                      <Badge className={getUrgencyColor(event.urgency)} variant="outline">
-                        {event.urgency}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        <span>{event.location}</span>
+          {events && events.length > 0 ? (
+            <div className="space-y-4">
+              {events.map((event: any) => (
+                <div key={event.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/20 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <Badge className={getTypeColor(event.event_type)}>
+                      {event.event_type.toUpperCase()}
+                    </Badge>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">
+                          {event.patient ? `${event.patient.first_name} ${event.patient.last_name}` : 'Unknown Patient'}
+                        </h3>
+                        <span className="text-sm text-muted-foreground">
+                          ({event.patient?.medical_record_number || 'N/A'})
+                        </span>
+                        <Badge className={getUrgencyColor(event.urgency)} variant="outline">
+                          {event.urgency}
+                        </Badge>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        <span>{event.timestamp}</span>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          <span>{event.location}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          <span>{formatTimestamp(event.created_at)}</span>
+                        </div>
                       </div>
+                      {event.details && (
+                        <p className="text-sm text-muted-foreground">{event.details}</p>
+                      )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{event.details}</p>
                   </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => {
+                      if (event.patient_id) {
+                        navigate(`/patients/${event.patient_id}/chart`);
+                      }
+                    }}
+                  >
+                    <ArrowRight className="h-3 w-3 mr-1" />
+                    View Details
+                  </Button>
                 </div>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => {
-                    navigate(`/patients/${event.patientId}/chart`);
-                  }}
-                >
-                  <ArrowRight className="h-3 w-3 mr-1" />
-                  View Details
-                </Button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No ADT events today</h3>
+              <p className="text-sm text-muted-foreground">
+                Patient admission, discharge, and transfer events will appear here
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -181,8 +179,7 @@ const RealtimeFeed = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Today's Admissions</p>
-                <p className="text-2xl font-bold text-green-600">47</p>
-                <p className="text-xs text-muted-foreground">+12% from yesterday</p>
+                <p className="text-2xl font-bold text-green-600">{metrics?.admissions || 0}</p>
               </div>
               <Users className="h-8 w-8 text-green-600" />
             </div>
@@ -194,8 +191,7 @@ const RealtimeFeed = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Today's Discharges</p>
-                <p className="text-2xl font-bold text-blue-600">52</p>
-                <p className="text-xs text-muted-foreground">+8% from yesterday</p>
+                <p className="text-2xl font-bold text-blue-600">{metrics?.discharges || 0}</p>
               </div>
               <ArrowRight className="h-8 w-8 text-blue-600" />
             </div>
@@ -207,8 +203,7 @@ const RealtimeFeed = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Active Transfers</p>
-                <p className="text-2xl font-bold text-orange-600">8</p>
-                <p className="text-xs text-muted-foreground">3 in progress</p>
+                <p className="text-2xl font-bold text-orange-600">{metrics?.transfers || 0}</p>
               </div>
               <Activity className="h-8 w-8 text-orange-600" />
             </div>
@@ -220,8 +215,7 @@ const RealtimeFeed = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Current Census</p>
-                <p className="text-2xl font-bold text-primary">234</p>
-                <p className="text-xs text-muted-foreground">78% occupancy</p>
+                <p className="text-2xl font-bold text-primary">{metrics?.currentCensus || 0}</p>
               </div>
               <MapPin className="h-8 w-8 text-primary" />
             </div>

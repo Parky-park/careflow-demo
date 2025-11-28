@@ -4,44 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Send, Search, Shield, Clock, Paperclip, Star, Plus } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { MessageSquare, Send, Search, Shield, Clock, Paperclip, Star, Plus, Package } from "lucide-react";
+import { useConversations } from "@/hooks/useMessaging";
 
 const Messages = () => {
   const navigate = useNavigate();
+  const { data: conversations, isLoading } = useConversations();
   
-  const conversations = [
-    {
-      id: "1",
-      participant: "Dr. Michael Chen",
-      role: "Cardiologist", 
-      lastMessage: "Patient in Room 302 needs immediate cardiac consultation",
-      timestamp: "3 min ago",
-      unread: 2,
-      priority: "high",
-      encrypted: true
-    },
-    {
-      id: "2",
-      participant: "Nurse Jennifer Lee",
-      role: "ICU Supervisor",
-      lastMessage: "Medication order completed for patient Johnson",
-      timestamp: "8 min ago", 
-      unread: 0,
-      priority: "medium",
-      encrypted: true
-    },
-    {
-      id: "3",
-      participant: "Dr. Sarah Wilson",
-      role: "Emergency Medicine",
-      lastMessage: "New admission requires immediate attention",
-      timestamp: "12 min ago",
-      unread: 1,
-      priority: "high",
-      encrypted: true
-    }
-  ];
-
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'bg-destructive text-destructive-foreground';
@@ -49,6 +19,26 @@ const Messages = () => {
       case 'low': return 'bg-success text-success-foreground';
       default: return 'bg-muted text-muted-foreground';
     }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
+    return date.toLocaleDateString();
   };
 
   return (
@@ -72,7 +62,7 @@ const Messages = () => {
             <CardTitle className="flex items-center justify-between">
               <span>Conversations</span>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary">{conversations.filter(c => c.unread > 0).length}</Badge>
+                <Badge variant="secondary">{conversations?.filter((c: any) => c.unread_count > 0).length || 0}</Badge>
                 <Button size="sm" onClick={() => navigate('/chat/new')}>
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -85,48 +75,61 @@ const Messages = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {conversations.map((conversation) => (
-                <div
-                  key={conversation.id}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 cursor-pointer border"
-                  onClick={() => navigate(`/chat/${conversation.id}`)}
-                >
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback>
-                      {conversation.participant.split(' ').map(n => n[0]).join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium truncate">{conversation.participant}</h3>
-                        <p className="text-xs text-muted-foreground">{conversation.role}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {conversation.unread > 0 && (
-                          <Badge variant="destructive" className="h-5 px-2 text-xs">
-                            {conversation.unread}
+              {conversations && conversations.length > 0 ? (
+                conversations.map((conversation) => (
+                  <div
+                    key={conversation.id}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 cursor-pointer border"
+                    onClick={() => navigate(`/chat/${conversation.id}`)}
+                  >
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback>
+                        {conversation.participant_name.split(' ').map((n: string) => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-medium truncate">{conversation.participant_name}</h3>
+                          <p className="text-xs text-muted-foreground">{conversation.participant_role}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {conversation.unread_count > 0 && (
+                            <Badge variant="destructive" className="h-5 px-2 text-xs">
+                              {conversation.unread_count}
+                            </Badge>
+                          )}
+                          <Badge className={getPriorityColor(conversation.priority)}>
+                            {conversation.priority}
                           </Badge>
-                        )}
-                        <Badge className={getPriorityColor(conversation.priority)}>
-                          {conversation.priority}
-                        </Badge>
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate mt-1">
-                      {conversation.lastMessage}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Clock className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">{conversation.timestamp}</span>
-                      {conversation.encrypted && (
-                        <Shield className="h-3 w-3 text-green-500" />
-                      )}
+                      <p className="text-sm text-muted-foreground truncate mt-1">
+                        {conversation.last_message}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">{formatTimestamp(conversation.last_message_at)}</span>
+                        {conversation.encrypted && (
+                          <Shield className="h-3 w-3 text-green-500" />
+                        )}
+                      </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No conversations yet</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Start a new conversation to get started
+                  </p>
+                  <Button onClick={() => navigate('/chat/new')}>
+                    New Conversation
+                  </Button>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
