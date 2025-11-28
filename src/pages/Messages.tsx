@@ -304,12 +304,8 @@ const Messages = () => {
               <MessageSquare className="h-16 w-16 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Select a conversation</h3>
               <p className="text-sm text-muted-foreground text-center max-w-sm">
-                Choose a conversation from the list to view messages and reply, or start a new conversation.
+                Choose a conversation from the list to view messages and reply, or use the + button above to start a new conversation.
               </p>
-              <Button onClick={() => navigate('/chat/new')} className="mt-4">
-                <Plus className="h-4 w-4 mr-2" />
-                New Conversation
-              </Button>
             </CardContent>
           )}
         </Card>
