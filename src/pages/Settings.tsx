@@ -1,21 +1,55 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { ChangePasswordModal } from "@/components/modals/ChangePasswordModal";
 import { SecurityLogModal } from "@/components/modals/SecurityLogModal";
 import { SystemLogsModal } from "@/components/modals/SystemLogsModal";
 import { ManageIntegrationsModal } from "@/components/modals/ManageIntegrationsModal";
 import { EditProfileModal } from "@/components/modals/EditProfileModal";
 import { useToast } from "@/hooks/use-toast";
+import { useUserProfile, useUserPreferences, useUpdatePreferences } from "@/hooks/useUserSettings";
 import { Settings as SettingsIcon } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { data: profile, isLoading: profileLoading } = useUserProfile();
+  const { data: preferences, isLoading: preferencesLoading } = useUserPreferences();
+  const updatePreferences = useUpdatePreferences();
+  
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [showSecurityLogModal, setShowSecurityLogModal] = useState(false);
   const [showSystemLogsModal, setShowSystemLogsModal] = useState(false);
   const [showManageIntegrationsModal, setShowManageIntegrationsModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+
+  const handleThemeChange = (theme: string) => {
+    updatePreferences.mutate({ theme });
+  };
+
+  const handleNotificationToggle = (key: string, value: boolean) => {
+    updatePreferences.mutate({ [key]: value });
+  };
+
+  if (profileLoading || preferencesLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  const initials = profile?.full_name 
+    ? profile.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase()
+    : profile?.email?.substring(0, 2).toUpperCase() || 'U';
 
   return (
     <div className="space-y-6">
@@ -37,30 +71,11 @@ const Settings = () => {
           <CardContent className="space-y-4">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-xl font-semibold text-primary">DR</span>
+                <span className="text-xl font-semibold text-primary">{initials}</span>
               </div>
               <div>
-                <h3 className="font-semibold">Dr. Richard Chen</h3>
-                <p className="text-sm text-muted-foreground">Chief Medical Officer</p>
-                <p className="text-sm text-muted-foreground">richard.chen@careflow.health</p>
-              </div>
-            </div>
-            <div className="space-y-2 pt-4 border-t">
-              <div className="flex justify-between text-sm">
-                <span>Department:</span>
-                <span className="font-medium">Cardiology</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Employee ID:</span>
-                <span className="font-medium">CMO-001</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>License:</span>
-                <span className="font-medium">MD-CAL-12345</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Last Login:</span>
-                <span className="font-medium">Today, 9:15 AM</span>
+                <h3 className="font-semibold">{profile?.full_name || 'User'}</h3>
+                <p className="text-sm text-muted-foreground">{profile?.email}</p>
               </div>
             </div>
             <Button className="w-full" variant="outline" onClick={() => setShowEditProfileModal(true)}>
@@ -134,21 +149,39 @@ const Settings = () => {
             <div className="space-y-2">
               <label className="text-sm font-medium">Theme</label>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">Light</Button>
-                <Button variant="outline" size="sm">Dark</Button>
-                <Button variant="default" size="sm">Auto</Button>
+                <Button 
+                  variant={preferences?.theme === 'light' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => handleThemeChange('light')}
+                >
+                  Light
+                </Button>
+                <Button 
+                  variant={preferences?.theme === 'dark' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => handleThemeChange('dark')}
+                >
+                  Dark
+                </Button>
+                <Button 
+                  variant={preferences?.theme === 'auto' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => handleThemeChange('auto')}
+                >
+                  Auto
+                </Button>
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Language</label>
               <Button variant="outline" className="w-full justify-start">
-                English (US)
+                {preferences?.language || 'English (US)'}
               </Button>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Timezone</label>
               <Button variant="outline" className="w-full justify-start">
-                UTC-5 (Eastern Time)
+                {preferences?.timezone || 'UTC-5 (Eastern Time)'}
               </Button>
             </div>
           </CardContent>
@@ -161,19 +194,24 @@ const Settings = () => {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm">Email Notifications</span>
-              <Button variant="outline" size="sm">Enabled</Button>
+              <Switch
+                checked={preferences?.email_notifications ?? true}
+                onCheckedChange={(checked) => handleNotificationToggle('email_notifications', checked)}
+              />
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">SMS Alerts</span>
-              <Button variant="outline" size="sm">Enabled</Button>
+              <Switch
+                checked={preferences?.sms_alerts ?? true}
+                onCheckedChange={(checked) => handleNotificationToggle('sms_alerts', checked)}
+              />
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Push Notifications</span>
-              <Button variant="outline" size="sm">Disabled</Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Security Alerts</span>
-              <Button variant="default" size="sm">Always On</Button>
+              <Switch
+                checked={preferences?.push_notifications ?? false}
+                onCheckedChange={(checked) => handleNotificationToggle('push_notifications', checked)}
+              />
             </div>
           </CardContent>
         </Card>

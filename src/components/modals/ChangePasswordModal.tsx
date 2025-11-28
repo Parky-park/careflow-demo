@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useChangePassword } from "@/hooks/useUserSettings";
 import { Eye, EyeOff, Shield } from "lucide-react";
 
 interface ChangePasswordModalProps {
@@ -13,6 +14,7 @@ interface ChangePasswordModalProps {
 
 export function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
   const { toast } = useToast();
+  const changePassword = useChangePassword();
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -43,18 +45,22 @@ export function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalP
       return;
     }
 
-    // Simulate password change
-    toast({
-      title: "Password Changed Successfully",
-      description: "Your password has been updated. Please log in again.",
-    });
-    
-    setFormData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: ""
-    });
-    onOpenChange(false);
+    changePassword.mutate(
+      {
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword,
+      },
+      {
+        onSuccess: () => {
+          setFormData({
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: ""
+          });
+          onOpenChange(false);
+        },
+      }
+    );
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -145,8 +151,8 @@ export function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalP
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">
-              Change Password
+            <Button type="submit" disabled={changePassword.isPending}>
+              {changePassword.isPending ? 'Changing...' : 'Change Password'}
             </Button>
           </div>
         </form>
