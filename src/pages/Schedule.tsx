@@ -1,14 +1,27 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ScheduleAppointmentModal } from "@/components/modals/ScheduleAppointmentModal";
 import { FilterModal } from "@/components/modals/FilterModal";
-import { Calendar, Clock, Plus, Filter } from "lucide-react";
+import { Calendar, Clock, Plus, Filter, Package } from "lucide-react";
 import { useState } from "react";
+import { useTodayAppointments, useAppointmentMetrics } from "@/hooks/useAppointments";
 
 const Schedule = () => {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const { data: appointments, isLoading } = useTodayAppointments();
+  const { data: metrics } = useAppointmentMetrics();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -34,94 +47,49 @@ const Schedule = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Today's Schedule
+                Today's Appointments
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Dr. Sarah Johnson - Cardiology</h4>
-                      <p className="text-sm text-muted-foreground">Room 302A</p>
+              {appointments && appointments.length > 0 ? (
+                <div className="space-y-4">
+                  {appointments.map((appointment) => (
+                    <div key={appointment.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">{appointment.provider_name}</h4>
+                          <p className="text-sm text-muted-foreground">{appointment.room || 'Room TBD'}</p>
+                          {appointment.patient && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Patient: {appointment.patient.first_name} {appointment.patient.last_name}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <Badge variant="outline">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {new Date(appointment.appointment_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-muted-foreground">
+                        {appointment.appointment_type}
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <Badge variant="outline">
-                        <Clock className="h-3 w-3 mr-1" />
-                        9:00 AM - 12:00 PM
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    8 appointments scheduled
-                  </div>
+                  ))}
                 </div>
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Dr. Michael Chen - Orthopedics</h4>
-                      <p className="text-sm text-muted-foreground">Room 205B</p>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="outline">
-                        <Clock className="h-3 w-3 mr-1" />
-                        1:00 PM - 5:00 PM
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    12 appointments scheduled
-                  </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No appointments today</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Schedule appointments to see them here
+                  </p>
+                  <Button onClick={() => setShowScheduleModal(true)}>
+                    Schedule Appointment
+                  </Button>
                 </div>
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">Dr. Emily Davis - Emergency</h4>
-                      <p className="text-sm text-muted-foreground">Emergency Department</p>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="secondary">
-                        <Clock className="h-3 w-3 mr-1" />
-                        24/7 On-Call
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    Available for emergencies
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Upcoming Appointments</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b">
-                  <div>
-                    <p className="font-medium">John Smith</p>
-                    <p className="text-sm text-muted-foreground">Cardiology Checkup</p>
-                  </div>
-                  <Badge variant="outline">9:30 AM</Badge>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b">
-                  <div>
-                    <p className="font-medium">Maria Garcia</p>
-                    <p className="text-sm text-muted-foreground">Orthopedic Consultation</p>
-                  </div>
-                  <Badge variant="outline">10:15 AM</Badge>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b">
-                  <div>
-                    <p className="font-medium">Robert Johnson</p>
-                    <p className="text-sm text-muted-foreground">Physical Therapy</p>
-                  </div>
-                  <Badge variant="outline">11:00 AM</Badge>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -135,19 +103,19 @@ const Schedule = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Today's Appointments</span>
-                  <span className="font-medium">24</span>
+                  <span className="font-medium">{metrics?.todayTotal || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Available Slots</span>
-                  <span className="font-medium">8</span>
+                  <span className="font-medium">{metrics?.availableSlots || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Cancelled</span>
-                  <span className="font-medium text-red-600">3</span>
+                  <span className="font-medium text-red-600">{metrics?.cancelled || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">No Shows</span>
-                  <span className="font-medium text-orange-600">1</span>
+                  <span className="font-medium text-orange-600">{metrics?.noShows || 0}</span>
                 </div>
               </div>
             </CardContent>
