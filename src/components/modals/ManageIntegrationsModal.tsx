@@ -1,12 +1,12 @@
-import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Database, Wifi, WifiOff, Settings, Plus, Trash2 } from "lucide-react";
+import { Database, Wifi, WifiOff, Settings, Plus } from "lucide-react";
+import { useIntegrations, useUpdateIntegration } from "@/hooks/useSystemSettings";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ManageIntegrationsModalProps {
   open: boolean;
@@ -15,58 +15,8 @@ interface ManageIntegrationsModalProps {
 
 export function ManageIntegrationsModal({ open, onOpenChange }: ManageIntegrationsModalProps) {
   const { toast } = useToast();
-  const [integrations, setIntegrations] = useState([
-    {
-      id: "1",
-      name: "FHIR API Connection",
-      description: "Healthcare data interoperability standard",
-      status: "connected",
-      enabled: true,
-      endpoint: "https://fhir.hospital.ca/api/v1",
-      lastSync: "2024-01-09 14:30:15",
-      dataTypes: ["Patient Records", "Observations", "Medications"]
-    },
-    {
-      id: "2",
-      name: "Provincial Health Registry",
-      description: "Real-time patient updates and demographics",
-      status: "connected",
-      enabled: true,
-      endpoint: "https://phr.ontario.ca/api/v2",
-      lastSync: "2024-01-09 14:25:42",
-      dataTypes: ["Demographics", "Insurance", "Emergency Contacts"]
-    },
-    {
-      id: "3",
-      name: "Laboratory Systems",
-      description: "Lab results integration and monitoring",
-      status: "pending",
-      enabled: false,
-      endpoint: "https://labs.hospital.ca/hl7/v3",
-      lastSync: "Never",
-      dataTypes: ["Lab Results", "Test Orders", "Critical Values"]
-    },
-    {
-      id: "4",
-      name: "Pharmacy Network",
-      description: "Prescription management and drug interactions",
-      status: "connected",
-      enabled: true,
-      endpoint: "https://pharmacy.network.ca/api",
-      lastSync: "2024-01-09 14:20:33",
-      dataTypes: ["Prescriptions", "Drug Interactions", "Inventory"]
-    },
-    {
-      id: "5",
-      name: "Radiology PACS",
-      description: "Medical imaging and radiology reports",
-      status: "error",
-      enabled: true,
-      endpoint: "https://pacs.hospital.ca/dicom",
-      lastSync: "2024-01-09 12:15:22",
-      dataTypes: ["Medical Images", "Radiology Reports", "DICOM Data"]
-    }
-  ]);
+  const { data: integrations, isLoading } = useIntegrations();
+  const updateIntegration = useUpdateIntegration();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -92,18 +42,8 @@ export function ManageIntegrationsModal({ open, onOpenChange }: ManageIntegratio
     }
   };
 
-  const handleToggleIntegration = (id: string) => {
-    setIntegrations(prev => prev.map(integration => 
-      integration.id === id 
-        ? { ...integration, enabled: !integration.enabled }
-        : integration
-    ));
-    
-    const integration = integrations.find(i => i.id === id);
-    toast({
-      title: `Integration ${integration?.enabled ? 'Disabled' : 'Enabled'}`,
-      description: `${integration?.name} has been ${integration?.enabled ? 'disabled' : 'enabled'}.`,
-    });
+  const handleToggleIntegration = (id: string, currentEnabled: boolean) => {
+    updateIntegration.mutate({ id, enabled: !currentEnabled });
   };
 
   const handleTestConnection = (integration: any) => {
@@ -139,8 +79,15 @@ export function ManageIntegrationsModal({ open, onOpenChange }: ManageIntegratio
         </DialogHeader>
         
         <div className="flex-1 overflow-y-auto px-1">
-          <div className="space-y-4">
-            {integrations.map((integration) => (
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-48 w-full" />
+              ))}
+            </div>
+          ) : integrations && integrations.length > 0 ? (
+            <div className="space-y-4">
+              {integrations.map((integration) => (
               <div key={integration.id} className="p-4 border rounded-lg bg-card">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-start gap-3 flex-1">
@@ -155,8 +102,8 @@ export function ManageIntegrationsModal({ open, onOpenChange }: ManageIntegratio
                         </Badge>
                         <div className="ml-auto">
                           <Switch
-                            checked={integration.enabled}
-                            onCheckedChange={() => handleToggleIntegration(integration.id)}
+                            checked={integration.enabled || false}
+                            onCheckedChange={() => handleToggleIntegration(integration.id, integration.enabled || false)}
                           />
                         </div>
                       </div>
@@ -173,14 +120,18 @@ export function ManageIntegrationsModal({ open, onOpenChange }: ManageIntegratio
                         </div>
                         <div>
                           <Label className="text-xs font-medium text-muted-foreground">Last Sync</Label>
-                          <p className="mt-1">{integration.lastSync}</p>
+                          <p className="mt-1">
+                            {integration.last_sync 
+                              ? new Date(integration.last_sync).toLocaleString()
+                              : 'Never'}
+                          </p>
                         </div>
                       </div>
                       
                       <div className="mt-3">
                         <Label className="text-xs font-medium text-muted-foreground">Data Types</Label>
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {integration.dataTypes.map((type, index) => (
+                          {integration.data_types?.map((type, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
                               {type}
                             </Badge>
@@ -214,8 +165,17 @@ export function ManageIntegrationsModal({ open, onOpenChange }: ManageIntegratio
                   )}
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Database className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">No integrations configured</h3>
+              <p className="text-muted-foreground">
+                Add integrations to connect external systems
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-between items-center pt-4 border-t flex-shrink-0">

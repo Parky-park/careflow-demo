@@ -7,6 +7,10 @@ import { SecurityLogModal } from "@/components/modals/SecurityLogModal";
 import { SystemLogsModal } from "@/components/modals/SystemLogsModal";
 import { ManageIntegrationsModal } from "@/components/modals/ManageIntegrationsModal";
 import { EditProfileModal } from "@/components/modals/EditProfileModal";
+import { TwoFactorModal } from "@/components/modals/TwoFactorModal";
+import { BackupModal } from "@/components/modals/BackupModal";
+import { LanguageModal } from "@/components/modals/LanguageModal";
+import { TimezoneModal } from "@/components/modals/TimezoneModal";
 import { useToast } from "@/hooks/use-toast";
 import { useUserProfile, useUserPreferences, useUpdatePreferences } from "@/hooks/useUserSettings";
 import { Settings as SettingsIcon } from "lucide-react";
@@ -25,6 +29,10 @@ const Settings = () => {
   const [showSystemLogsModal, setShowSystemLogsModal] = useState(false);
   const [showManageIntegrationsModal, setShowManageIntegrationsModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [showTwoFactorModal, setShowTwoFactorModal] = useState(false);
+  const [showBackupModal, setShowBackupModal] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [showTimezoneModal, setShowTimezoneModal] = useState(false);
 
   const handleThemeChange = (theme: string) => {
     updatePreferences.mutate({ theme });
@@ -105,7 +113,7 @@ const Settings = () => {
             <Button 
               variant="outline" 
               className="w-full justify-start"
-              onClick={() => toast({ title: "Two-Factor Authentication", description: "2FA configuration opened." })}
+              onClick={() => setShowTwoFactorModal(true)}
             >
               Two-Factor Authentication
             </Button>
@@ -134,7 +142,7 @@ const Settings = () => {
             <Button 
               variant="outline" 
               className="w-full justify-start"
-              onClick={() => toast({ title: "Backup Settings", description: "Backup configuration opened." })}
+              onClick={() => setShowBackupModal(true)}
             >
               Backup & Recovery
             </Button>
@@ -174,14 +182,22 @@ const Settings = () => {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Language</label>
-              <Button variant="outline" className="w-full justify-start">
-                {preferences?.language || 'English (US)'}
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setShowLanguageModal(true)}
+              >
+                {preferences?.language || 'en-US'}
               </Button>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Timezone</label>
-              <Button variant="outline" className="w-full justify-start">
-                {preferences?.timezone || 'UTC-5 (Eastern Time)'}
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setShowTimezoneModal(true)}
+              >
+                {preferences?.timezone || 'UTC-5'}
               </Button>
             </div>
           </CardContent>
@@ -222,6 +238,18 @@ const Settings = () => {
       <SecurityLogModal open={showSecurityLogModal} onOpenChange={setShowSecurityLogModal} />
       <SystemLogsModal open={showSystemLogsModal} onOpenChange={setShowSystemLogsModal} />
       <ManageIntegrationsModal open={showManageIntegrationsModal} onOpenChange={setShowManageIntegrationsModal} />
+      <TwoFactorModal open={showTwoFactorModal} onOpenChange={setShowTwoFactorModal} />
+      <BackupModal open={showBackupModal} onOpenChange={setShowBackupModal} />
+      <LanguageModal 
+        open={showLanguageModal} 
+        onOpenChange={setShowLanguageModal}
+        currentLanguage={preferences?.language || 'en-US'}
+      />
+      <TimezoneModal 
+        open={showTimezoneModal} 
+        onOpenChange={setShowTimezoneModal}
+        currentTimezone={preferences?.timezone || 'UTC-5'}
+      />
     </div>
   );
 };

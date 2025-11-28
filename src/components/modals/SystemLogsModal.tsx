@@ -3,8 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Database, Clock, AlertTriangle, Info, CheckCircle, X } from "lucide-react";
+import { useSystemLogs } from "@/hooks/useSystemSettings";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SystemLogsModalProps {
   open: boolean;
@@ -14,73 +15,7 @@ interface SystemLogsModalProps {
 export function SystemLogsModal({ open, onOpenChange }: SystemLogsModalProps) {
   const [selectedLevel, setSelectedLevel] = useState("all");
   const [selectedService, setSelectedService] = useState("all");
-
-  const systemLogs = [
-    {
-      id: "1",
-      timestamp: "2024-01-09 14:35:22",
-      level: "INFO",
-      service: "Database",
-      message: "Database backup completed successfully",
-      details: "Backup size: 2.3GB, Duration: 45 seconds"
-    },
-    {
-      id: "2",
-      timestamp: "2024-01-09 14:30:15",
-      level: "WARN",
-      service: "Authentication",
-      message: "Multiple failed login attempts detected",
-      details: "IP: 203.0.113.42, Attempts: 5, User: unknown"
-    },
-    {
-      id: "3",
-      timestamp: "2024-01-09 14:25:10",
-      level: "ERROR",
-      service: "Integration",
-      message: "FHIR API connection timeout",
-      details: "Endpoint: https://fhir.hospital.ca/api/v1, Timeout: 30s"
-    },
-    {
-      id: "4",
-      timestamp: "2024-01-09 14:20:05",
-      level: "INFO",
-      service: "Inventory",
-      message: "Low stock alert triggered",
-      details: "Item: Insulin Pens, Current: 8, Threshold: 15"
-    },
-    {
-      id: "5",
-      timestamp: "2024-01-09 14:15:33",
-      level: "INFO",
-      service: "Scheduler",
-      message: "Daily maintenance tasks completed",
-      details: "Tasks: 12, Duration: 2m 15s, Status: All successful"
-    },
-    {
-      id: "6",
-      timestamp: "2024-01-09 14:10:28",
-      level: "WARN",
-      service: "Monitoring",
-      message: "ICU capacity approaching limit",
-      details: "Current: 18/20 beds occupied (90%)"
-    },
-    {
-      id: "7",
-      timestamp: "2024-01-09 14:05:44",
-      level: "ERROR",
-      service: "Network",
-      message: "Temporary network connectivity issue",
-      details: "Affected services: Lab Integration, Duration: 2 minutes"
-    },
-    {
-      id: "8",
-      timestamp: "2024-01-09 14:00:12",
-      level: "INFO",
-      service: "Analytics",
-      message: "Daily analytics report generated",
-      details: "Report ID: RPT-20240109, Patients: 1,247, Events: 2,156"
-    }
-  ];
+  const { data: systemLogs, isLoading } = useSystemLogs();
 
   const getLevelIcon = (level: string) => {
     switch (level) {
@@ -119,13 +54,13 @@ export function SystemLogsModal({ open, onOpenChange }: SystemLogsModalProps) {
     }
   };
 
-  const filteredLogs = systemLogs.filter(log => {
+  const filteredLogs = systemLogs?.filter(log => {
     const levelMatch = selectedLevel === "all" || log.level === selectedLevel;
     const serviceMatch = selectedService === "all" || log.service === selectedService;
     return levelMatch && serviceMatch;
-  });
+  }) || [];
 
-  const services = [...new Set(systemLogs.map(log => log.service))];
+  const services = [...new Set((systemLogs || []).map(log => log.service))];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -170,8 +105,15 @@ export function SystemLogsModal({ open, onOpenChange }: SystemLogsModalProps) {
         </div>
         
         <div className="flex-1 overflow-y-auto px-1">
-          <div className="space-y-3">
-            {filteredLogs.map((log) => (
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-32 w-full" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredLogs.map((log) => (
               <div
                 key={log.id}
                 className={`p-4 border-l-4 rounded-lg ${getLogColor(log.level)}`}
@@ -197,9 +139,9 @@ export function SystemLogsModal({ open, onOpenChange }: SystemLogsModalProps) {
                   </div>
                 </div>
               </div>
-            ))}
-            
-            {filteredLogs.length === 0 && (
+              ))}
+              
+              {filteredLogs.length === 0 && (
               <div className="text-center py-8">
                 <Database className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">No logs found</h3>
@@ -207,8 +149,9 @@ export function SystemLogsModal({ open, onOpenChange }: SystemLogsModalProps) {
                   No system logs match the selected filters.
                 </p>
               </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex justify-between items-center pt-4 border-t flex-shrink-0">
