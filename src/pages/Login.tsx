@@ -39,6 +39,18 @@ const Login = () => {
 
       if (error) throw error;
 
+      // Check if email is confirmed
+      if (data.user && !data.user.email_confirmed_at) {
+        setError("Please verify your email before logging in. Check your inbox for the verification link.");
+        toast({
+          title: "Email Not Verified",
+          description: "Please check your email and click the verification link to continue.",
+          variant: "destructive",
+        });
+        await supabase.auth.signOut();
+        return;
+      }
+
       toast({
         title: "Login Successful",
         description: "Welcome back!",
