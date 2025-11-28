@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Activity, ArrowLeft, AlertCircle } from "lucide-react";
+import { Activity, ArrowLeft, AlertCircle, CheckCircle, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,7 @@ const Signup = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [signupSuccess, setSignupSuccess] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -72,13 +73,8 @@ const Signup = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Verification Email Sent",
-        description: "Please check your email and click the verification link to complete your registration.",
-      });
-      
-      // Redirect to login page instead of dashboard
-      navigate("/login");
+      // Show success message instead of navigating immediately
+      setSignupSuccess(true);
     } catch (error: any) {
       const errorMessage = error.message || "Unable to create account";
       setError(errorMessage);
@@ -121,19 +117,60 @@ const Signup = () => {
       {/* Signup Card */}
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            {signupSuccess ? "Check Your Email" : "Create an account"}
+          </CardTitle>
           <CardDescription>
-            Enter your information to get started with CareFlow
+            {signupSuccess 
+              ? "We've sent you a verification link" 
+              : "Enter your information to get started with CareFlow"}
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+        
+        {signupSuccess ? (
+          <CardContent className="space-y-6">
+            <Alert className="border-primary/50 bg-primary/5">
+              <Mail className="h-5 w-5 text-primary" />
+              <AlertDescription className="ml-2">
+                <div className="font-semibold mb-2">Verification Email Sent!</div>
+                <p className="text-sm text-muted-foreground">
+                  We've sent a verification link to <strong>{formData.email}</strong>. 
+                  Please check your inbox and click the link to verify your email address.
+                </p>
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <p>Check your spam folder if you don't see the email within a few minutes</p>
+              </div>
+              <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <p>The verification link will expire in 24 hours</p>
+              </div>
+              <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <p>After verifying, return to the login page to access your account</p>
+              </div>
+            </div>
+
+            <Button 
+              onClick={() => navigate("/login")} 
+              className="w-full"
+            >
+              Go to Login Page
+            </Button>
+          </CardContent>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-4">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
               <Input
@@ -176,30 +213,31 @@ const Signup = () => {
                 required
               />
             </div>
-            <div className="text-xs text-muted-foreground">
-              By creating an account, you agree to our Terms of Service and Privacy Policy.
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-            >
-              {isLoading ? "Creating account..." : "Create Account"}
-            </Button>
-            <div className="text-sm text-center text-muted-foreground">
-              Already have an account?{" "}
-              <button
-                type="button"
-                onClick={() => navigate("/login")}
-                className="text-primary hover:underline font-medium"
+              <div className="text-xs text-muted-foreground">
+                By creating an account, you agree to our Terms of Service and Privacy Policy.
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4">
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isLoading}
               >
-                Sign in
-              </button>
-            </div>
-          </CardFooter>
-        </form>
+                {isLoading ? "Creating account..." : "Create Account"}
+              </Button>
+              <div className="text-sm text-center text-muted-foreground">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Sign in
+                </button>
+              </div>
+            </CardFooter>
+          </form>
+        )}
       </Card>
     </div>
   );
