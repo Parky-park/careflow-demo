@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,12 +6,70 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MessageSquare, Send, Search, Shield, Clock, Paperclip, Star, Plus, Package } from "lucide-react";
-import { useConversations } from "@/hooks/useMessaging";
+import { MessageSquare, Send, Search, Shield, Clock, Paperclip, Plus, Package } from "lucide-react";
+import { useConversations, useMessages } from "@/hooks/useMessaging";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Messages = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { data: conversations, isLoading } = useConversations();
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [messageText, setMessageText] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const { data: messages, isLoading: messagesLoading } = useMessages(selectedConversationId || "");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setCurrentUserId(user?.id || null);
+    });
+  }, []);
+
+  const selectedConversation = conversations?.find(c => c.id === selectedConversationId);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!messageText.trim() || !selectedConversationId) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const { error } = await supabase
+        .from("messages")
+        .insert({
+          conversation_id: selectedConversationId,
+          sender_id: user.id,
+          sender_name: profile?.full_name || user.email || "You",
+          content: messageText,
+        });
+
+      if (error) throw error;
+
+      await supabase
+        .from("conversations")
+        .update({
+          last_message: messageText,
+          last_message_at: new Date().toISOString(),
+        })
+        .eq("id", selectedConversationId);
+
+      setMessageText("");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+    }
+  };
   
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -79,8 +138,10 @@ const Messages = () => {
                 conversations.map((conversation) => (
                   <div
                     key={conversation.id}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 cursor-pointer border"
-                    onClick={() => navigate(`/chat/${conversation.id}`)}
+                    className={`flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 cursor-pointer border ${
+                      selectedConversationId === conversation.id ? 'bg-primary/10 border-primary' : ''
+                    }`}
+                    onClick={() => setSelectedConversationId(conversation.id)}
                   >
                     <Avatar className="h-10 w-10">
                       <AvatarFallback>
@@ -136,66 +197,121 @@ const Messages = () => {
 
         {/* Message Thread */}
         <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar>
-                  <AvatarFallback>MC</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3>Dr. Michael Chen</h3>
-                  <p className="text-sm text-muted-foreground">Cardiologist</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className={getPriorityColor('high')}>High Priority</Badge>
-                <Shield className="h-4 w-4 text-green-500" />
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4 min-h-[300px]">
-              {/* Sample Messages */}
-              <div className="flex gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>MC</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-sm">Patient in Room 302 needs immediate cardiac consultation. Elevated troponin levels and EKG changes noted.</p>
+          {selectedConversation ? (
+            <>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarFallback>
+                        {selectedConversation.participant_name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3>{selectedConversation.participant_name}</h3>
+                      <p className="text-sm text-muted-foreground">{selectedConversation.participant_role}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    <span>3 minutes ago</span>
-                    <Shield className="h-3 w-3 text-green-500" />
+                  <div className="flex items-center gap-2">
+                    <Badge className={getPriorityColor(selectedConversation.priority)}>
+                      {selectedConversation.priority} priority
+                    </Badge>
+                    {selectedConversation.encrypted && <Shield className="h-4 w-4 text-green-500" />}
                   </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 min-h-[400px] max-h-[500px] overflow-y-auto mb-4">
+                  {messagesLoading ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-16 w-3/4" />
+                      <Skeleton className="h-16 w-3/4 ml-auto" />
+                      <Skeleton className="h-16 w-3/4" />
+                    </div>
+                  ) : messages && messages.length > 0 ? (
+                    messages.map((message: any) => {
+                      const isCurrentUser = message.sender_id === currentUserId;
+                      
+                      return (
+                        <div key={message.id} className={`flex gap-3 ${isCurrentUser ? 'justify-end' : ''}`}>
+                          {!isCurrentUser && (
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>
+                                {message.sender_name.split(' ').map((n: string) => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
+                          <div className={`flex-1 max-w-xs ${isCurrentUser ? 'ml-auto' : ''}`}>
+                            <div className={`rounded-lg p-3 ${
+                              isCurrentUser ? 'bg-primary/10 ml-auto' : 'bg-muted/50'
+                            }`}>
+                              {!isCurrentUser && (
+                                <p className="text-xs font-medium text-muted-foreground mb-1">
+                                  {message.sender_name}
+                                </p>
+                              )}
+                              <p className="text-sm">{message.content}</p>
+                            </div>
+                            <div className={`flex items-center gap-2 mt-1 text-xs text-muted-foreground ${
+                              isCurrentUser ? 'justify-end' : ''
+                            }`}>
+                              <Clock className="h-3 w-3" />
+                              <span>{formatTimestamp(message.created_at)}</span>
+                              {message.encrypted && <Shield className="h-3 w-3 text-green-500" />}
+                            </div>
+                          </div>
+                          {isCurrentUser && (
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>You</AvatarFallback>
+                            </Avatar>
+                          )}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-12 text-muted-foreground">
+                      No messages yet. Start the conversation!
+                    </div>
+                  )}
                 </div>
-              </div>
+                
+                {/* Message Input */}
+                <form onSubmit={handleSendMessage} className="flex gap-2 pt-4 border-t">
+                  <Button variant="outline" size="sm" type="button">
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
+                  <Input 
+                    placeholder="Type your secure message..." 
+                    className="flex-1"
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                  />
+                  <Button size="sm" type="submit" disabled={!messageText.trim()}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </form>
 
-              <div className="flex gap-3 justify-end">
-                <div className="flex-1 max-w-xs">
-                  <div className="bg-primary/10 rounded-lg p-3 ml-auto">
-                    <p className="text-sm">On my way to Room 302 now. Will assess and provide recommendations.</p>
-                  </div>
-                  <div className="flex items-center justify-end gap-2 mt-1 text-xs text-muted-foreground">
-                    <span>Just now</span>
-                    <Shield className="h-3 w-3 text-green-500" />
-                  </div>
+                <div className="flex items-center gap-2 text-green-800 bg-green-50 dark:bg-green-950 dark:text-green-200 p-3 rounded-lg mt-4">
+                  <Shield className="h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    All messages are HIPAA-compliant and end-to-end encrypted
+                  </span>
                 </div>
-              </div>
-            </div>
-            
-            {/* Message Input */}
-            <div className="flex gap-2 pt-4 border-t">
-              <Button variant="outline" size="sm">
-                <Paperclip className="h-4 w-4" />
+              </CardContent>
+            </>
+          ) : (
+            <CardContent className="flex flex-col items-center justify-center min-h-[500px]">
+              <MessageSquare className="h-16 w-16 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Select a conversation</h3>
+              <p className="text-sm text-muted-foreground text-center max-w-sm">
+                Choose a conversation from the list to view messages and reply, or start a new conversation.
+              </p>
+              <Button onClick={() => navigate('/chat/new')} className="mt-4">
+                <Plus className="h-4 w-4 mr-2" />
+                New Conversation
               </Button>
-              <Input placeholder="Type your secure message..." className="flex-1" />
-              <Button size="sm">
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
       </div>
 
