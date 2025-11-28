@@ -9,12 +9,14 @@ import { Bell, Search, Settings, MessageCircle, LogOut, User } from "lucide-reac
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBadgeCounts } from "@/hooks/useBadgeCounts";
 
 export function DashboardHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { data: badgeCounts } = useBadgeCounts();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,9 +100,11 @@ export function DashboardHeader() {
             <Button variant="ghost" size="sm" className="relative" asChild>
               <Link to="/messages">
                 <MessageCircle className="h-4 w-4" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-accent flex items-center justify-center">
-                  3
-                </Badge>
+                {badgeCounts && badgeCounts.messages > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-accent flex items-center justify-center">
+                    {badgeCounts.messages}
+                  </Badge>
+                )}
               </Link>
             </Button>
 
@@ -112,9 +116,11 @@ export function DashboardHeader() {
             >
               <Link to="/notifications">
                 <Bell className="h-4 w-4" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-destructive flex items-center justify-center">
-                  5
-                </Badge>
+                {badgeCounts && badgeCounts.notifications > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-destructive flex items-center justify-center">
+                    {badgeCounts.notifications}
+                  </Badge>
+                )}
               </Link>
             </Button>
 
