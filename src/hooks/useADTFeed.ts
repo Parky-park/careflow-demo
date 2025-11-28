@@ -24,6 +24,7 @@ export const useADTMetrics = () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
+      // Get today's events
       const { data, error } = await supabase
         .from("adt_events")
         .select("*")
@@ -35,13 +36,20 @@ export const useADTMetrics = () => {
       const admissions = events.filter(e => e.event_type === 'admission').length;
       const discharges = events.filter(e => e.event_type === 'discharge').length;
       const transfers = events.filter(e => e.event_type === 'transfer').length;
-      const activeCases = admissions - discharges;
+      
+      // Get current census from patient facility attachments
+      const { count, error: attachmentError } = await supabase
+        .from("patient_facility_attachments")
+        .select("*", { count: "exact", head: true })
+        .is("detached_at", null);
+      
+      if (attachmentError) throw attachmentError;
       
       return {
         admissions,
         discharges,
         transfers,
-        currentCensus: Math.max(0, activeCases + 200), // Base census + today's net change
+        currentCensus: count || 0,
       };
     },
   });
