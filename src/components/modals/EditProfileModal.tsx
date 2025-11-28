@@ -16,9 +16,7 @@ export function EditProfileModal({ open, onOpenChange }: EditProfileModalProps) 
   const [fullName, setFullName] = useState("");
 
   useEffect(() => {
-    if (profile?.full_name) {
-      setFullName(profile.full_name);
-    }
+    setFullName(profile?.full_name || '');
   }, [profile]);
 
   const handleSubmit = (e: React.FormEvent) => {
