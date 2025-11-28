@@ -73,11 +73,12 @@ const Signup = () => {
       if (error) throw error;
 
       toast({
-        title: "Account Created",
-        description: "Welcome to CareFlow!",
+        title: "Verification Email Sent",
+        description: "Please check your email and click the verification link to complete your registration.",
       });
       
-      navigate("/dashboard");
+      // Redirect to login page instead of dashboard
+      navigate("/login");
     } catch (error: any) {
       const errorMessage = error.message || "Unable to create account";
       setError(errorMessage);
