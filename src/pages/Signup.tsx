@@ -73,6 +73,18 @@ const Signup = () => {
 
       if (error) throw error;
 
+      // Check if user already exists (Supabase returns user but with identities array empty)
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        const errorMsg = "An account with this email already exists. Please log in instead.";
+        setError(errorMsg);
+        toast({
+          title: "Account Already Exists",
+          description: errorMsg,
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Show success message instead of navigating immediately
       setSignupSuccess(true);
     } catch (error: any) {
