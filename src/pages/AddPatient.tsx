@@ -46,7 +46,7 @@ const AddPatient = () => {
         phone: formData.get("phone") as string || null,
         email: formData.get("email") as string || null,
         address: formData.get("address") as string || null,
-        risk_score: formData.get("riskScore") ? parseInt(formData.get("riskScore") as string) : null,
+        risk_score: formData.get("riskScore") ? parseInt(formData.get("riskScore") as string) : 0,
         emergency_contact_name: formData.get("emergencyContactName") as string || null,
         emergency_contact_phone: formData.get("emergencyContactPhone") as string || null,
         insurance_provider: formData.get("insuranceProvider") as string || null,
@@ -172,27 +172,33 @@ const AddPatient = () => {
               </div>
             </div>
 
-            {patientType === 'high-utilizer' && (
-              <div className="space-y-4 p-4 border rounded-lg bg-muted">
-                <h3 className="font-semibold">High-Utilizer Information</h3>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="riskScore">Risk Level</Label>
-                  <Select name="riskScore">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select risk level" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-popover">
-                      <SelectItem value="20">Low Risk (20)</SelectItem>
-                      <SelectItem value="50">Medium Risk (50)</SelectItem>
-                      <SelectItem value="70">High Risk (70)</SelectItem>
-                      <SelectItem value="90">Very High Risk (90)</SelectItem>
-                      <SelectItem value="95">Critical Risk (95)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="space-y-4 p-4 border rounded-lg bg-muted">
+              <h3 className="font-semibold">
+                {patientType === 'high-utilizer' ? 'High-Utilizer Information' : 'Risk Assessment'}
+              </h3>
+              
+              <div className="space-y-2">
+                <Label htmlFor="riskScore">Risk Level *</Label>
+                <Select name="riskScore" defaultValue={patientType === 'high-utilizer' ? "85" : undefined} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select risk level" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-popover">
+                    <SelectItem value="20">Low Risk (20)</SelectItem>
+                    <SelectItem value="50">Medium Risk (50)</SelectItem>
+                    <SelectItem value="70">High Risk (70)</SelectItem>
+                    <SelectItem value="85">High Utilizer (85)</SelectItem>
+                    <SelectItem value="90">Very High Risk (90)</SelectItem>
+                    <SelectItem value="95">Critical Risk (95)</SelectItem>
+                  </SelectContent>
+                </Select>
+                {patientType === 'high-utilizer' && (
+                  <p className="text-xs text-muted-foreground">
+                    High utilizer patients require a risk score of 80 or above
+                  </p>
+                )}
               </div>
-            )}
+            </div>
 
             <div className="flex gap-3 pt-4">
               <Button type="submit" disabled={isSubmitting}>
