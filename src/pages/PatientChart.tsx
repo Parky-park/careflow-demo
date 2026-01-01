@@ -3,74 +3,212 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Calendar, FileText, Pill, Activity, Phone, Mail, MapPin, Edit, Download } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Calendar, FileText, Pill, Activity, Phone, Mail, MapPin, Edit, Download, Trash2 } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import { EditPatientModal } from "@/components/modals/EditPatientModal";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const PatientChart = () => {
   const { id } = useParams();
-  
-  // Mock patient data - in real app, fetch by ID
-  const patient = {
-    id: id || "1",
-    name: "Sarah Johnson",
-    age: 67,
-    mrn: "MRN-001234",
-    riskLevel: "high",
-    lastVisit: "2024-01-08",
-    conditions: ["Diabetes", "Hypertension", "COPD"],
-    provider: "Dr. Wilson",
-    status: "active",
-    phone: "(555) 123-4567",
-    email: "sarah.johnson@email.com",
-    address: "123 Main St, Anytown, ST 12345",
-    emergencyContact: "John Johnson (spouse) - (555) 987-6543",
-    insurance: "Blue Cross Blue Shield",
-    allergies: ["Penicillin", "Shellfish"]
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { data: patient, isLoading, error } = useQuery({
+    queryKey: ['patient', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const { data: appointments } = useQuery({
+    queryKey: ['patient-appointments', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('patient_id', id)
+        .order('appointment_date', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
+  const { data: prescriptions } = useQuery({
+    queryKey: ['patient-prescriptions', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('prescriptions')
+        .select('*')
+        .eq('patient_id', id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
   };
 
-  const vitals = [
-    { label: "Blood Pressure", value: "145/92", status: "high", date: "Today" },
-    { label: "Heart Rate", value: "78 bpm", status: "normal", date: "Today" },
-    { label: "Temperature", value: "98.6°F", status: "normal", date: "Today" },
-    { label: "Weight", value: "165 lbs", status: "normal", date: "Yesterday" },
-    { label: "BMI", value: "27.3", status: "moderate", date: "Yesterday" },
-  ];
+  const getRiskColor = (score: number) => {
+    if (score >= 80) return 'bg-destructive text-destructive-foreground';
+    if (score >= 60) return 'bg-warning text-warning-foreground';
+    return 'bg-success text-success-foreground';
+  };
 
-  const medications = [
-    { name: "Metformin", dosage: "500mg", frequency: "Twice daily", prescriber: "Dr. Wilson" },
-    { name: "Lisinopril", dosage: "10mg", frequency: "Once daily", prescriber: "Dr. Wilson" },
-    { name: "Albuterol", dosage: "90mcg", frequency: "As needed", prescriber: "Dr. Patel" },
-  ];
+  const getRiskLabel = (score: number) => {
+    if (score >= 80) return 'high risk';
+    if (score >= 60) return 'medium risk';
+    return 'low risk';
+  };
 
-  const appointments = [
-    { date: "2024-01-15", time: "10:00 AM", type: "Follow-up", provider: "Dr. Wilson", status: "Scheduled" },
-    { date: "2024-01-08", time: "2:30 PM", type: "Routine", provider: "Dr. Wilson", status: "Completed" },
-    { date: "2023-12-20", time: "11:15 AM", type: "Consultation", provider: "Dr. Patel", status: "Completed" },
-  ];
+  const handleExport = () => {
+    if (!patient) return;
 
-  const getRiskColor = (level: string) => {
-    switch (level) {
-      case 'high': return 'bg-destructive text-destructive-foreground';
-      case 'medium': return 'bg-warning text-warning-foreground';
-      case 'low': return 'bg-success text-success-foreground';
-      default: return 'bg-muted text-muted-foreground';
+    const patientData = {
+      "Patient Information": {
+        "Name": `${patient.first_name} ${patient.last_name}`,
+        "Date of Birth": patient.date_of_birth,
+        "Age": calculateAge(patient.date_of_birth),
+        "Gender": patient.gender || "N/A",
+        "MRN": patient.medical_record_number || "N/A",
+        "Status": patient.status,
+        "Risk Score": patient.risk_score,
+      },
+      "Contact Information": {
+        "Phone": patient.phone || "N/A",
+        "Email": patient.email || "N/A",
+        "Address": patient.address || "N/A",
+      },
+      "Emergency Contact": {
+        "Name": patient.emergency_contact_name || "N/A",
+        "Phone": patient.emergency_contact_phone || "N/A",
+      },
+      "Insurance": {
+        "Provider": patient.insurance_provider || "N/A",
+        "Number": patient.insurance_number || "N/A",
+      },
+    };
+
+    const blob = new Blob([JSON.stringify(patientData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `patient_${patient.first_name}_${patient.last_name}_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Export Successful",
+      description: "Patient data has been exported.",
+    });
+  };
+
+  const handleDelete = async () => {
+    if (!patient) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('patients')
+        .delete()
+        .eq('id', patient.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Patient Deleted",
+        description: "The patient record has been deleted.",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['patients'] });
+      navigate('/patients');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete patient",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const getVitalStatus = (status: string) => {
-    switch (status) {
-      case 'high': return 'text-destructive';
-      case 'low': return 'text-destructive';
-      case 'normal': return 'text-success';
-      case 'moderate': return 'text-warning';
-      default: return 'text-muted-foreground';
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-4 md:p-6">
+        <Skeleton className="h-10 w-40" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-60 w-full" />
+      </div>
+    );
+  }
+
+  if (error || !patient) {
+    return (
+      <div className="space-y-6 p-4 md:p-6">
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/patients">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Patients
+          </Link>
+        </Button>
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground">Patient not found</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const age = calculateAge(patient.date_of_birth);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row md:items-center gap-4">
         <Button variant="outline" size="sm" asChild>
           <Link to="/patients">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -80,15 +218,41 @@ const PatientChart = () => {
         <div className="flex-1">
           <h1 className="text-2xl md:text-3xl font-bold">Patient Chart</h1>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setEditModalOpen(true)}>
             <Edit className="h-4 w-4 mr-2" />
             Edit
           </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Patient</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete {patient.first_name} {patient.last_name}? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
@@ -97,22 +261,23 @@ const PatientChart = () => {
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <Avatar className="h-16 w-16">
+              <AvatarImage src={`https://api.dicebear.com/7.x/personas/svg?seed=${patient.id}`} />
               <AvatarFallback className="text-lg">
-                {patient.name.split(' ').map(n => n[0]).join('')}
+                {patient.first_name[0]}{patient.last_name[0]}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
-                <h2 className="text-xl font-semibold">{patient.name}</h2>
-                <Badge className={getRiskColor(patient.riskLevel)}>
-                  {patient.riskLevel} risk
+                <h2 className="text-xl font-semibold">{patient.first_name} {patient.last_name}</h2>
+                <Badge className={getRiskColor(patient.risk_score || 0)}>
+                  {getRiskLabel(patient.risk_score || 0)}
                 </Badge>
                 <Badge variant="outline">{patient.status}</Badge>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
-                <div>Age: {patient.age} years</div>
-                <div>MRN: {patient.mrn}</div>
-                <div>Provider: {patient.provider}</div>
+                <div>Age: {age} years</div>
+                <div>MRN: {patient.medical_record_number || 'N/A'}</div>
+                <div>Gender: {patient.gender || 'N/A'}</div>
               </div>
             </div>
           </div>
@@ -121,15 +286,15 @@ const PatientChart = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{patient.phone}</span>
+              <span className="text-sm">{patient.phone || 'N/A'}</span>
             </div>
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{patient.email}</span>
+              <span className="text-sm">{patient.email || 'N/A'}</span>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{patient.address}</span>
+              <span className="text-sm">{patient.address || 'N/A'}</span>
             </div>
           </div>
         </CardContent>
@@ -148,40 +313,13 @@ const PatientChart = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Medical Conditions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {patient.conditions.map((condition, index) => (
-                    <Badge key={index} variant="outline" className="mr-2">
-                      {condition}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Allergies</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {patient.allergies.map((allergy, index) => (
-                    <Badge key={index} variant="destructive" className="mr-2">
-                      {allergy}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
                 <CardTitle>Emergency Contact</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm">{patient.emergencyContact}</p>
+                <p className="text-sm">
+                  {patient.emergency_contact_name || 'N/A'} 
+                  {patient.emergency_contact_phone && ` - ${patient.emergency_contact_phone}`}
+                </p>
               </CardContent>
             </Card>
 
@@ -190,7 +328,39 @@ const PatientChart = () => {
                 <CardTitle>Insurance</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm">{patient.insurance}</p>
+                <p className="text-sm">{patient.insurance_provider || 'N/A'}</p>
+                {patient.insurance_number && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Policy: {patient.insurance_number}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Last Visit</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm">
+                  {patient.last_visit 
+                    ? new Date(patient.last_visit).toLocaleDateString() 
+                    : 'No visits recorded'}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Risk Score</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl font-bold">{patient.risk_score || 0}</span>
+                  <Badge className={getRiskColor(patient.risk_score || 0)}>
+                    {getRiskLabel(patient.risk_score || 0)}
+                  </Badge>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -205,19 +375,9 @@ const PatientChart = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {vitals.map((vital, index) => (
-                  <div key={index} className="p-4 border rounded-lg">
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-medium">{vital.label}</h4>
-                      <span className="text-xs text-muted-foreground">{vital.date}</span>
-                    </div>
-                    <div className={`text-lg font-semibold ${getVitalStatus(vital.status)}`}>
-                      {vital.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p className="text-muted-foreground text-sm">
+                Vitals data will be available once integrated with clinical systems.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -231,24 +391,25 @@ const PatientChart = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {medications.map((medication, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h4 className="font-medium">{medication.name}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {medication.dosage} • {medication.frequency}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Prescribed by {medication.prescriber}
-                      </p>
+              {prescriptions && prescriptions.length > 0 ? (
+                <div className="space-y-4">
+                  {prescriptions.map((prescription) => (
+                    <div key={prescription.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-medium">{prescription.medication_name}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {prescription.dosage} • {prescription.frequency}
+                        </p>
+                        <Badge variant="outline" className="mt-1">
+                          {prescription.status}
+                        </Badge>
+                      </div>
                     </div>
-                    <Button variant="outline" size="sm">
-                      Edit
-                    </Button>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">No medications on record.</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -262,28 +423,38 @@ const PatientChart = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {appointments.map((appointment, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h4 className="font-medium">{appointment.type}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {appointment.date} at {appointment.time}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Provider: {appointment.provider}
-                      </p>
+              {appointments && appointments.length > 0 ? (
+                <div className="space-y-4">
+                  {appointments.map((appointment) => (
+                    <div key={appointment.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-medium">{appointment.appointment_type}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(appointment.appointment_date).toLocaleDateString()} at {new Date(appointment.appointment_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Provider: {appointment.provider_name}
+                        </p>
+                      </div>
+                      <Badge variant={appointment.status === "completed" ? "default" : "secondary"}>
+                        {appointment.status}
+                      </Badge>
                     </div>
-                    <Badge variant={appointment.status === "Completed" ? "default" : "secondary"}>
-                      {appointment.status}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">No appointments on record.</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      <EditPatientModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        patient={patient}
+      />
     </div>
   );
 };
