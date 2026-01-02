@@ -8,25 +8,51 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function DrugUtilizationRuleNew() {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
     category: "",
-    priority: "Medium",
+    priority: "medium",
     description: "",
     isActive: true,
     conditions: "",
     actions: ""
   });
 
-  const handleSave = () => {
-    console.log("Creating new rule:", formData);
-    // Generate a mock ID for the new rule
-    const newId = `DUE${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
-    navigate(`/drug-utilization/rules/${newId}`);
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase
+        .from("drug_utilization_rules")
+        .insert({
+          name: formData.name,
+          category: formData.category,
+          priority: formData.priority.toLowerCase(),
+          description: `${formData.description}\n\nConditions:\n${formData.conditions}\n\nActions:\n${formData.actions}`,
+          active: formData.isActive,
+          trigger_count: 0,
+          intervention_count: 0,
+          effectiveness_rate: 0
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success("DUE rule created successfully");
+      navigate(`/drug-utilization/rules/${data.id}`);
+    } catch (error: any) {
+      console.error("Error creating rule:", error);
+      toast.error("Failed to create rule: " + error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -88,10 +114,10 @@ export default function DrugUtilizationRuleNew() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Critical">Critical</SelectItem>
-                  <SelectItem value="High">High</SelectItem>
-                  <SelectItem value="Medium">Medium</SelectItem>
-                  <SelectItem value="Low">Low</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -142,16 +168,13 @@ export default function DrugUtilizationRuleNew() {
           <div className="flex gap-4 pt-4">
             <Button 
               onClick={handleSave}
-              disabled={!formData.name || !formData.category || !formData.description || !formData.conditions || !formData.actions}
+              disabled={!formData.name || !formData.category || !formData.description || !formData.conditions || !formData.actions || isSubmitting}
             >
               <Save className="h-4 w-4 mr-2" />
-              Create Rule
+              {isSubmitting ? "Creating..." : "Create Rule"}
             </Button>
             <Button variant="outline" onClick={() => navigate('/drug-utilization/rules')}>
               Cancel
-            </Button>
-            <Button variant="outline" disabled>
-              Test Rule
             </Button>
           </div>
         </CardContent>
