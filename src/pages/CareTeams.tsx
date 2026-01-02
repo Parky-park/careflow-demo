@@ -3,14 +3,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { HeartHandshake, Users, MessageSquare, Phone, Package } from "lucide-react";
+import { HeartHandshake, Users, MessageSquare, Phone, Package, Plus, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCareTeams, useStaffMembers } from "@/hooks/useCareTeams";
+import { AddCareTeamModal } from "@/components/modals/AddCareTeamModal";
+import { AddStaffModal } from "@/components/modals/AddStaffModal";
+import { useState } from "react";
 
 const CareTeams = () => {
   const navigate = useNavigate();
   const { data: teams, isLoading: teamsLoading } = useCareTeams();
   const { data: staff, isLoading: staffLoading } = useStaffMembers();
+  const [showAddTeamModal, setShowAddTeamModal] = useState(false);
+  const [showAddStaffModal, setShowAddStaffModal] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -36,14 +41,26 @@ const CareTeams = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          <HeartHandshake className="h-8 w-8 text-primary" />
-          Care Teams
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Coordinate healthcare teams and manage collaborative care
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+            <HeartHandshake className="h-8 w-8 text-primary" />
+            Care Teams
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Coordinate healthcare teams and manage collaborative care
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowAddStaffModal(true)}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Add Staff
+          </Button>
+          <Button onClick={() => setShowAddTeamModal(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Team
+          </Button>
+        </div>
       </div>
 
       {/* Team Overview */}
@@ -104,9 +121,13 @@ const CareTeams = () => {
           <CardContent className="text-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No care teams found</h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mb-4">
               Create your first care team to get started
             </p>
+            <Button onClick={() => setShowAddTeamModal(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Team
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -202,6 +223,9 @@ const CareTeams = () => {
           </div>
         </CardContent>
       </Card>
+
+      <AddCareTeamModal open={showAddTeamModal} onOpenChange={setShowAddTeamModal} />
+      <AddStaffModal open={showAddStaffModal} onOpenChange={setShowAddStaffModal} />
     </div>
   );
 };

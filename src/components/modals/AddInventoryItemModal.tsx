@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface AddInventoryItemModalProps {
   open: boolean;
@@ -14,6 +16,7 @@ interface AddInventoryItemModalProps {
 
 export function AddInventoryItemModal({ open, onOpenChange }: AddInventoryItemModalProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -29,30 +32,61 @@ export function AddInventoryItemModal({ open, onOpenChange }: AddInventoryItemMo
     storageRequirements: ""
   });
 
+  const createItemMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const { data: result, error } = await supabase
+        .from("inventory_items")
+        .insert({
+          name: data.name,
+          category: data.category,
+          quantity: parseInt(data.currentStock) || 0,
+          reorder_level: parseInt(data.minThreshold) || 50,
+          unit_price: parseFloat(data.unitCost) || 0,
+          sku: data.barcode || `SKU-${Date.now()}`,
+          status: "in_stock"
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory-metrics"] });
+      toast({
+        title: "Inventory Item Added",
+        description: `${formData.name} has been successfully added to the inventory system.`,
+      });
+      setFormData({
+        name: "",
+        category: "",
+        currentStock: "",
+        minThreshold: "",
+        maxCapacity: "",
+        location: "",
+        unitCost: "",
+        supplier: "",
+        barcode: "",
+        expirationDate: "",
+        description: "",
+        storageRequirements: ""
+      });
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to add inventory item. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Error adding inventory item:", error);
+    }
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    toast({
-      title: "Inventory Item Added",
-      description: `${formData.name} has been successfully added to the inventory system.`,
-    });
-    
-    // Reset form and close modal
-    setFormData({
-      name: "",
-      category: "",
-      currentStock: "",
-      minThreshold: "",
-      maxCapacity: "",
-      location: "",
-      unitCost: "",
-      supplier: "",
-      barcode: "",
-      expirationDate: "",
-      description: "",
-      storageRequirements: ""
-    });
-    onOpenChange(false);
+    createItemMutation.mutate(formData);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -229,8 +263,8 @@ export function AddInventoryItemModal({ open, onOpenChange }: AddInventoryItemMo
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">
-                Add Item
+              <Button type="submit" disabled={createItemMutation.isPending}>
+                {createItemMutation.isPending ? "Adding..." : "Add Item"}
               </Button>
             </div>
           </form>
