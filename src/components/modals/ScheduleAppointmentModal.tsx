@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface ScheduleAppointmentModalProps {
   open: boolean;
@@ -15,6 +17,7 @@ interface ScheduleAppointmentModalProps {
 
 export function ScheduleAppointmentModal({ open, onOpenChange, patientId }: ScheduleAppointmentModalProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     patientId: patientId || "",
     appointmentType: "",
@@ -27,26 +30,61 @@ export function ScheduleAppointmentModal({ open, onOpenChange, patientId }: Sche
     notes: ""
   });
 
+  const createAppointmentMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const appointmentDateTime = new Date(`${data.date}T${data.time}`);
+      
+      const { data: result, error } = await supabase
+        .from("appointments")
+        .insert({
+          patient_id: data.patientId || null,
+          provider_name: data.provider,
+          appointment_type: data.appointmentType,
+          appointment_date: appointmentDateTime.toISOString(),
+          duration_minutes: parseInt(data.duration),
+          notes: data.notes || null,
+          status: "scheduled"
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["today-appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["appointment-metrics"] });
+      toast({
+        title: "Appointment Scheduled",
+        description: `Appointment has been scheduled for ${formData.date} at ${formData.time}.`,
+      });
+      setFormData({
+        patientId: "",
+        appointmentType: "",
+        provider: "",
+        date: "",
+        time: "",
+        duration: "30",
+        reason: "",
+        priority: "medium",
+        notes: ""
+      });
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to schedule appointment. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Error scheduling appointment:", error);
+    }
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    toast({
-      title: "Appointment Scheduled",
-      description: `Appointment has been scheduled for ${formData.date} at ${formData.time}.`,
-    });
-    
-    setFormData({
-      patientId: "",
-      appointmentType: "",
-      provider: "",
-      date: "",
-      time: "",
-      duration: "30",
-      reason: "",
-      priority: "medium",
-      notes: ""
-    });
-    onOpenChange(false);
+    createAppointmentMutation.mutate(formData);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -189,8 +227,8 @@ export function ScheduleAppointmentModal({ open, onOpenChange, patientId }: Sche
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">
-                Schedule Appointment
+              <Button type="submit" disabled={createAppointmentMutation.isPending}>
+                {createAppointmentMutation.isPending ? "Scheduling..." : "Schedule Appointment"}
               </Button>
             </div>
           </form>
